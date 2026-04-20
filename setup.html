@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav ── */
+.nav {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 57px;
+  min-height: 57px;
+  max-height: 57px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 40px;
+}
+.nav-brand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 18px 16px;
+  transition: color .2s, background .2s;
+  position: relative;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.btn-nav-cta {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  padding: 7px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.btn-nav-cta:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 12px rgba(37,99,235,0.3);
+}
+.snake-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  padding: 5px 14px;
+  border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.snake-pill:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(59,130,246,.1);
+}
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 57px;
+  left: 0; right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left { display: flex; align-items: center; gap: 8px; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-right { display: flex; align-items: center; gap: 20px; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+
+/* ── Docs layout ── */
+.docs-wrap {
+  display: flex;
+  flex: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 32px;
+}
+.docs-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  padding: 20px 0;
+  border-right: 1px solid var(--border);
+}
+.docs-sidebar::-webkit-scrollbar { width: 4px; }
+.docs-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-search {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 0 0 14px 0;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  outline: none;
+  transition: border-color .2s;
+}
+.sidebar-search:focus { border-color: var(--accent); }
+.sidebar-search::placeholder { color: var(--dim); }
+.sidebar-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 0 4px;
+  margin-top: 4px;
+}
+.sidebar-link {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 12px;
+  border-left: 2px solid transparent;
+  transition: color .15s, border-color .15s, background .15s;
+  cursor: pointer;
+}
+.sidebar-link:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.sidebar-link.active { color: var(--accent); border-left-color: var(--accent); }
+
+.docs-content {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 0 64px 40px;
+}
+.docs-content section {
+  margin-bottom: 48px;
+}
+.docs-content h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.docs-content h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  margin-top: 28px;
+}
+.docs-content h3:first-child { margin-top: 0; }
+.docs-content p {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.docs-content ul, .docs-content ol {
+  margin: 0 0 12px 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.docs-content li { margin-bottom: 4px; }
+.docs-content code {
+  background: var(--bg3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.docs-content .port-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin: 12px 0 16px;
+}
+.port-table th, .port-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.port-table th {
+  font-weight: 700;
+  color: var(--text);
+  background: var(--bg2);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.port-table td { color: var(--muted); }
+
+/* ── Mobile sidebar toggle ── */
+.sidebar-toggle {
+  display: none;
+  width: 100%;
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--bg2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+}
+
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+[data-theme="light"] .nav-brand { color: #1a1a1a; }
+[data-theme="light"] .nav-links a { color: #1a1a1a; }
+[data-theme="light"] .nav-links a:hover { color: var(--text); background: rgba(0,0,0,.04); }
+[data-theme="light"] .nav-links a.active { color: var(--text); }
+[data-theme="light"] .snake-pill { color: var(--accent); border-color: rgba(59,130,246,0.3); }
+[data-theme="light"] .snake-pill:hover { color: #fff; background: rgba(59,130,246,.1); }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+[data-theme="light"] .nav-mobile-menu { background: #fff; border-bottom-color: var(--border); }
+[data-theme="light"] .nav-mobile-menu a { color: #1a1a1a; }
+[data-theme="light"] .nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-hamburger { color: #1a1a1a; }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .footer-tagline { color: #1a1a1a; }
+[data-theme="light"] .footer-copy { color: #1a1a1a; }
+[data-theme="light"] .sidebar-search { background: #fff; border-color: var(--border); }
+[data-theme="light"] .docs-sidebar { border-right-color: var(--border); }
+[data-theme="light"] .port-table th { background: #eaeaea; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .nav-inner { gap: 20px; }
+  .nav-links a { padding: 16px 10px; font-size: 11px; }
+  .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  .docs-wrap { padding: 0 20px; }
+  .docs-sidebar { width: 200px; }
+  .docs-content { padding-left: 24px; }
+}
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-right { gap: 8px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .footer { padding: 24px 16px; }
+  .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  .docs-wrap { flex-direction: column; }
+  .docs-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    max-height: 0;
+    overflow: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    transition: max-height .3s ease, padding .3s ease;
+  }
+  .docs-sidebar.open {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .sidebar-toggle { display: block; }
+  .docs-content { padding: 20px 0 48px; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html" class="active">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html" class="active">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <button class="sidebar-toggle" id="sidebar-toggle">&#9776; Documentation Menu</button>
+
+  <div class="docs-wrap">
+    <aside class="docs-sidebar" id="docs-sidebar">
+      <input type="text" class="sidebar-search" id="sidebar-search" placeholder="Search docs…">
+
+      <div class="sidebar-group-title">Getting Started</div>
+      <a class="sidebar-link" href="#download-install">Download &amp; Install</a>
+      <a class="sidebar-link" href="#license-activation">License Activation</a>
+      <a class="sidebar-link" href="#airgap-activation">Air-Gapped Activation</a>
+      <a class="sidebar-link" href="#deactivation-transfer">Deactivation &amp; Transfer</a>
+
+      <div class="sidebar-group-title">Integrate Setup</div>
+      <a class="sidebar-link" href="#create-workspace">Create a Workspace</a>
+      <a class="sidebar-link" href="#folder-structure">Workspace Folder Structure</a>
+      <a class="sidebar-link" href="#import-export-workspace">Import / Export Workspace</a>
+      <a class="sidebar-link" href="#link-shared-drive">Link Shared Drive</a>
+
+      <div class="sidebar-group-title">Inventory</div>
+      <a class="sidebar-link" href="#add-inventory">Add Inventory</a>
+      <a class="sidebar-link" href="#inventory-to-pulse">Inventory to Pulse</a>
+      <a class="sidebar-link" href="#hard-drive-tracking">Hard Drive Tracking</a>
+      <a class="sidebar-link" href="#inventory-csv">Import / Export CSV</a>
+
+      <div class="sidebar-group-title">Pulse</div>
+      <a class="sidebar-link" href="#pulse-overview">Pulse Overview</a>
+      <a class="sidebar-link" href="#pulse-toggling">Toggling Mechanism</a>
+      <a class="sidebar-link" href="#integrations">Integrations</a>
+      <a class="sidebar-link" href="#stig-score-sync">STIG Score Sync</a>
+
+      <div class="sidebar-group-title">Artifacts &amp; Documents</div>
+      <a class="sidebar-link" href="#artifact-manager">Artifact Manager</a>
+      <a class="sidebar-link" href="#document-editors">Document Editors</a>
+      <a class="sidebar-link" href="#sctm">SCTM</a>
+      <a class="sidebar-link" href="#poam">POA&amp;M</a>
+      <a class="sidebar-link" href="#conmon">CONMON</a>
+      <a class="sidebar-link" href="#cm-tracker">CM Tracker</a>
+      <a class="sidebar-link" href="#publications">Publications</a>
+
+      <div class="sidebar-group-title">STIG Validation</div>
+      <a class="sidebar-link" href="#stig-quarters">Quarters</a>
+      <a class="sidebar-link" href="#stig-checklists">Checklists</a>
+      <a class="sidebar-link" href="#stig-report">Report</a>
+
+      <div class="sidebar-group-title">Cyber Hygiene</div>
+      <a class="sidebar-link" href="#cyber-hygiene-overview">Dashboard Overview</a>
+      <a class="sidebar-link" href="#cyber-hygiene-export">HTML Export</a>
+
+      <div class="sidebar-group-title">Floor Plans</div>
+      <a class="sidebar-link" href="#room-editor">Room Editor</a>
+      <a class="sidebar-link" href="#device-placement">Device Placement</a>
+
+      <div class="sidebar-group-title">Admin Results</div>
+      <a class="sidebar-link" href="#admin-results-overview">Overview</a>
+      <a class="sidebar-link" href="#admin-results-logs">Application Logs</a>
+
+      <div class="sidebar-group-title">Admin Tools Setup</div>
+      <a class="sidebar-link" href="#admin-overview">Overview</a>
+      <a class="sidebar-link" href="#admin-link-workspace">Linking to Workspace</a>
+      <a class="sidebar-link" href="#admin-network-reqs">Network Requirements</a>
+      <a class="sidebar-link" href="#admin-domain">Domain-Joined Requirements</a>
+      <a class="sidebar-link" href="#admin-dhcp">DHCP / Static IP</a>
+      <a class="sidebar-link" href="#admin-credentials">Credential Handling</a>
+
+      <div class="sidebar-group-title">Admin Tools Scans</div>
+      <a class="sidebar-link" href="#scan-pps">PPS</a>
+      <a class="sidebar-link" href="#scan-encryption">Encryption Check</a>
+      <a class="sidebar-link" href="#scan-logs">Log Collection</a>
+      <a class="sidebar-link" href="#scan-ad-users">AD Users</a>
+      <a class="sidebar-link" href="#scan-software">Installed Software</a>
+      <a class="sidebar-link" href="#scan-dns">DNS Spot Check</a>
+      <a class="sidebar-link" href="#scan-domain-join">Domain Join Check</a>
+
+      <div class="sidebar-group-title">Export</div>
+      <a class="sidebar-link" href="#export-formats">Export Formats</a>
+      <a class="sidebar-link" href="#export-admin">Admin Tools Export</a>
+      <a class="sidebar-link" href="#export-workspace">Workspace Export</a>
+    </aside>
+
+    <main class="docs-content">
+
+      <!-- ════════════════ GETTING STARTED ════════════════ -->
+      <section id="download-install">
+        <h2>Getting Started</h2>
+        <h3>Download and Install</h3>
+        <p>CyberRMF ships as two desktop applications: <strong>Integrate</strong> (the ISSO compliance workstation) and <strong>Admin Tools</strong> (the administrator scanning engine). Both are Electron-based and run on Windows 10+ and Linux.</p>
+        <p>After purchasing a license, you will receive an email with your <strong>license key</strong> and a download link for the installer. Run the installer on the target machine and follow the on-screen prompts.</p>
+        <p><strong>System requirements:</strong></p>
+        <ul>
+          <li>Windows 10 or later (64-bit), or a modern Linux distribution</li>
+          <li>4 GB RAM minimum, 8 GB recommended</li>
+          <li>500 MB disk space for the application</li>
+          <li>Network access to the shared workspace drive (for split deployments)</li>
+        </ul>
+      </section>
+
+      <section id="license-activation">
+        <h3>License Activation</h3>
+        <p>When you launch CyberRMF for the first time, you will be prompted to activate your license.</p>
+        <ol>
+          <li>Copy the license key from your purchase confirmation email.</li>
+          <li>Paste it into the activation field in the application.</li>
+          <li>The app sends your license key and hardware fingerprint to the licensing server.</li>
+          <li>Upon validation, the license is bound to your machine and stored securely.</li>
+        </ol>
+        <p>One license covers <strong>both Integrate and Admin Tools</strong>. If running on two separate machines (split deployment), the license supports up to two machine activations.</p>
+      </section>
+
+      <section id="airgap-activation">
+        <h3>Air-Gapped Activation</h3>
+        <p>For systems without internet access, CyberRMF supports offline activation using cryptographic license verification.</p>
+        <ol>
+          <li>Open the app on the air-gapped machine. It will display your <strong>Hardware ID</strong>.</li>
+          <li>On an internet-connected machine, navigate to the activation portal and enter your license key and the Hardware ID.</li>
+          <li>Download the signed activation certificate file.</li>
+          <li>Transfer the certificate to the air-gapped machine via USB or other approved media.</li>
+          <li>Import the certificate into the app to complete activation.</li>
+        </ol>
+        <p>Offline validation uses ED25519 cryptographic signatures — the app verifies the certificate locally without any network call.</p>
+      </section>
+
+      <section id="deactivation-transfer">
+        <h3>Deactivation and Transfer</h3>
+        <p>To move your license to a new machine:</p>
+        <ol>
+          <li>Open the app on the current machine and select <strong>Deactivate License</strong>.</li>
+          <li>The app generates a deactivation code and directs you to <code>integratermf.com/deactivate</code>.</li>
+          <li>Submit the deactivation code. The machine is unregistered from your license.</li>
+          <li>Install on the new machine and activate with the same license key.</li>
+        </ol>
+        <p>Your license expiration date does <strong>not</strong> reset — the remaining time carries over to the new machine.</p>
+      </section>
+
+      <!-- ════════════════ INTEGRATE SETUP ════════════════ -->
+      <section id="create-workspace">
+        <h2>Integrate Setup</h2>
+        <h3>Create a Workspace</h3>
+        <p>A workspace is the central container for all your compliance data. To create one:</p>
+        <ol>
+          <li>From the <strong>Programs</strong> screen, click <strong>New Workspace</strong>.</li>
+          <li>Enter a workspace name (e.g., "Program Alpha").</li>
+          <li>Select a classification level.</li>
+          <li>Choose a security baseline overlay (this drives the SCTM controls).</li>
+          <li>Optionally set the ATO date and next assessment date.</li>
+          <li>Choose a parent folder on disk where the workspace data will live.</li>
+        </ol>
+        <p>The workspace is created immediately and appears as a tile on the Programs screen.</p>
+      </section>
+
+      <section id="folder-structure">
+        <h3>Workspace Folder Structure</h3>
+        <p>When a workspace is created, the following directory structure is established on disk:</p>
+        <ul>
+          <li><code>{ParentFolder}/{WorkspaceName}/</code> — Workspace root</li>
+          <li><code>CyberRMF/data/.cyberrmf/</code> — JSON data files (inventory, SCTM, POA&amp;M, admin results, etc.)</li>
+          <li><code>CyberRMF/{ArtifactRow}/{ArtifactTile}/</code> — File Manager artifacts</li>
+          <li><code>CyberRMF/STIG Validator/</code> — STIG checklist files</li>
+          <li><code>CyberRMF/Artifacts/CM/</code> — Change management attachments</li>
+        </ul>
+        <p>A <code>.workspace.lock</code> file in the <code>.cyberrmf</code> folder prevents simultaneous edits. If the lock is stale (30 seconds), it is automatically released.</p>
+      </section>
+
+      <section id="import-export-workspace">
+        <h3>Import / Export Workspace</h3>
+        <p><strong>Export:</strong> From the Programs screen, select a workspace and click Export. A ZIP file is created containing:</p>
+        <ul>
+          <li>A <code>manifest.json</code> with all workspace metadata</li>
+          <li>Inventory, POA&amp;M, SCTM overrides, CONMON schedules, appointments, integrations config</li>
+          <li>STIG quarters and per-quarter validation data</li>
+          <li>Optionally: File Manager artifacts and Admin Tools results</li>
+        </ul>
+        <p><strong>Import:</strong> Select a ZIP file created by CyberRMF. Choose a parent folder, and the workspace is unpacked and registered. All data keys are restored.</p>
+      </section>
+
+      <section id="link-shared-drive">
+        <h3>Link Shared Drive</h3>
+        <p>CyberRMF supports a <strong>split deployment</strong> where Admin Tools runs on a privileged admin workstation and Integrate runs on the ISSO's workstation. Both point to the same workspace folder on a network share.</p>
+        <ol>
+          <li>Create the workspace from Integrate on any machine.</li>
+          <li>Place the workspace folder on a shared network drive (e.g., <code>\\server\share\Program Alpha</code>).</li>
+          <li>In Integrate, set the workspace parent folder to the network path.</li>
+          <li>In Admin Tools, click <strong>Select Folder</strong> and point to the same workspace folder.</li>
+        </ol>
+        <p>Both apps read and write to the same <code>.cyberrmf</code> data directory. Admin Tools writes scan results; Integrate reads them on focus or reload.</p>
+      </section>
+
+      <!-- ════════════════ INVENTORY ════════════════ -->
+      <section id="add-inventory">
+        <h2>Inventory</h2>
+        <h3>Add Inventory</h3>
+        <p>The Inventory tab is the master asset database. Click <strong>Add</strong> to create a new entry with fields including:</p>
+        <ul>
+          <li>Name, Location, Room, Type, Make, Model, Serial Number, Asset Tag</li>
+          <li>DNS Name, Domain, IP Address, Operating System</li>
+          <li>Cyber (Yes/No) — marks the asset for inclusion in Pulse and auditing</li>
+          <li>Virtual (Yes/No), Connection type, Router assignment</li>
+          <li>EOL Date, STIG Score, Memory type (Volatile/Non-Volatile)</li>
+        </ul>
+        <p>Assets can be duplicated, highlighted for attention, and bulk-edited for EOL dates by model.</p>
+      </section>
+
+      <section id="inventory-to-pulse">
+        <h3>Inventory to Pulse</h3>
+        <p>Any inventory item with <code>Cyber = Yes</code> automatically appears in <strong>Pulse</strong>. Pulse is the operational view that shows connectivity, reference compliance, and integration status for your cyber assets.</p>
+        <p>To populate Pulse, ensure your cyber assets have at minimum: DNS Name, IP Address, and OS fields filled in. These are used for scans, integrations, and STIG matching.</p>
+      </section>
+
+      <section id="hard-drive-tracking">
+        <h3>Hard Drive Tracking</h3>
+        <p>For assets that contain hard drives:</p>
+        <ol>
+          <li>Set <code>Hard Drives = Yes</code> on the inventory item.</li>
+          <li>A sub-panel appears to add individual drives with serial numbers and status (In Use / Out of Use).</li>
+          <li>Drives can be assigned to <strong>safes</strong> in the Floor Plans (Places) view.</li>
+          <li>The Hard Drives sub-tab shows all drives across all assets with their current assignments.</li>
+        </ol>
+        <p>Export the hard drive list as CSV for physical tracking and audits.</p>
+      </section>
+
+      <section id="inventory-csv">
+        <h3>Import / Export CSV</h3>
+        <p>Inventory data can be exported as CSV from the toolbar. For Pulse, you can import a CSV that maps reference column values (DNS, SIEM, AV, Vuln, Logs) and STIG scores by IP address. Column file uploads can also provide DNS-to-IP mappings for batch updates.</p>
+      </section>
+
+      <!-- ════════════════ PULSE ════════════════ -->
+      <section id="pulse-overview">
+        <h2>Pulse</h2>
+        <h3>Pulse Overview</h3>
+        <p>Pulse is the real-time operational view of all devices marked as <code>Cyber = Yes</code> in your inventory. Each device row shows:</p>
+        <ul>
+          <li><strong>Connectivity:</strong> Ping status (reachable/unreachable)</li>
+          <li><strong>Reference columns:</strong> DNS, SIEM, AV, Vuln, Logs — each shows Yes/No</li>
+          <li><strong>STIG Score:</strong> From quarterly STIG validation uploads</li>
+          <li><strong>Integration columns:</strong> SIEM last seen, AV status, vulnerability counts (appear when integrations are configured)</li>
+        </ul>
+        <p>Additional tools include Traceroute (per-IP or bulk), IP Ranges display, and a Ports reference table.</p>
+      </section>
+
+      <section id="pulse-toggling">
+        <h3>Toggling Mechanism</h3>
+        <p>Each reference column (DNS, SIEM, AV, Vuln, Logs) can be toggled per device:</p>
+        <ul>
+          <li>Click a cell to manually toggle between Yes and No.</li>
+          <li>Import a Pulse CSV to bulk-set these values — the CSV is matched by IP address.</li>
+          <li>Integration auto-population (if configured) fills SIEM, AV, and Vuln columns based on live queries.</li>
+        </ul>
+        <p>Changes persist to the workspace data immediately.</p>
+      </section>
+
+      <section id="integrations">
+        <h3>Integrations</h3>
+        <p>CyberRMF can connect to your existing security tools to auto-populate Pulse and Cyber Hygiene data:</p>
+        <ul>
+          <li><strong>SIEM:</strong> Splunk (REST API, port 8089, Bearer token) or ELK/Elasticsearch</li>
+          <li><strong>Antivirus:</strong> Trellix, CrowdStrike, Defender, Symantec, Carbon Black, or a generic "Other" endpoint</li>
+          <li><strong>Vulnerability Scanner:</strong> Tenable.sc or Nessus (API key authentication)</li>
+        </ul>
+        <p>Configure each integration from the Integrations settings panel. Use <strong>Test Connection</strong> to verify before querying devices. Integration tokens are encrypted on disk using the operating system's secure storage (DPAPI on Windows, Keyring on Linux).</p>
+      </section>
+
+      <section id="stig-score-sync">
+        <h3>STIG Score Sync</h3>
+        <p>When you upload STIG results (XCCDF files) in the STIG Validation tab, OS STIG scores can be synced back to Inventory and Pulse. The app matches STIG results to inventory items by hostname and IP address, then updates the STIG Score field. Both raw scores and reviewed/adjusted scores are available.</p>
+      </section>
+
+      <!-- ════════════════ ARTIFACTS ════════════════ -->
+      <section id="artifact-manager">
+        <h2>Artifacts and Documents</h2>
+        <h3>Artifact Manager</h3>
+        <p>The Artifact Manager organizes your RMF documentation into <strong>rows</strong> (categories) and <strong>tiles</strong> (individual artifacts). You can:</p>
+        <ul>
+          <li>Create, rename, recolor, and reorder rows and tiles</li>
+          <li>Upload and manage files within each tile (the File Manager)</li>
+          <li>View files in the built-in viewer (DOCX, PDF, spreadsheet support)</li>
+          <li>Switch between tile view and tree view</li>
+          <li>Export selected tiles as a ZIP package</li>
+        </ul>
+      </section>
+
+      <section id="document-editors">
+        <h3>Document Editors</h3>
+        <p>CyberRMF includes built-in editors for standard RMF artifacts:</p>
+        <ul>
+          <li><strong>ATO (Authority to Operate)</strong> — Authorization document editor</li>
+          <li><strong>SAR (Security Assessment Report)</strong> — Assessment findings editor</li>
+          <li><strong>SSP (System Security Plan)</strong> — Plan documentation editor</li>
+          <li><strong>RAR (Risk Assessment Report)</strong> — Risk analysis editor</li>
+          <li><strong>PPS (Ports, Protocols, and Services)</strong> — PPS documentation tied to Admin Tools scan data</li>
+        </ul>
+        <p>Changes are saved to the workspace and can be exported as DOCX.</p>
+      </section>
+
+      <section id="sctm">
+        <h3>SCTM (Security Controls Traceability Matrix)</h3>
+        <p>The SCTM is driven by your selected security baseline overlay. It displays all applicable 800-53 controls with columns for:</p>
+        <ul>
+          <li>Control ID, Name, CIA impact levels (Low/Medium/High)</li>
+          <li>Implementation status, frequency, justification, parameter values</li>
+          <li>Assurance, resiliency, ATT&amp;CK mapping, related controls</li>
+        </ul>
+        <p>You can edit implementation details, frequency, and comments per control. Overrides and field edits persist to the workspace. The SCTM can be exported as CSV, XLSX, or PDF.</p>
+      </section>
+
+      <section id="poam">
+        <h3>POA&amp;M (Plan of Action and Milestones)</h3>
+        <p>Track remediation items from STIG findings or manual entry. Each POA&amp;M item includes:</p>
+        <ul>
+          <li>Status (Open, Working, Closed), POA&amp;M ID, discovered by, date discovered</li>
+          <li>Affected controls (linked to SCTM), comments, last updated date</li>
+        </ul>
+        <p>POA&amp;M items can be created directly from STIG Validation findings with one click.</p>
+      </section>
+
+      <section id="conmon">
+        <h3>CONMON (Continuous Monitoring)</h3>
+        <p>CONMON schedules track recurring compliance activities on a calendar view. Set frequencies for controls and monitoring activities, with per-year schedule management.</p>
+      </section>
+
+      <section id="cm-tracker">
+        <h3>CM Tracker (Change Management)</h3>
+        <p>Track hardware and software changes through the approval lifecycle:</p>
+        <ul>
+          <li>HW/SW type, country of origin, make/company, model/version</li>
+          <li>EOL/EOSL dates, CCB needed (Yes/No), approval status (Requested, Approved, Rejected, Expired)</li>
+          <li>Attached documentation, in-use tracking</li>
+        </ul>
+      </section>
+
+      <section id="publications">
+        <h3>Publications</h3>
+        <p>CyberRMF includes a built-in PDF reader for NIST Special Publications. Open any bundled publication in a split-view panel alongside your artifacts. Features include search within the document, zoom controls, and the ability to reference specific sections while editing your compliance documentation.</p>
+      </section>
+
+      <!-- ════════════════ STIG VALIDATION ════════════════ -->
+      <section id="stig-quarters">
+        <h2>STIG Validation</h2>
+        <h3>Quarters</h3>
+        <p>Organize STIG assessments by quarterly periods. Create a new quarter (e.g., "2026 Q1") to begin tracking. Each quarter stores its own set of STIG results independently.</p>
+      </section>
+
+      <section id="stig-checklists">
+        <h3>Checklists</h3>
+        <p>Import STIG results by dragging XCCDF files into the application, or use the batch import dialog. For each STIG benchmark:</p>
+        <ul>
+          <li>View all rules with their pass/fail/not-applicable status</li>
+          <li>Override results with justifications and comments</li>
+          <li>Link findings to SCTM controls for traceability</li>
+          <li>Create POA&amp;M entries from failed rules with one click</li>
+          <li>Filter by OS STIGs vs. application STIGs</li>
+        </ul>
+      </section>
+
+      <section id="stig-report">
+        <h3>Report</h3>
+        <p>The Report tab generates per-quarter scoring tables. Each row is a device showing its OS STIG score and scores for each application STIG benchmark. Toggle between raw scores and reviewed/adjusted scores. Export as CSV, XLSX, or PDF.</p>
+      </section>
+
+      <!-- ════════════════ CYBER HYGIENE ════════════════ -->
+      <section id="cyber-hygiene-overview">
+        <h2>Cyber Hygiene Dashboard</h2>
+        <h3>Dashboard Overview</h3>
+        <p>The Cyber Hygiene Dashboard is a card-based compliance summary that pulls data from across the entire workspace:</p>
+        <ul>
+          <li>Appointment schedules and upcoming deadlines</li>
+          <li>System information and workspace metadata</li>
+          <li>SCTM compliance coverage and POA&amp;M status</li>
+          <li>Admin Tools scan summaries (PPS, encryption, logs, software)</li>
+          <li>Integration status (SIEM, AV, vulnerability scanner device counts)</li>
+        </ul>
+        <p>Cards can be reordered by dragging. The layout persists per workspace.</p>
+      </section>
+
+      <section id="cyber-hygiene-export">
+        <h3>HTML Export</h3>
+        <p>Export the Cyber Hygiene Dashboard as a standalone HTML file. This creates a self-contained report that can be opened in any browser — useful for sharing with leadership or including in authorization packages.</p>
+      </section>
+
+      <!-- ════════════════ FLOOR PLANS ════════════════ -->
+      <section id="room-editor">
+        <h2>Floor Plans (Places)</h2>
+        <h3>Room Editor</h3>
+        <p>Create rooms to represent physical spaces. Within each room, draw shapes on the canvas:</p>
+        <ul>
+          <li>Rectangles, squares, circles, L-shapes, and lines for room geometry</li>
+          <li>Classification stamps (Unclassified, Secret, Top Secret) as overlay markers</li>
+          <li>Safe shapes that can hold hard drive assignments</li>
+        </ul>
+        <p>Shapes can be rotated, flipped, labeled, and repositioned. Each room has its own name and optional location field.</p>
+      </section>
+
+      <section id="device-placement">
+        <h3>Device Placement</h3>
+        <p>Drag inventory devices from the sidebar onto the floor plan to indicate their physical location. Devices can be displayed as icons or boxes. Hard drives from inventory can be assigned to safe shapes on the floor plan, creating a complete physical-to-logical asset mapping. Navigate to a device's floor plan location directly from Inventory or Pulse.</p>
+      </section>
+
+      <!-- ════════════════ ADMIN RESULTS ════════════════ -->
+      <section id="admin-results-overview">
+        <h2>Admin Results</h2>
+        <h3>Overview</h3>
+        <p>Admin Results is a read-only section within <strong>Integrate</strong> that displays data generated by <strong>Admin Tools</strong>. When Admin Tools runs scans on the shared workspace, the results are written to the <code>.cyberrmf</code> data directory. Integrate reads these results and presents them under the Admin Results tab.</p>
+        <p>This gives the ISSO full visibility into scan outcomes — PPS data, encryption status, installed software, AD users, and more — without needing access to the Admin Tools application itself.</p>
+      </section>
+
+      <section id="admin-results-logs">
+        <h3>Application Logs</h3>
+        <p>Every scan action performed in Admin Tools generates an audit log entry stored in the shared workspace. Integrate displays these logs under <strong>Admin Results → Application Logs</strong>. Each log entry records:</p>
+        <ul>
+          <li><strong>PC User:</strong> The Windows/Linux account running Admin Tools</li>
+          <li><strong>Account Used:</strong> The credential account passed for the scan (or current session)</li>
+          <li><strong>Credential Type:</strong> Domain, Local, Current Session, or None</li>
+          <li><strong>Date/Time:</strong> ISO timestamp of the scan attempt</li>
+          <li><strong>Action:</strong> <span style="color:#22c55e;font-weight:600;">Successfully</span> or <span style="color:#ef4444;font-weight:600;">Unsuccessfully</span> initiated scan</li>
+          <li><strong>Scan Type:</strong> PPS, Encryption, Logs, AD Users, Software, DNS, Domain Join</li>
+          <li><strong>Target IP:</strong> The target device or "Batch" for bulk scans</li>
+        </ul>
+        <p>Logs are persistent and never cleared. Table headers are sortable and filterable. Export with a date range filter as CSV or PDF.</p>
+      </section>
+
+      <!-- ════════════════ ADMIN TOOLS SETUP ════════════════ -->
+      <section id="admin-overview">
+        <h2>Admin Tools Setup</h2>
+        <h3>Overview</h3>
+        <p>Admin Tools is the scanning and data collection engine. It runs on an administrator's workstation and writes scan results to the shared workspace. Integrate reads these results for display in Admin Results, Pulse, and Cyber Hygiene.</p>
+        <p>This separation enforces <strong>separation of duties</strong> — the administrator performing scans operates on a different machine than the ISSO reviewing compliance data, aligned with NIST 800-53 AC-5.</p>
+      </section>
+
+      <section id="admin-link-workspace">
+        <h3>Linking to Shared Workspace</h3>
+        <p>In Admin Tools, click <strong>Select Folder</strong> and navigate to the Integrate workspace folder on the shared drive. The app validates that the folder contains a <code>.cyberrmf</code> data directory. Once linked, all scan results are written to this shared location.</p>
+        <p>The workspace path appears in the Admin Tools header. Both apps must point to the same folder for data to flow correctly.</p>
+      </section>
+
+      <section id="admin-network-reqs">
+        <h3>Network Requirements</h3>
+        <p>Admin Tools connects to remote targets using several protocols depending on the scan type and target operating system. Ensure the following ports are open between the Admin Tools machine and the targets:</p>
+        <table class="port-table">
+          <thead>
+            <tr><th>Method</th><th>Ports</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>WMI / CIM (DCOM)</td><td>TCP 135 + RPC dynamic range</td><td>WMI service and DCOM permissions on target. For local accounts remotely, set <code>LocalAccountTokenFilterPolicy = 1</code>.</td></tr>
+            <tr><td>WinRM</td><td>TCP 5985 (HTTP) / 5986 (HTTPS)</td><td><code>Enable-PSRemoting</code> on target. TrustedHosts or Kerberos for non-domain scenarios. The app can auto-configure WinRM.</td></tr>
+            <tr><td>SMB (log export)</td><td>TCP 445</td><td>Admin share (<code>\\target\c$</code>) access for WMI-path log collection.</td></tr>
+            <tr><td>SSH</td><td>TCP 22</td><td>Password authentication must be enabled on the target <code>sshd</code>. Used for all Linux scans.</td></tr>
+            <tr><td>DNS</td><td>UDP/TCP 53</td><td>DNS spot check resolves names from the Admin Tools host.</td></tr>
+            <tr><td>LDAP</td><td>TCP 389 / 636</td><td>AD user lookup and domain join check require LDAP access to domain controllers.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="admin-domain">
+        <h3>Domain-Joined Requirements</h3>
+        <p>Admin Tools detects whether the host machine is domain-joined and whether the current user has administrator privileges:</p>
+        <ul>
+          <li><strong>Domain-joined + admin:</strong> "Using domain token" — no password is required. Windows remoting uses the current Kerberos ticket for authentication.</li>
+          <li><strong>Not domain-joined or not admin:</strong> The app prompts for explicit Windows credentials (domain\username + password). For Linux targets, SSH credentials are requested separately.</li>
+        </ul>
+        <p>AD Users and Domain Join scans require that the Admin Tools host can reach Active Directory domain controllers. The RSAT tools or <code>Get-ADComputer</code> cmdlet should be available for full domain join verification.</p>
+      </section>
+
+      <section id="admin-dhcp">
+        <h3>DHCP / Static IP</h3>
+        <p>All scans target devices by IP address, pulled from your inventory. For environments using DHCP:</p>
+        <ul>
+          <li>Ensure all target devices have DNS records that resolve to current IP addresses.</li>
+          <li>Use DHCP reservations to prevent IP address changes between scans.</li>
+          <li>Alternatively, use static IP assignments for critical infrastructure.</li>
+        </ul>
+        <p>The DNS Spot Check scan can verify that your inventory's DNS names and IP addresses match what DNS actually resolves, helping catch stale records.</p>
+      </section>
+
+      <section id="admin-credentials">
+        <h3>Credential Handling</h3>
+        <p>Admin Tools stores credentials <strong>in process memory only</strong>. They are:</p>
+        <ul>
+          <li>Never written to disk</li>
+          <li>Cleared after each scan batch completes</li>
+          <li>Subject to a <strong>10-minute idle timeout</strong> — if no scan runs within 10 minutes, credentials are automatically wiped</li>
+          <li>Passed to scan processes via environment variables, which are cleared immediately after use</li>
+        </ul>
+        <p>This design ensures credentials have minimal exposure, even in memory.</p>
+      </section>
+
+      <!-- ════════════════ ADMIN TOOLS SCANS ════════════════ -->
+      <section id="scan-pps">
+        <h2>Admin Tools Scans</h2>
+        <h3>PPS (Ports, Protocols, and Services)</h3>
+        <p>Collects running processes and active network connections from each target:</p>
+        <ul>
+          <li><strong>Windows (WMI):</strong> <code>Win32_Process</code> and <code>MSFT_NetTCPConnection</code> / <code>MSFT_NetUDPEndpoint</code> via CIM session</li>
+          <li><strong>Windows (WinRM):</strong> <code>Get-Process</code>, <code>Get-NetTCPConnection</code>, <code>Get-NetUDPEndpoint</code> via remote PowerShell</li>
+          <li><strong>Linux (SSH):</strong> <code>ps aux</code> + <code>ss -Htulnp</code></li>
+        </ul>
+        <p>Results are cross-referenced with a bundled ports CSV for service identification. PPS data can generate a DOCX artifact for your authorization package.</p>
+      </section>
+
+      <section id="scan-encryption">
+        <h3>Encryption Check</h3>
+        <p>Checks disk encryption status on each target:</p>
+        <ul>
+          <li><strong>Windows:</strong> Queries <code>Win32_EncryptableVolume</code> for BitLocker status, encryption method (AES-128, AES-256, XTS-AES), and completion percentage per volume.</li>
+          <li><strong>Linux:</strong> Parses <code>lsblk -f -J</code> output to detect LUKS-encrypted volumes.</li>
+        </ul>
+        <p>If BitLocker is not available on a target, the result shows "BitLocker unavailable" rather than an error.</p>
+      </section>
+
+      <section id="scan-logs">
+        <h3>Log Collection</h3>
+        <p>Collects event logs from remote targets and saves them locally:</p>
+        <ul>
+          <li><strong>Windows:</strong> Lists logs via <code>Win32_NTEventLogFile</code>, then exports each log using <code>wevtutil epl</code>. Files are saved as <code>.evtx</code> organized by date and device name.</li>
+          <li><strong>Linux:</strong> Collects <code>journalctl</code> boot logs and files from <code>/var/log/</code> via SCP.</li>
+        </ul>
+        <p>A <strong>Verify</strong> mode checks whether logs exist locally or remotely without collecting them.</p>
+      </section>
+
+      <section id="scan-ad-users">
+        <h3>AD Users</h3>
+        <p>Queries Active Directory for all user accounts and their attributes:</p>
+        <ul>
+          <li>SID, sAMAccountName, Display Name, Email, UPN</li>
+          <li>Enabled/Disabled status, Last Logon, Logon Count</li>
+          <li>Group memberships, Department, Title, Company</li>
+          <li>Password Last Set, Lockout Time, Bad Password Count</li>
+        </ul>
+        <p>Uses ADSI/LDAP queries on Windows. Results are paginated (1000 per page) to handle large directories.</p>
+      </section>
+
+      <section id="scan-software">
+        <h3>Installed Software</h3>
+        <p>Enumerates installed software on each target:</p>
+        <ul>
+          <li><strong>Windows:</strong> Scans the registry (<code>HKLM</code> and <code>HKCU</code> Uninstall keys) plus <code>Win32_Product</code> via WMI. Results are deduplicated by name.</li>
+          <li><strong>Linux:</strong> Uses <code>rpm -qa</code> (Red Hat/CentOS) or <code>dpkg-query -W</code> (Debian/Ubuntu).</li>
+        </ul>
+        <p>Results can be viewed grouped by host or by software name. Export as CSV, XLSX, or PDF.</p>
+      </section>
+
+      <section id="scan-dns">
+        <h3>DNS Spot Check</h3>
+        <p>Validates DNS consistency for all cyber inventory items. For each device, the app runs <code>nslookup</code> from the Admin Tools host and compares the resolved IP and hostname against inventory records. Results are classified as:</p>
+        <ul>
+          <li><strong>Match:</strong> DNS resolution matches inventory</li>
+          <li><strong>Mismatch:</strong> Resolved IP or name differs from inventory</li>
+          <li><strong>Unreachable:</strong> DNS query failed</li>
+        </ul>
+      </section>
+
+      <section id="scan-domain-join">
+        <h3>Domain Join Check</h3>
+        <p>Verifies that inventory devices appear in Active Directory as computer objects. The app queries AD using <code>Get-ADComputer</code> (or a LDAP fallback) and matches results against your inventory by DNS name, short name, or device name. Each device is marked as <strong>Joined</strong> or <strong>Not Found in AD</strong>.</p>
+      </section>
+
+      <!-- ════════════════ EXPORT ════════════════ -->
+      <section id="export-formats">
+        <h2>Export</h2>
+        <h3>Export Formats</h3>
+        <p>Most tables throughout CyberRMF support export in multiple formats:</p>
+        <ul>
+          <li><strong>CSV:</strong> Comma-separated values, compatible with Excel and other spreadsheet tools</li>
+          <li><strong>XLSX:</strong> Native Excel format with formatting preserved</li>
+          <li><strong>PDF:</strong> Formatted document suitable for printing and sharing</li>
+        </ul>
+      </section>
+
+      <section id="export-admin">
+        <h3>Admin Tools Export</h3>
+        <p>Admin Tools includes both per-tool export (from each scan sub-tab) and a combined export dialog that lets you select multiple scan types and export them as a single multi-sheet document. This is useful for generating comprehensive scan reports for authorization packages.</p>
+      </section>
+
+      <section id="export-workspace">
+        <h3>Workspace Export</h3>
+        <p>The full workspace export creates a ZIP containing all compliance data, STIG results, and optionally File Manager artifacts and Admin Tools results. Use this for backup, migration, or sharing workspaces between teams. Import on any machine with CyberRMF installed to restore the full workspace.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script>
+/* ── Sidebar search ── */
+(function() {
+  var searchInput = document.getElementById('sidebar-search');
+  var links = document.querySelectorAll('.sidebar-link');
+  var groupTitles = document.querySelectorAll('.sidebar-group-title');
+  var sections = document.querySelectorAll('.docs-content section');
+
+  searchInput.addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    if (!q) {
+      links.forEach(function(l) { l.style.display = ''; });
+      groupTitles.forEach(function(g) { g.style.display = ''; });
+      sections.forEach(function(s) { s.style.display = ''; });
+      return;
+    }
+    var visibleGroups = new Set();
+    links.forEach(function(l) {
+      var text = l.textContent.toLowerCase();
+      var sectionId = l.getAttribute('href').replace('#', '');
+      var section = document.getElementById(sectionId);
+      var sectionText = section ? section.textContent.toLowerCase() : '';
+      var match = text.includes(q) || sectionText.includes(q);
+      l.style.display = match ? '' : 'none';
+      if (section) section.style.display = match ? '' : 'none';
+      if (match) {
+        var prev = l.previousElementSibling;
+        while (prev && !prev.classList.contains('sidebar-group-title')) prev = prev.previousElementSibling;
+        if (prev) visibleGroups.add(prev);
+      }
+    });
+    groupTitles.forEach(function(g) {
+      g.style.display = visibleGroups.has(g) ? '' : 'none';
+    });
+  });
+})();
+
+/* ── Active section highlighting ── */
+(function() {
+  var links = document.querySelectorAll('.sidebar-link');
+  var sections = document.querySelectorAll('.docs-content section');
+  if (!sections.length || !('IntersectionObserver' in window)) return;
+
+  var linkMap = {};
+  links.forEach(function(l) {
+    var id = l.getAttribute('href').replace('#', '');
+    linkMap[id] = l;
+  });
+
+  var currentActive = null;
+  var clickLock = false;
+
+  function setActive(link) {
+    if (currentActive) currentActive.classList.remove('active');
+    if (link) link.classList.add('active');
+    currentActive = link;
+  }
+
+  links.forEach(function(l) {
+    l.addEventListener('click', function() {
+      var id = l.getAttribute('href').replace('#', '');
+      clickLock = true;
+      setActive(linkMap[id] || null);
+      setTimeout(function() { clickLock = false; }, 800);
+    });
+  });
+
+  var observer = new IntersectionObserver(function(entries) {
+    if (clickLock) return;
+    var visible = null;
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && entry.intersectionRatio > 0) {
+        if (!visible || entry.boundingClientRect.top < visible.boundingClientRect.top) {
+          visible = entry;
+        }
+      }
+    });
+    if (visible) {
+      var id = visible.target.id;
+      setActive(linkMap[id] || null);
+    }
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(function(s) { observer.observe(s); });
+})();
+
+/* ── Mobile sidebar toggle ── */
+(function() {
+  var toggle = document.getElementById('sidebar-toggle');
+  var sidebar = document.getElementById('docs-sidebar');
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener('click', function() {
+    sidebar.classList.toggle('open');
+    toggle.textContent = sidebar.classList.contains('open') ? '\u2715 Close Menu' : '\u2630 Documentation Menu';
+  });
+  sidebar.addEventListener('click', function(e) {
+    if (e.target.classList.contains('sidebar-link') && window.innerWidth <= 640) {
+      sidebar.classList.remove('open');
+      toggle.textContent = '\u2630 Documentation Menu';
+    }
+  });
+})();
+  </script>
+</body>
+</html>

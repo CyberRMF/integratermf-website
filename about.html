@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav (matches index.html) ── */
+.nav {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 57px;
+  min-height: 57px;
+  max-height: 57px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 40px;
+}
+.nav-brand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 18px 16px;
+  transition: color .2s, background .2s;
+  position: relative;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.btn-nav-cta {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  padding: 7px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.btn-nav-cta:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 12px rgba(37,99,235,0.3);
+}
+.snake-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  padding: 5px 14px;
+  border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.snake-pill:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(59,130,246,.1);
+}
+
+/* ── Page content ── */
+.page-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 32px;
+  flex: 1;
+}
+.page-wrap h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.company-tag {
+  font-size: 12px;
+  color: #e4e6eb;
+  font-weight: 600;
+  margin-bottom: 36px;
+}
+.cascade-letter {
+  display: inline;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.about-body p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.85;
+  margin-bottom: 22px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.about-body p.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.contact-row {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.contact-row.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.contact-row span {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+.contact-row a {
+  font-size: 13px;
+  color: var(--accent);
+  transition: color .2s;
+}
+.contact-row a:hover { color: #93c5fd; }
+
+/* ── Footer (matches index.html) ── */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+
+/* ── Light theme ── */
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
+[data-theme="light"] .nav { border-bottom-color: var(--border); }
+[data-theme="light"] .nav-brand { color: #1a1a1a; }
+[data-theme="light"] .nav-links a { color: #1a1a1a; }
+[data-theme="light"] .nav-links a:hover { color: var(--text); background: rgba(0,0,0,.04); }
+[data-theme="light"] .nav-links a.active { color: var(--text); }
+[data-theme="light"] .snake-pill { color: var(--accent); border-color: rgba(59,130,246,0.3); }
+[data-theme="light"] .snake-pill:hover { color: #fff; background: rgba(59,130,246,.1); }
+[data-theme="light"] .page-wrap h1 { color: var(--text); }
+[data-theme="light"] .about-body p { color: #1a1a1a; }
+[data-theme="light"] .contact-row { border-top-color: var(--border); }
+[data-theme="light"] .contact-row span { color: #1a1a1a; }
+[data-theme="light"] .footer { border-top-color: var(--border); background: var(--footer-bg); }
+[data-theme="light"] .footer-tagline { color: #1a1a1a; }
+[data-theme="light"] .footer-copy { color: #1a1a1a; }
+[data-theme="light"] .company-tag { color: #1a1a1a; }
+[data-theme="light"] .nav-mobile-menu { background: #fff; border-bottom-color: var(--border); }
+[data-theme="light"] .nav-mobile-menu a { color: #1a1a1a; }
+[data-theme="light"] .nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-hamburger { color: #1a1a1a; }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+[data-theme="light"] .nav-logo circle { fill: #2563eb; }
+
+/* ── Hamburger menu ── */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 57px;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+
+@media (max-width: 768px) {
+  .nav-inner { gap: 20px; }
+  .nav-links a { padding: 16px 10px; font-size: 11px; }
+  .page-wrap { padding: 48px 20px; }
+  .page-wrap h1 { font-size: 24px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .snake-pill { padding: 5px 10px; font-size: 10px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .page-wrap { padding: 32px 16px; }
+  .page-wrap h1 { font-size: 22px; }
+  .about-body p { font-size: 13px; }
+  .footer { padding: 20px 16px; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html" class="active">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html" class="active">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1>About</h1>
+    <p class="company-tag" id="company-tag">CyberRMF LLC &nbsp;|&nbsp; US-based company</p>
+
+    <div class="about-body">
+      <p>The standard for Cyber compliance has become exponentially demanding for organizations; the workflow must adjust to support these demands.</p>
+      <p>CyberRMF addresses this gap through innovative workflows and tools; every data point feeds into the next, creating a seamless mental map of compliance deficiencies.</p>
+      <p>By virtue of using CyberRMF Integrate, employees receive relevant training and insight into their organization&rsquo;s needs to gain an accurate understanding of the true health of their system in real time.</p>
+    </div>
+
+    <div class="contact-row">
+      <span>Contact</span>
+      <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script>
+(function() {
+  var LETTER_DELAY = 50;
+  var GLOW_DURATION = 400;
+  var BLUE = '#3b82f6';
+
+  var tagEl = document.getElementById('company-tag');
+  if (!tagEl) return;
+
+  var text = tagEl.textContent;
+  tagEl.innerHTML = '';
+  var WHITE = '#e4e6eb';
+  var spans = [];
+  for (var i = 0; i < text.length; i++) {
+    var s = document.createElement('span');
+    s.className = 'cascade-letter';
+    s.textContent = text[i];
+    if (text[i] === ' ' || text[i] === '\u00A0') s.innerHTML = '&nbsp;';
+    s.style.color = WHITE;
+    tagEl.appendChild(s);
+    spans.push(s);
+  }
+
+  var cascadeEnd = 600;
+  for (var i = 0; i < spans.length; i++) {
+    (function(sp, delay) {
+      setTimeout(function() {
+        sp.style.color = BLUE;
+        sp.style.textShadow = '0 0 10px ' + BLUE + ', 0 0 20px ' + BLUE;
+        setTimeout(function() {
+          sp.style.textShadow = 'none';
+        }, GLOW_DURATION);
+      }, delay);
+    })(spans[i], 600 + i * LETTER_DELAY);
+    cascadeEnd = 600 + i * LETTER_DELAY + GLOW_DURATION;
+  }
+
+  var rows = document.querySelectorAll('.about-body p, .contact-row');
+  rows.forEach(function(row, i) {
+    setTimeout(function() {
+      row.classList.add('visible');
+    }, 600 + i * 400);
+  });
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Trial — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav ── */
+.nav {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-links a.active::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--accent); border-radius: 1px;
+}
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+
+/* ── Trial layout ── */
+.trial-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.trial-page-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  padding: 0 32px 8px;
+  width: 100%;
+  max-width: 620px;
+}
+.trial-no-cc {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #22c55e;
+  margin-bottom: 28px;
+  letter-spacing: 0.02em;
+}
+.trial-form-col {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg3);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 32px;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.trial-form-col:hover,
+.trial-form-col:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(59,130,246,0.2), 0 0 40px rgba(59,130,246,0.08);
+}
+
+/* ── Placeholder slide-in ── */
+@keyframes placeholder-slide {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.form-group input::placeholder,
+.form-group select::placeholder {
+  animation: placeholder-slide 0.5s ease both;
+}
+.form-group:nth-child(1) input::placeholder { animation-delay: 0.1s; }
+.form-group:nth-child(2) input::placeholder { animation-delay: 0.2s; }
+.form-group {
+  margin-bottom: 16px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.form-group label .optional {
+  font-weight: 400;
+  color: var(--dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+.form-group input::placeholder { color: var(--dim); }
+.form-group select { cursor: pointer; }
+.form-group select option { background: var(--bg2); color: var(--text); }
+
+.trial-btn {
+  display: block;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  padding: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em;
+  margin-top: 24px;
+}
+.trial-btn:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 18px rgba(37,99,235,0.35);
+}
+.trial-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.form-error {
+  color: #ef4444;
+  font-size: 11px;
+  margin-top: 8px;
+  display: none;
+}
+.form-success {
+  text-align: center;
+  padding: 48px 0;
+  display: none;
+}
+.form-success h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #22c55e;
+  margin-bottom: 12px;
+}
+.form-success p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 400px;
+  margin: 0 auto;
+}
+.trial-badge {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 10px;
+  color: var(--dim);
+}
+.tc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.tc-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.tc-row a {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tc-row a:hover { color: #93c5fd; }
+.tc-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.tc-modal-overlay.open { display: flex; }
+.tc-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 90%;
+  max-width: 680px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.tc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 700;
+}
+.tc-modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.tc-modal-close:hover { color: var(--text); }
+.tc-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-family: var(--mono);
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+[data-theme="light"] .nav-brand { color: #1a1a1a; }
+[data-theme="light"] .nav-links a { color: #1a1a1a; }
+[data-theme="light"] .nav-links a:hover { color: var(--text); background: rgba(0,0,0,.04); }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+[data-theme="light"] .snake-pill { color: var(--accent); border-color: rgba(59,130,246,0.3); }
+[data-theme="light"] .snake-pill:hover { color: #fff; background: rgba(59,130,246,.1); }
+[data-theme="light"] .trial-page-title { color: var(--text); }
+[data-theme="light"] .trial-form-col { background: #e0e0e0; border-color: transparent; }
+[data-theme="light"] .trial-form-col:hover,
+[data-theme="light"] .trial-form-col:focus-within { border-color: var(--accent); }
+[data-theme="light"] .form-group label { color: #1a1a1a; }
+[data-theme="light"] .form-group label .optional { color: #4b5563; }
+[data-theme="light"] .form-group input,
+[data-theme="light"] .form-group select { background: #fff; border-color: var(--border); color: var(--text); }
+[data-theme="light"] .form-group input::placeholder { color: #9ca3af; }
+[data-theme="light"] .form-group select option { background: #fff; color: var(--text); }
+[data-theme="light"] .trial-badge { color: #1a1a1a; }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .footer-tagline { color: #1a1a1a; }
+[data-theme="light"] .tc-modal { background: #fff; border-color: var(--border); }
+[data-theme="light"] .tc-modal-header { border-bottom-color: var(--border); color: #1a1a1a; }
+[data-theme="light"] .tc-modal-body { color: #1a1a1a; }
+
+/* ── Hamburger menu ── */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 57px;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-mobile-menu { background: #fff; border-bottom-color: var(--border); }
+[data-theme="light"] .nav-mobile-menu a { color: #1a1a1a; }
+[data-theme="light"] .nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-hamburger { color: #1a1a1a; }
+
+@media (max-width: 768px) {
+  .trial-form-col { max-width: 100%; padding: 24px; }
+  .trial-page-title { font-size: 24px; padding: 0 20px 8px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .snake-pill { padding: 5px 10px; font-size: 10px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .trial-form-col { padding: 20px 16px; }
+  .trial-page-title { font-size: 20px; padding: 0 16px 8px; }
+  .footer { padding: 20px 16px; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="trial-center">
+    <div class="trial-page-title">Start your <span class="gradient-text">free trial</span></div>
+    <p class="trial-no-cc">No credit card required &mdash; 14 days, full access</p>
+
+    <div class="trial-form-col" id="trial-form-area">
+      <form id="trial-form" autocomplete="on">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="fname" name="fname" placeholder="Jane" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lname" name="lname" placeholder="Doe" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Work Email</label>
+          <input type="email" id="email" name="email" placeholder="jane@organization.mil" required>
+        </div>
+
+        <div class="form-group">
+          <label>Organization Name</label>
+          <input type="text" id="org" name="org" placeholder="Your organization" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Industry</label>
+            <select id="industry" name="industry" required onchange="toggleOtherIndustry()">
+              <option value="" disabled selected>Select industry</option>
+              <option value="defense">Defense / DoD</option>
+              <option value="federal">Federal Civilian</option>
+              <option value="state-local">State &amp; Local Government</option>
+              <option value="contractor">Government Contractor</option>
+              <option value="healthcare">Healthcare</option>
+              <option value="finance">Finance</option>
+              <option value="education">Education</option>
+              <option value="other">Other</option>
+            </select>
+            <input type="text" id="industry-other" name="industry-other" placeholder="Enter your industry" style="display:none;margin-top:8px;" required>
+          </div>
+          <div class="form-group">
+            <label>Phone <span class="optional">(optional)</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567">
+          </div>
+        </div>
+
+        <div class="tc-row">
+          <input type="checkbox" id="tc-agree" required>
+          <label for="tc-agree">I have read and accept the <a onclick="document.getElementById('tc-modal').classList.add('open')">Terms and Conditions</a></label>
+        </div>
+
+        <div id="form-error" class="form-error"></div>
+
+        <button type="submit" id="submit-btn" class="trial-btn" disabled>Start Free Trial</button>
+        <p class="trial-badge">14-day trial &bull; Includes CyberRMF Integrate + Admin Tools</p>
+      </form>
+    </div>
+
+    <div id="trial-success" class="form-success" style="display:none;">
+      <h2>&#10003; Trial Activated</h2>
+      <p>Your 14-day trial key has been sent to your email. Check your inbox (and spam folder) for download and activation instructions.</p>
+      <p style="margin-top:16px;font-size:11px;color:var(--dim);">If you don&rsquo;t receive it within 5 minutes, contact <a href="mailto:info@cyberrmf.com" style="color:var(--accent);">info@cyberrmf.com</a></p>
+    </div>
+  </div>
+
+  <div class="tc-modal-overlay" id="tc-modal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="tc-modal">
+      <div class="tc-modal-header">
+        <span>Terms and Conditions</span>
+        <button class="tc-modal-close" onclick="document.getElementById('tc-modal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="tc-modal-body" id="tc-body" style="white-space:pre-wrap;"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script>
+function toggleOtherIndustry() {
+  var sel = document.getElementById('industry');
+  var other = document.getElementById('industry-other');
+  if (sel.value === 'other') {
+    other.style.display = 'block';
+    other.required = true;
+  } else {
+    other.style.display = 'none';
+    other.required = false;
+    other.value = '';
+  }
+}
+
+var TRIAL_ENDPOINT = 'https://integratermf.com/api/create-trial';
+
+var form = document.getElementById('trial-form');
+var submitBtn = document.getElementById('submit-btn');
+var errorEl = document.getElementById('form-error');
+var tcCheckbox = document.getElementById('tc-agree');
+
+tcCheckbox.addEventListener('change', function() {
+  submitBtn.disabled = !tcCheckbox.checked;
+});
+
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!tcCheckbox.checked) {
+    errorEl.textContent = 'You must accept the Terms and Conditions to continue.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Processing\u2026';
+
+  var industryVal = document.getElementById('industry').value;
+  if (industryVal === 'other') industryVal = document.getElementById('industry-other').value.trim();
+  var data = {
+    fname: document.getElementById('fname').value.trim(),
+    lname: document.getElementById('lname').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    org:   document.getElementById('org').value.trim(),
+    industry: industryVal,
+    phone: document.getElementById('phone').value.trim()
+  };
+
+  try {
+    var res = await fetch(TRIAL_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    var json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Something went wrong');
+
+    document.getElementById('trial-form-area').style.display = 'none';
+    document.getElementById('trial-success').style.display = 'block';
+  } catch (err) {
+    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+    errorEl.style.display = 'block';
+    submitBtn.disabled = !tcCheckbox.checked;
+    submitBtn.textContent = 'Start Free Trial';
+  }
+});
+
+(function() {
+  var inputs = document.querySelectorAll('#trial-form input[placeholder], #trial-form select');
+  inputs.forEach(function(inp, idx) {
+    var ph = inp.getAttribute('placeholder');
+    if (!ph) return;
+    inp.setAttribute('placeholder', '');
+    setTimeout(function() { inp.setAttribute('placeholder', ph); }, 200 + idx * 120);
+  });
+})();
+
+fetch('TERMS_AND_CONDITIONS.txt').then(function(r){return r.text()}).then(function(t){document.getElementById('tc-body').textContent=t}).catch(function(){document.getElementById('tc-body').textContent='Terms and Conditions could not be loaded. Please contact info@cyberrmf.com.'});
+  </script>
+</body>
+</html>

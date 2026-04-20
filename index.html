@@ -1,132 +1,1320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IntegrateRMF — Streamline Your Risk Management Framework</title>
-  <link rel="stylesheet" href="/assets/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberRMF Integrate</title>
+  <meta name="description" content="CyberRMF Integrate: All-in-one Cyber compliance workflow.">
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* ── Nav ── */
+.nav {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 57px;
+  min-height: 57px;
+  max-height: 57px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 40px;
+}
+.nav-brand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+
+/* ── Tesseract logo ── */
+
+.nav-links {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 18px 16px;
+  transition: color .2s, background .2s;
+  position: relative;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.btn-nav-cta {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  padding: 7px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.btn-nav-cta:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 12px rgba(37,99,235,0.3);
+}
+.snake-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  padding: 5px 14px;
+  border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.snake-pill:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(59,130,246,.1);
+}
+
+/* ── Container ── */
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: 100px 0 80px;
+  background: var(--hero-bg);
+  position: relative;
+  overflow: hidden;
+}
+.hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+}
+.hero-left {
+  flex: 1.1;
+  min-width: 0;
+}
+.hero-right {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  margin-top: 40px;
+}
+.hero h1 {
+  font-family: var(--mono);
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+.hero h1 .accent { color: var(--accent); }
+#nist-text {
+  white-space: nowrap;
+}
+.hero-tagline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.hero-tagline-admin {
+  color: var(--muted);
+  margin-top: 2px;
+  margin-bottom: 16px;
+}
+.hero-sub {
+  font-size: 14px;
+  color: #b0b5be;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 480px;
+}
+.hero-sub p {
+  margin: 0 0 10px;
+}
+.hero-sub p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Email form ── */
+.hero-email-form {
+  display: flex;
+  align-items: stretch;
+  max-width: 420px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid rgba(59,130,246,0.2);
+  box-shadow: 0 0 8px rgba(59,130,246,0.08);
+}
+.hero-email-input {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  border-radius: 6px 0 0 6px;
+}
+.hero-email-input::placeholder {
+  color: var(--dim);
+}
+.hero-email-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: background .2s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-radius: 0 6px 6px 0;
+}
+.hero-email-btn:hover {
+  background: #1d4ed8;
+}
+.hero-airgap {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--dim);
+  letter-spacing: 0.01em;
+  transition: color 0.3s ease;
+}
+.hero-email-form:focus-within + .hero-airgap {
+  color: var(--accent);
+}
+.hero-img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+/* ── Sync dots animation ── */
+.sync-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sync-wave { display: flex; gap: 5px; align-items: center; }
+.sync-word { font-size: 12px; color: var(--dim); font-weight: 500; letter-spacing: 0.05em; }
+.pw-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  animation-duration: 2.8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-delay: calc(var(--i, 0) * 0.15s);
+}
+.pw-blue   { background: var(--accent); animation-name: pw-wave-blue; }
+.pw-white  { background: #e4e6eb; animation-name: pw-wave-white; }
+@keyframes pw-wave-blue {
+  0%   { box-shadow: 0 0 3px rgba(59,130,246,0.2); transform: scale(0.8); opacity: 0.45; }
+  40%  { box-shadow: 0 0 10px #3b82f6, 0 0 20px rgba(59,130,246,0.4); transform: scale(1.2); opacity: 1; }
+  60%  { box-shadow: 0 0 6px #3b82f6, 0 0 12px rgba(59,130,246,0.3); transform: scale(1.05); opacity: 0.85; }
+  100% { box-shadow: 0 0 3px rgba(59,130,246,0.2); transform: scale(0.8); opacity: 0.45; }
+}
+@keyframes pw-wave-white {
+  0%   { box-shadow: 0 0 3px rgba(228,230,235,0.15); transform: scale(0.8); opacity: 0.35; }
+  40%  { box-shadow: 0 0 8px rgba(228,230,235,0.5); transform: scale(1.2); opacity: 0.9; }
+  60%  { box-shadow: 0 0 5px rgba(228,230,235,0.3); transform: scale(1.05); opacity: 0.7; }
+  100% { box-shadow: 0 0 3px rgba(228,230,235,0.15); transform: scale(0.8); opacity: 0.35; }
+}
+
+/* ── Features ── */
+.section-heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  line-height: 1.3;
+}
+
+.rows-section {
+  padding: 40px 0 60px;
+}
+.rows-section .section-heading,
+.rows-section .section-title {
+  text-align: center;
+}
+.expand-row {
+  border-bottom: 1px solid var(--border);
+}
+.section-title + .expand-row {
+  border-top: 1px solid var(--border);
+}
+.row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  cursor: pointer;
+  user-select: none;
+  transition: color .2s;
+}
+.row-header:hover { color: var(--accent); }
+.row-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.row-num {
+  font-size: 11px;
+  color: var(--accent);
+  margin-right: 12px;
+  font-weight: 600;
+}
+.row-chevron {
+  font-size: 14px;
+  color: var(--dim);
+  transition: transform .3s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+.expand-row.open .row-chevron {
+  transform: rotate(180deg);
+}
+.row-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .4s ease;
+}
+.row-body-inner {
+  padding: 0 0 28px;
+}
+.row-text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 700px;
+  margin-bottom: 16px;
+}
+.row-text strong { color: var(--text); font-weight: 600; }
+.row-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  margin-bottom: 20px;
+}
+.row-sub-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(42,42,42,0.6);
+}
+.row-sub-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.row-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.row-bullets li {
+  font-size: 12px;
+  color: var(--muted);
+  padding-left: 16px;
+  position: relative;
+}
+.row-bullets li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-brand {
+  font-size: 12px;
+  font-weight: 600;
+}
+.footer-tagline {
+  font-size: 11px;
+  color: var(--dim);
+}
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.footer-email {
+  font-size: 11px;
+  color: var(--accent);
+  transition: color .2s;
+}
+.footer-email:hover { color: #93c5fd; }
+.footer-copy {
+  font-size: 10px;
+  color: var(--dim);
+}
+
+/* ── Cascade letter animation ── */
+.cascade-letter {
+  display: inline;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* ── Product toggle tabs ── */
+.product-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+.product-tab {
+  padding: 10px 28px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dim);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.product-tab:first-child { border-radius: 6px 0 0 6px; }
+.product-tab:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.product-tab.active {
+  color: #fff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.product-tab:not(.active):hover {
+  color: var(--text);
+  background: rgba(255,255,255,.04);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Features grid (on index) ── */
+.idx-features-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.idx-feat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12px;
+  color: var(--text);
+  transition: color .3s ease;
+}
+.idx-feat-item .ck { color: var(--accent); font-size: 13px; flex-shrink: 0; line-height: 1.4; transition: color .3s ease; }
+.idx-feat-item.glow-blue { color: var(--accent); }
+.idx-feat-item.glow-blue .ck { color: var(--accent); }
+.idx-feat-sub {
+  display: none;
+}
+.idx-feat-sub.show {
+  display: block;
+}
+.feat-cascade-hidden {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.feat-cascade-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.idx-feat-sub-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0 3px 22px;
+  font-size: 11px;
+  color: var(--dim);
+}
+.idx-feat-sub-item .ck { color: var(--accent); font-size: 11px; }
+.idx-sep-duties {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.idx-feat-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.idx-feat-tab {
+  flex: 1;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.idx-feat-tab:first-child { border-right: 1px solid var(--border); }
+.idx-feat-tab.active {
+  color: var(--accent);
+}
+.idx-feat-tab:not(.active):hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+}
+.idx-feat-panel { display: none; padding: 10px 32px 20px; }
+.idx-feat-panel.active { display: block; }
+.idx-sod-overlay {
+  text-align: center;
+  padding: 48px 32px;
+}
+.idx-sod-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  min-height: 1.4em;
+}
+.idx-sod-line {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  margin-bottom: 10px;
+}
+.idx-sod-line.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.show-all-wrap {
+  text-align: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.show-all-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(59,130,246,0.3);
+  padding: 5px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.show-all-btn:hover {
+  background: rgba(59,130,246,.1);
+  border-color: var(--accent);
+  color: #fff;
+}
+/* ── Light theme (page-specific) ── */
+[data-theme="light"] .hero-sub { color: #1a1a1a; }
+[data-theme="light"] .hero-tagline { color: var(--accent); }
+[data-theme="light"] .hero-email-form { background: #fff; border-color: rgba(59,130,246,0.15); box-shadow: 0 0 6px rgba(59,130,246,0.06); }
+[data-theme="light"] .hero-email-input { color: var(--text); }
+[data-theme="light"] .hero-email-input::placeholder { color: #9ca3af; }
+[data-theme="light"] .hero-img { border-color: var(--border); box-shadow: 0 0 8px rgba(59,130,246,0.08), 0 8px 40px rgba(0,0,0,0.12); }
+[data-theme="light"] .expand-row { background: transparent; border-color: var(--border); }
+[data-theme="light"] .row-header:hover { background: #f0f4ff; }
+[data-theme="light"] .row-header h3 { color: var(--text); }
+[data-theme="light"] .row-text { color: #1a1a1a; }
+[data-theme="light"] .row-img { border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+[data-theme="light"] .idx-features-card { background: #fff; border-color: var(--border); }
+[data-theme="light"] .idx-sep-duties { border-bottom-color: var(--border); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .show-all-btn { background: #fff; border-color: var(--border); color: var(--accent); }
+[data-theme="light"] .show-all-btn:hover { background: #eff6ff; color: var(--accent); }
+[data-theme="light"] .product-tab { background: #fff; border-color: var(--border); color: #1a1a1a; }
+[data-theme="light"] .product-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+[data-theme="light"] .product-tab:not(.active):hover { background: rgba(0,0,0,.04); }
+[data-theme="light"] .pw-white { background: #1a1a1a; }
+[data-theme="light"] .row-sub-section { border-top-color: #d1d5db; }
+[data-theme="light"] .rows-section { background: var(--bg); }
+[data-theme="light"] .idx-feat-tab { color: #1a1a1a; }
+[data-theme="light"] .idx-feat-tab.active { color: var(--accent); }
+[data-theme="light"] .idx-feat-tab:first-child { border-right-color: var(--border); }
+[data-theme="light"] .idx-feat-tabs { border-bottom-color: var(--border); }
+[data-theme="light"] .idx-sod-line { color: #1a1a1a; }
+[data-theme="light"] .idx-feat-sub-item .ck { color: var(--accent); }
+[data-theme="light"] .hero-airgap { color: #1a1a1a; }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+[data-theme="light"] .sync-word { color: #1a1a1a; }
+[data-theme="light"] .row-num { color: var(--accent); }
+[data-theme="light"] .row-chevron { color: #1a1a1a; }
+[data-theme="light"] .row-bullets li { color: #1a1a1a; }
+[data-theme="light"] .idx-feat-item { color: #1a1a1a; }
+[data-theme="light"] .idx-feat-sub-item { color: #1a1a1a; }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+/* ── Hero image blue glow ── */
+.hero-img {
+  box-shadow: 0 0 10px rgba(59,130,246,0.1), 0 8px 40px rgba(0,0,0,0.5);
+}
+.trial-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.trial-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(59,130,246,0.35);
+  padding: 8px 22px;
+  border-radius: 6px;
+  transition: background .2s, box-shadow .2s, color .2s, border-color .2s;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 8px rgba(59,130,246,0.12);
+}
+.trial-btn:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  box-shadow: 0 0 18px rgba(37,99,235,0.35);
+}
+.trial-subtext {
+  font-size: 10px;
+  color: #6b7280;
+}
+[data-theme="light"] .trial-btn { color: var(--accent); border-color: rgba(59,130,246,0.4); box-shadow: 0 0 6px rgba(59,130,246,0.1); }
+[data-theme="light"] .trial-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+[data-theme="light"] .trial-subtext { color: #6b7280; }
+
+/* ── Hamburger menu ── */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 57px;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hero-inner { flex-direction: column; gap: 40px; }
+  .hero-right { margin-top: 0; }
+  .hero { padding: 60px 0 50px; }
+  .hero h1 { font-size: 28px; }
+  .hero-email-form { max-width: 100%; }
+  .nav-inner { gap: 20px; }
+  .nav-links a { padding: 16px 10px; font-size: 11px; }
+  .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  .container { padding: 0 20px; }
+  .idx-feat-panel { padding: 20px 18px; }
+  #nist-text { white-space: normal; }
+  .rows-section { padding: 28px 0 40px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .hero { padding: 40px 0 36px; }
+  .hero h1 { font-size: 22px; }
+  .hero-tagline { font-size: 13px; }
+  .hero-sub { font-size: 13px; }
+  .hero-email-form { flex-direction: column; border-radius: 6px; }
+  .hero-email-input { border-radius: 6px 6px 0 0; }
+  .hero-email-btn { padding: 12px; border-radius: 0 0 6px 6px; }
+  .container { padding: 0 16px; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .snake-pill { padding: 5px 10px; font-size: 10px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .footer { padding: 24px 16px; }
+  .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  .section-title { font-size: 18px; }
+  .idx-feat-panel { padding: 16px 14px; }
+  .idx-feat-item { font-size: 11px; }
+  .idx-feat-sub-item { font-size: 10px; padding-left: 16px; }
+  .product-tab { padding: 8px 16px; font-size: 11px; }
+  .row-header h3 { font-size: 13px; }
+  .idx-sod-overlay { padding: 32px 16px; }
+}
+  </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="/" class="nav-logo">IntegrateRMF</a>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
       <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="/beta.html" class="btn btn-primary btn-sm">Beta Test</a>
+        <a href="index.html" class="active">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
       </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html" class="active">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
     </div>
   </nav>
 
-  <header class="hero">
-    <div class="hero-container">
-      <div class="hero-badge">Now accepting Beta Testers</div>
-      <h1>Compliance automation<br />built for security teams.</h1>
-      <p class="hero-subtitle">
-        CyberRMF Integrate brings your RMF workflow into a single desktop application.
-        Manage inventories, run scans, track STIGs, and generate artifacts — all offline, all secure.
-      </p>
-      <div class="hero-actions">
-        <a href="/beta.html" class="btn btn-primary btn-lg">Join the Beta</a>
-        <a href="#features" class="btn btn-ghost btn-lg">Learn More</a>
-      </div>
-    </div>
-  </header>
-
-  <section id="features" class="features">
-    <div class="section-container">
-      <h2>Everything you need for RMF compliance</h2>
-      <p class="section-subtitle">Two apps, one mission: streamline your Authority to Operate.</p>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  <section class="hero" id="hero-section">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-left">
+          <h1>Integrate your <span id="nist-text">NIST&nbsp;SP&nbsp;800-53</span> workflow.</h1>
+          <p class="hero-tagline" id="tagline-text">Tailored for the ISSO, ISSM, and SCA</p>
+          <p class="hero-tagline hero-tagline-admin" id="admin-tagline-text">with Admin Tools for the SA</p>
+          <div class="hero-sub">
+            <p>Manage/generate artifacts, track inventory, integrate SIEM, AV, and Vuln Scanner, and much, much more.</p>
+            <p>Export everything to your organization and SCAs.</p>
           </div>
-          <h3>CyberRMF Integrate</h3>
-          <p>Your compliance workspace. Track assets, manage STIG results, generate POA&amp;Ms, SSPs, and all RMF artifacts from a single application.</p>
+          <form class="hero-email-form" onsubmit="return false;">
+            <input class="hero-email-input" type="email" placeholder="Your work email" required>
+            <button class="hero-email-btn" type="submit">Receive updates</button>
+          </form>
+          <p class="hero-airgap">Full air-gapped support</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <div class="hero-right">
+          <img class="hero-img" src="images/pulse.png" alt="CyberRMF Integrate — Pulse Dashboard">
+          <div class="trial-row">
+            <a href="https://integratermf.com/trial" class="trial-btn">14-day trial</a>
+            <span class="trial-subtext">No credit card required</span>
           </div>
-          <h3>Admin Tools</h3>
-          <p>Run network scans, perform AD lookups, check ports &amp; protocols, collect logs, and push results directly into your Integrate workspace.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </div>
-          <h3>Pulse Monitoring</h3>
-          <p>Real-time network visibility with ping sweeps, DNS checks, traceroute, IP change detection, and visual effects to quickly identify issues.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          </div>
-          <h3>Artifact Generation</h3>
-          <p>Automatically produce SSPs, POA&amp;Ms, RAR/SAR documents, and continuous monitoring reports aligned with NIST 800-53 controls.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-          </div>
-          <h3>Fully Offline</h3>
-          <p>All data stays on your machine or shared drive. No cloud dependency, no data exfiltration risk. Works in air-gapped environments.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          </div>
-          <h3>Team Collaboration</h3>
-          <p>ISSOs and SysAdmins share a workspace via shared drive. Admin Tools scans feed directly into Integrate for seamless handoff.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="how-it-works" class="how-it-works">
-    <div class="section-container">
-      <h2>How it works</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Create a workspace</h3>
-          <p>Set up a new program workspace in Integrate. All your compliance data lives in one portable folder.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Import your inventory</h3>
-          <p>Add your assets, assign controls, and configure your security categorization and baseline.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Scan with Admin Tools</h3>
-          <p>Your SysAdmin runs AD lookups, port scans, encryption checks, and log collection from Admin Tools.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <h3>Generate artifacts</h3>
-          <p>Results flow into Integrate. Generate your SSP, POA&amp;M, and all required documents with a few clicks.</p>
+  <div id="features" class="rows-section container">
+    <div class="sync-row" aria-hidden="true">
+      <span class="sync-wave">
+        <span class="pw-dot pw-blue" style="--i:0"></span>
+        <span class="pw-dot pw-blue" style="--i:1"></span>
+        <span class="pw-dot pw-white" style="--i:2"></span>
+        <span class="pw-dot pw-blue" style="--i:3"></span>
+        <span class="pw-dot pw-blue" style="--i:4"></span>
+      </span>
+      <span class="sync-word">Integrate</span>
+      <span class="sync-wave">
+        <span class="pw-dot pw-blue" style="--i:5"></span>
+        <span class="pw-dot pw-blue" style="--i:6"></span>
+        <span class="pw-dot pw-white" style="--i:7"></span>
+        <span class="pw-dot pw-blue" style="--i:8"></span>
+        <span class="pw-dot pw-blue" style="--i:9"></span>
+      </span>
+    </div>
+    <div class="product-tabs">
+      <button class="product-tab active" onclick="switchProductTab('workflow')">Workflow</button>
+      <button class="product-tab" onclick="switchProductTab('features')">Features</button>
+    </div>
+
+    <div id="panel-workflow" class="tab-panel active">
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">01</span>Create / Import a Workspace</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Create or Import an existing workspace to locally save all files related to the network.</p>
+          <img class="row-img" src="images/Workspace.png" alt="Create a Workspace" loading="lazy">
         </div>
       </div>
     </div>
-  </section>
 
-  <section class="cta">
-    <div class="section-container">
-      <h2>Ready to simplify your ATO?</h2>
-      <p>Join the beta and get early access to CyberRMF Integrate and Admin Tools.</p>
-      <a href="/beta.html" class="btn btn-primary btn-lg">Request Beta Access</a>
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">02</span>Manage All NIST SP 800-53 Artifacts</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Upload .doc, .pdf, .xlsx, or .csv to view all your artifacts in our native viewer.</p>
+          <p class="row-text">Easily reference all preloaded NIST Publications related to 800-53 alongside your RMF package.</p>
+          <p class="row-text">No more hassle with reorganizing a shared drive or standardizing.</p>
+          <img class="row-img" src="images/filemanager2.png" alt="File Manager" loading="lazy">
+          <img class="row-img" src="images/Artifacts.png" alt="Artifacts and Publications" loading="lazy">
+        </div>
+      </div>
     </div>
-  </section>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">03</span>Inventory</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Intuitive Inventory database. You may select which devices need to be audited for compliance. Once selected, that item will be copied to Pulse.</p>
+          <img class="row-img" src="images/inventory1.png" alt="Inventory Master Table" loading="lazy">
+          <div class="row-sub-section">
+            <p class="row-sub-title">Hard Drive Tracking</p>
+            <p class="row-text">Track Hard Drive statuses &mdash; are they in storage or in the asset?</p>
+            <img class="row-img" src="images/inventory2.png" alt="Hard Drive Tracking" loading="lazy">
+          </div>
+          <div class="row-sub-section">
+            <p class="row-sub-title">Places</p>
+            <p class="row-text">Drag and drop assets into a floorplan. Select the asset name in Inventory to transport to that asset's location.</p>
+            <img class="row-img" src="images/inventory3.png" alt="Places — Floor Plan" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">04</span>Pulse</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Integrate your SIEM, AV, Vulnerability Manager, and STIG results to see live connections between your inventory.</p>
+          <p class="row-text">See last reported, AV definition dates, Vulnerability scan results, and verify logs.</p>
+          <img class="row-img" src="images/pulse.png" alt="Pulse Dashboard" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">05</span>STIG Validation</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Drag-and-drop STIGs for an easy experience. Shows previous and new % after completing checklist.</p>
+          <img class="row-img" src="images/STIG1.png" alt="STIG Validation" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">06</span>Admin Tools</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Generate a ports, protocols, and services artifact with a click of a button. Shows exactly what port is open, the service using it, the company associated to it, and the risk level of that service.</p>
+          <img class="row-img" src="images/admin.png" alt="Admin Tools — PPS" loading="lazy">
+          <ul class="row-bullets">
+            <li>Scan network for unencrypted devices</li>
+            <li>Active Directory lookup for an accurate user count</li>
+            <li>Verify all security-relevant logs are backed up</li>
+            <li>Parse all the software on every device in your network</li>
+            <li>Verify your DNS Name matches the name on your Inventory</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">07</span>Cyber Hygiene</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Consolidate all system information in your workspace for an intuitive and accurate sense of your environment.</p>
+          <img class="row-img" src="images/Hygiene.png" alt="800-53 Cyber Hygiene Dashboard" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <div class="expand-row">
+      <div class="row-header" onclick="toggleRow(this)">
+        <h3><span class="row-num">08</span>Export</h3>
+        <span class="row-chevron">&#9662;</span>
+      </div>
+      <div class="row-body">
+        <div class="row-body-inner">
+          <p class="row-text">Export your workspace for a user to import.</p>
+          <img class="row-img" src="images/export.png" alt="Export Workspace" loading="lazy">
+        </div>
+      </div>
+    </div>
+    </div><!-- end panel-workflow -->
+
+    <div id="panel-features" class="tab-panel">
+      <div class="idx-features-card">
+        <div class="idx-sep-duties">Separation of Duties</div>
+        <div class="idx-feat-tabs">
+          <button class="idx-feat-tab active" onclick="switchIdxFeatTab('integrate')">Integrate</button>
+          <button class="idx-feat-tab" onclick="switchIdxFeatTab('admin')">Admin Tools</button>
+        </div>
+        <div class="show-all-wrap">
+          <button class="show-all-btn" id="show-all-features-btn" onclick="toggleAllFeatures()">Show all features</button>
+        </div>
+        <div id="idx-panel-integrate" class="idx-feat-panel active">
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> 800-53 Cyber Hygiene Dashboard</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Full statistics on entire workspace</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Artifact Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload all RMF BoE</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native PDF, XLSX, and CSV viewer</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> SCTM builder</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> POA&amp;M database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Change Management Tracker</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> HW/SW list Database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native NIST Special Publications.</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> CONMON</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Create weekly plans for the year</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Reference SCTM on each control</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Add controls to POA&amp;M</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Sign with CAC/PKI</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Inventory Database</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on asset type</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> EOL Dates</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Hard Drive Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Link to assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track hard drive use</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Drag-and-drop floorplans</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track all locations</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Drag and drop assets into floorplan</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Click Inventory entry to teleport to physical location</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Pulse</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import Inventory database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Ping all assets at once</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Check DNS accuracy for assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> API integration for SIEM, AV, and Vulnerability Management</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Last reported</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> DAT version</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Vulnerability stats</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show # of logs backed up for each asset</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show STIG score for each asset</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> STIG Validator</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import STIG XCCDFs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show new score after remediation</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a table with all scores for all assets</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> File Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload organization&rsquo;s files</div></div>
+        </div>
+        <div id="idx-panel-admin" class="idx-feat-panel">
+          <div id="idx-sod-overlay" class="idx-sod-overlay">
+            <div class="idx-sod-title" id="idx-sod-title"></div>
+            <div class="idx-sod-line" id="idx-sod-l1">Two apps, one mission.</div>
+            <div class="idx-sod-line" id="idx-sod-l2">Admin Tools feeds scan data into Integrate for ISSO awareness.</div>
+            <div class="idx-sod-line" id="idx-sod-l3">Relevant data is populated into Pulse and Cyber Hygiene.</div>
+          </div>
+          <div id="idx-admin-features" style="display:none;">
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> AD Lookup</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pull reports of all users on a domain</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on account type</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Encryption Check</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Scan for unencrypted assets on a network</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Ports, Protocols, and Services</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a PPS; shows open port, service running on it, and risk score</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> Logs</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Copy and back-up logs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify which logs are missing</div></div>
+
+            <div class="idx-feat-item"><span class="ck">&#10003;</span> DNS Check</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify all assets are accurate in DNS</div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end panel-features -->
+
+  </div>
 
   <footer class="footer">
-    <div class="section-container">
-      <p>&copy; 2026 IntegrateRMF. All rights reserved.</p>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
     </div>
   </footer>
+
+  <script src="shared-themes.js"></script>
+  <script>
+/* ── Expand/collapse rows ── */
+function toggleRow(header) {
+  var row = header.parentElement;
+  var body = row.querySelector('.row-body');
+  if (row.classList.contains('open')) {
+    row.classList.remove('open');
+    body.style.maxHeight = null;
+  } else {
+    row.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }
+}
+
+/* ── Email form ── */
+var emailForm = document.querySelector('.hero-email-form');
+if (emailForm) {
+  emailForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var input = emailForm.querySelector('.hero-email-input');
+    if (input && input.value) {
+      var btn = emailForm.querySelector('.hero-email-btn');
+      btn.textContent = 'Subscribed!';
+      btn.style.background = '#16a34a';
+      input.disabled = true;
+      setTimeout(function() {
+        btn.textContent = 'Receive updates';
+        btn.style.background = '';
+        input.disabled = false;
+        input.value = '';
+      }, 3000);
+    }
+  });
+}
+
+/* ── Product tab switching ── */
+function switchProductTab(id) {
+  document.querySelectorAll('.product-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  var tabs = document.querySelectorAll('.product-tab');
+  tabs.forEach(function(t) { if (t.textContent.trim().toLowerCase() === id) t.classList.add('active'); });
+}
+
+var _featuresExpanded = false;
+function toggleAllFeatures() {
+  _featuresExpanded = !_featuresExpanded;
+  var activePanel = document.querySelector('.idx-feat-panel.active');
+  if (!activePanel) return;
+  var subs = activePanel.querySelectorAll('.idx-feat-sub');
+  var btn = document.getElementById('show-all-features-btn');
+  btn.textContent = _featuresExpanded ? 'Hide all features' : 'Show all features';
+
+  if (_featuresExpanded) {
+    var allItems = activePanel.querySelectorAll('.idx-feat-item');
+    var allSubItems = activePanel.querySelectorAll('.idx-feat-sub-item');
+
+    allItems.forEach(function(el) {
+      el.classList.add('feat-cascade-hidden');
+      el.classList.remove('feat-cascade-visible', 'glow-blue');
+    });
+    allSubItems.forEach(function(el) {
+      el.classList.add('feat-cascade-hidden');
+      el.classList.remove('feat-cascade-visible');
+    });
+
+    subs.forEach(function(s) { s.classList.add('show'); });
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        var allRows = activePanel.querySelectorAll('.idx-feat-item, .idx-feat-sub-item');
+        allRows.forEach(function(el, i) {
+          setTimeout(function() {
+            el.classList.add('feat-cascade-visible');
+            if (el.classList.contains('idx-feat-item')) {
+              el.classList.add('glow-blue');
+            }
+          }, i * 35);
+        });
+      });
+    });
+  } else {
+    subs.forEach(function(s) { s.classList.remove('show'); });
+    activePanel.querySelectorAll('.idx-feat-item').forEach(function(el) {
+      el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible', 'glow-blue');
+    });
+    activePanel.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
+      el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible');
+    });
+  }
+}
+
+function switchIdxFeatTab(tab) {
+  var tabs = document.querySelectorAll('.idx-feat-tab');
+  var intP = document.getElementById('idx-panel-integrate');
+  var admP = document.getElementById('idx-panel-admin');
+  tabs[0].classList.toggle('active', tab === 'integrate');
+  tabs[1].classList.toggle('active', tab === 'admin');
+  intP.classList.toggle('active', tab === 'integrate');
+  admP.classList.toggle('active', tab === 'admin');
+
+  var wasExpanded = _featuresExpanded;
+  if (!wasExpanded) {
+    _featuresExpanded = false;
+    document.getElementById('show-all-features-btn').textContent = 'Show all features';
+  }
+
+  document.querySelectorAll('.idx-feat-sub').forEach(function(s) { s.classList.remove('show'); });
+  document.querySelectorAll('.idx-feat-item').forEach(function(el) {
+    el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible', 'glow-blue');
+  });
+  document.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
+    el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible');
+  });
+
+  if (tab === 'admin') {
+    runIdxSodTransition(wasExpanded);
+  } else if (wasExpanded) {
+    expandPanelInstant(intP);
+  }
+}
+
+function expandPanelInstant(panel) {
+  if (!panel) return;
+  _featuresExpanded = true;
+  document.getElementById('show-all-features-btn').textContent = 'Hide all features';
+  panel.querySelectorAll('.idx-feat-sub').forEach(function(s) { s.classList.add('show'); });
+  panel.querySelectorAll('.idx-feat-item').forEach(function(el) {
+    el.classList.remove('feat-cascade-hidden');
+    el.classList.add('feat-cascade-visible', 'glow-blue');
+  });
+  panel.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
+    el.classList.remove('feat-cascade-hidden');
+    el.classList.add('feat-cascade-visible');
+  });
+}
+
+function runIdxSodTransition(expandAfter) {
+  var overlay = document.getElementById('idx-sod-overlay');
+  var adminFeat = document.getElementById('idx-admin-features');
+  var titleEl = document.getElementById('idx-sod-title');
+  var lines = [document.getElementById('idx-sod-l1'), document.getElementById('idx-sod-l2'), document.getElementById('idx-sod-l3')];
+
+  overlay.style.display = '';
+  adminFeat.style.display = 'none';
+  titleEl.textContent = '';
+  lines.forEach(function(l) { l.classList.remove('show'); });
+
+  var phrase = 'Separation of duties';
+  var idx = 0;
+
+  var typeInterval = setInterval(function() {
+    if (idx < phrase.length) {
+      titleEl.textContent += phrase[idx];
+      idx++;
+    } else {
+      clearInterval(typeInterval);
+      lines.forEach(function(line, i) {
+        setTimeout(function() { line.classList.add('show'); }, 400 + i * 600);
+      });
+      setTimeout(function() {
+        overlay.style.display = 'none';
+        adminFeat.style.display = 'block';
+        if (expandAfter) {
+          var admP = document.getElementById('idx-panel-admin');
+          expandPanelInstant(admP);
+        }
+      }, 400 + 3 * 600 + 2300);
+    }
+  }, 55);
+}
+
+/* ── Cascading text animation ── */
+(function() {
+  var LETTER_DELAY = 65;
+  var GLOW_DURATION = 480;
+  var cs = getComputedStyle(document.documentElement);
+  var BLUE = cs.getPropertyValue('--accent').trim() || '#3b82f6';
+  var WHITE = cs.getPropertyValue('--text').trim() || '#e4e6eb';
+  var MUTED = cs.getPropertyValue('--muted').trim() || '#9ca3af';
+
+  function splitIntoSpans(el) {
+    var text = el.textContent;
+    el.innerHTML = '';
+    var spans = [];
+    for (var i = 0; i < text.length; i++) {
+      var s = document.createElement('span');
+      s.className = 'cascade-letter';
+      s.textContent = text[i];
+      if (text[i] === ' ' || text[i] === '\u00A0') s.innerHTML = '&nbsp;';
+      el.appendChild(s);
+      spans.push(s);
+    }
+    return spans;
+  }
+
+  function cascadeTo(spans, toColor, glowColor, startDelay, letterDelay, glowDur) {
+    var lastEnd = startDelay;
+    for (var i = 0; i < spans.length; i++) {
+      (function(sp, delay) {
+        setTimeout(function() {
+          sp.style.color = toColor;
+          sp.style.textShadow = '0 0 14px ' + glowColor + ', 0 0 28px ' + glowColor;
+          setTimeout(function() {
+            sp.style.textShadow = 'none';
+          }, glowDur);
+        }, delay);
+      })(spans[i], startDelay + i * letterDelay);
+      lastEnd = startDelay + i * letterDelay + glowDur;
+    }
+    return lastEnd;
+  }
+
+  var nistEl = document.getElementById('nist-text');
+  var tagEl = document.getElementById('tagline-text');
+  var adminTagEl = document.getElementById('admin-tagline-text');
+  if (!nistEl || !tagEl) return;
+
+  var nistSpans = splitIntoSpans(nistEl);
+  nistSpans.forEach(function(s) { s.style.color = WHITE; });
+
+  var tagSpans = splitIntoSpans(tagEl);
+
+  var adminSpans = adminTagEl ? splitIntoSpans(adminTagEl) : [];
+
+  var nistEnd = cascadeTo(nistSpans, BLUE, BLUE, 600, LETTER_DELAY, GLOW_DURATION);
+
+  var tagStart = nistEnd + 1000;
+  cascadeTo(tagSpans, BLUE, BLUE, tagStart, LETTER_DELAY, GLOW_DURATION);
+
+  if (adminSpans.length) {
+    var oneThird = Math.floor(tagSpans.length / 3);
+    var adminStart = tagStart + oneThird * LETTER_DELAY;
+    cascadeTo(adminSpans, BLUE, BLUE, adminStart, LETTER_DELAY, GLOW_DURATION);
+  }
+})();
+
+  </script>
 </body>
 </html>

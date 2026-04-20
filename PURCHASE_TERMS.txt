@@ -1,0 +1,44 @@
+CYBERRMF — PURCHASE TERMS AND CONDITIONS
+
+Last Updated: March 28, 2026
+
+
+By submitting your order, you ("Customer," "you," or "your") agree to be bound by the following terms and conditions. Please read them carefully before completing your purchase.
+
+
+1. PAYMENT AUTHORIZATION AND LEGITIMACY
+
+By submitting payment through this checkout, you represent and warrant that: (a) you are the authorized holder of the payment method used, or have obtained explicit authorization from the account holder to complete this transaction; (b) all billing information provided is accurate and complete; and (c) this transaction constitutes a legitimate, voluntary purchase of the CyberRMF software license described herein. Any fraudulent, unauthorized, or disputed payment may result in immediate license revocation and referral to applicable law enforcement authorities.
+
+
+2. REFUND POLICY
+
+All purchases are final and non-refundable. CyberRMF does not offer refunds, credits, or exchanges for any reason, including but not limited to dissatisfaction with the Software, failure to use the Software, or changes in organizational requirements. For billing disputes, errors, or extenuating circumstances, please contact info@cyberrmf.com. CyberRMF will review each inquiry on a case-by-case basis at its sole discretion.
+
+
+3. LICENSE TERMS
+
+Customer acknowledges that each license key entitles the holder to install and use CyberRMF Integrate and CyberRMF Admin Tools (collectively, the "Software"). Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
+
+
+4. PRIVACY AND CUSTOMER DATA
+
+4.1 Limited Collection. CyberRMF collects only the information necessary to process your order and fulfill your license, including your name, email address, organization name, and billing details.
+
+4.2 Disclosure Required by Law. CyberRMF will not sell, rent, or otherwise disclose Customer personal information to third parties, except as required to comply with applicable federal, state, or local laws, regulations, or legal process, including but not limited to subpoenas, court orders, or requests from governmental or regulatory authorities with competent jurisdiction. Where permitted by law, CyberRMF will make reasonable efforts to notify the Customer prior to such disclosure.
+
+4.3 Internal Business Use. Customer acknowledges and agrees that CyberRMF may use non-personally identifiable and aggregated Customer data — including but not limited to organization name, industry sector, and general usage metrics — for CyberRMF's own internal business purposes, such as marketing materials, case studies, promotional content, and service improvement initiatives. CyberRMF will not use individually identifiable Customer information in any public-facing marketing material without prior written consent from the Customer.
+
+
+5. GENERAL
+
+5.1 These Purchase Terms supplement and do not replace the CyberRMF Software License Agreement. In the event of a conflict between these Purchase Terms and the Software License Agreement, the Software License Agreement shall control with respect to software usage, and these Purchase Terms shall control with respect to payment and purchase matters.
+
+5.2 CyberRMF reserves the right to modify these Purchase Terms at any time. Updated terms will be posted at integratermf.com. Your completion of a purchase constitutes acceptance of the terms in effect at the time of purchase.
+
+5.3 For questions regarding your purchase, licensing, or these terms, contact info@cyberrmf.com.
+
+
+---
+
+By clicking "I have read and accept the Terms and Conditions" and submitting your order, you acknowledge that you have read, understood, and agree to be bound by these Purchase Terms and Conditions.

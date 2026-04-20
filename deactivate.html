@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>License Management — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+.nav {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-links a.active::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 16px; right: 16px;
+  height: 2px; background: var(--accent); border-radius: 1px;
+}
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+
+.page-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 56px 32px 80px;
+  flex: 1;
+}
+.page-wrap h1 {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.page-sub {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+
+/* Top-level action picker */
+.action-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+.action-card {
+  flex: 1;
+  max-width: 280px;
+  padding: 28px 24px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.action-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(59,130,246,0.1);
+}
+.action-card.selected {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 16px rgba(59,130,246,0.12);
+}
+.action-card-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.action-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.action-card p {
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+/* Panels */
+.license-panel {
+  display: none;
+}
+.license-panel.active {
+  display: block;
+}
+
+/* Sub-tabs for Online / Air-Gapped */
+.method-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+.method-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.method-tab:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.method-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.method-panel {
+  display: none;
+  padding: 28px 0;
+}
+.method-panel.active { display: block; }
+
+/* Workflow steps */
+.workflow-steps { margin-bottom: 24px; }
+.step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-body h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.step-body p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.step-body code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+/* Forms */
+.license-form { margin-top: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--dim); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background .2s;
+  margin-top: 8px;
+}
+.btn-activate {
+  background: var(--blue);
+}
+.btn-activate:hover { background: #1d4ed8; }
+.btn-deactivate {
+  background: #dc2626;
+}
+.btn-deactivate:hover { background: #b91c1c; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.result-msg {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: none;
+}
+.result-msg.ok {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: #22c55e;
+}
+.result-msg.err {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+}
+
+.note-box {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.8;
+}
+.note-box strong { color: var(--muted); }
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+[data-theme="light"] .nav-brand { color: #1a1a1a; }
+[data-theme="light"] .nav-links a { color: #1a1a1a; }
+[data-theme="light"] .nav-links a:hover { color: var(--text); background: rgba(0,0,0,.04); }
+[data-theme="light"] .nav-links a.active { color: var(--text); }
+[data-theme="light"] .nav-logo polyline { stroke: #2563eb; }
+[data-theme="light"] .snake-pill { color: var(--accent); border-color: rgba(59,130,246,0.3); }
+[data-theme="light"] .snake-pill:hover { color: #fff; background: rgba(59,130,246,.1); }
+[data-theme="light"] .page-wrap h1 { color: var(--text); }
+[data-theme="light"] .page-sub { color: #1a1a1a; }
+[data-theme="light"] .action-card { background: #fff; border-color: var(--border); }
+[data-theme="light"] .action-card:hover { border-color: var(--accent); }
+[data-theme="light"] .action-card.selected { background: rgba(59,130,246,0.04); }
+[data-theme="light"] .action-card p { color: #6b7280; }
+[data-theme="light"] .step-body h3 { color: var(--text); }
+[data-theme="light"] .step-body p { color: #1a1a1a; }
+[data-theme="light"] .step-body code { background: #e8e8e8; color: var(--accent); }
+[data-theme="light"] .method-tabs { border-bottom-color: var(--border); }
+[data-theme="light"] .method-tab { color: #1a1a1a; }
+[data-theme="light"] .method-tab:hover { color: var(--text); background: rgba(0,0,0,.03); }
+[data-theme="light"] .form-group label { color: #1a1a1a; }
+[data-theme="light"] .form-group input,
+[data-theme="light"] .form-group textarea { background: #fff; border-color: var(--border); color: var(--text); }
+[data-theme="light"] .note-box { background: #fff; border-color: var(--border); color: #1a1a1a; }
+[data-theme="light"] .note-box strong { color: #1a1a1a; }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .footer-tagline { color: #1a1a1a; }
+[data-theme="light"] .footer-copy { color: #1a1a1a; }
+
+/* Hamburger menu */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 57px;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-mobile-menu { background: #fff; border-bottom-color: var(--border); }
+[data-theme="light"] .nav-mobile-menu a { color: #1a1a1a; }
+[data-theme="light"] .nav-mobile-menu a.active { color: var(--accent); }
+[data-theme="light"] .nav-hamburger { color: #1a1a1a; }
+
+@media (max-width: 768px) {
+  .nav-inner { gap: 20px; }
+  .nav-links a { padding: 16px 10px; font-size: 11px; }
+  .page-wrap { padding: 40px 20px 60px; }
+  .page-wrap h1 { font-size: 22px; }
+  .footer { padding: 24px 20px; }
+  .method-tab { font-size: 11px; padding: 10px 12px; }
+  .action-cards { gap: 14px; }
+  .action-card { padding: 20px 16px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .snake-pill { padding: 5px 10px; font-size: 10px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .page-wrap { padding: 28px 16px 48px; }
+  .page-wrap h1 { font-size: 20px; }
+  .page-sub { font-size: 13px; }
+  .action-cards { flex-direction: column; align-items: center; }
+  .action-card { max-width: 100%; }
+  .step { gap: 12px; }
+  .step-num { width: 20px; height: 20px; font-size: 10px; }
+  .step-body h3 { font-size: 13px; }
+  .step-body p { font-size: 11px; }
+  .method-tab { font-size: 10px; padding: 10px 8px; }
+  .note-box { font-size: 10px; padding: 12px 14px; }
+  .footer { padding: 20px 16px; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html" class="active">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html" class="active">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1>License Management</h1>
+    <p class="page-sub">Activate a new license or deactivate an existing one</p>
+
+    <!-- ── Top-level action selection ── -->
+    <div class="action-cards">
+      <div class="action-card" id="card-activate" onclick="selectAction('activate')">
+        <div class="action-card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h3>Activate License</h3>
+        <p>Enter your license key on a new machine or activate an air-gapped system</p>
+      </div>
+      <div class="action-card" id="card-deactivate" onclick="selectAction('deactivate')">
+        <div class="action-card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </div>
+        <h3>Deactivate License</h3>
+        <p>Release your license from the current machine to transfer it to another device</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ ACTIVATE PANEL ═══════════ -->
+    <div id="panel-activate" class="license-panel">
+      <div class="method-tabs">
+        <div class="method-tab active" onclick="switchTab('activate','online',this)">Online Activation</div>
+        <div class="method-tab" onclick="switchTab('activate','airgap',this)">Air-Gapped Activation</div>
+      </div>
+
+      <!-- Online Activation -->
+      <div id="activate-online" class="method-panel active">
+        <div class="workflow-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Open CyberRMF Integrate or Admin Tools</h3>
+              <p>Launch the application on the machine you want to activate. You will be prompted to enter your license key on first launch.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Enter your license key</h3>
+              <p>Paste the license key from your purchase confirmation email. The application will contact the license server to validate and bind the key to your machine.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Activation complete</h3>
+              <p>Once validated, the application unlocks and your license is bound to this device. You can begin creating workspaces immediately.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <strong>Troubleshooting:</strong> If activation fails, ensure the machine has internet access and that the license key has not already been activated on another device. To transfer, deactivate the old machine first. For assistance, contact <strong>info@cyberrmf.com</strong>.
+        </div>
+      </div>
+
+      <!-- Air-Gapped Activation -->
+      <div id="activate-airgap" class="method-panel">
+        <div class="workflow-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Generate an activation code</h3>
+              <p>On the air-gapped machine, open the application. It will display a short <strong>activation code</strong> derived from the machine&rsquo;s hardware fingerprint. Write this code down.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Enter the code on this page</h3>
+              <p>On any internet-connected machine (or phone), navigate to this page and enter your activation code, license key, and email below.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Enter the response code on the air-gapped machine</h3>
+              <p>After submission, you will receive a <strong>response code</strong>. Return to the air-gapped machine and enter this response code in the application to complete activation.</p>
+            </div>
+          </div>
+        </div>
+
+        <form class="license-form" id="activate-airgap-form" onsubmit="return handleActivateAirgap(event)">
+          <div class="form-group">
+            <label>License Key (received via email at purchase)</label>
+            <input type="text" id="act-ag-key" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+          </div>
+          <div class="form-group">
+            <label>Email (used at purchase)</label>
+            <input type="email" id="act-ag-email" placeholder="jane@organization.mil" required>
+          </div>
+          <div class="form-group">
+            <label>Activation Code (from the air-gapped machine)</label>
+            <input type="text" id="act-ag-code" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" required style="letter-spacing:0.1em;font-size:15px;">
+          </div>
+          <button type="submit" class="submit-btn btn-activate" id="act-ag-btn">Generate Response Code</button>
+          <div id="act-ag-result" class="result-msg"></div>
+          <div id="act-ag-response-code" style="display:none;margin-top:20px;padding:24px;background:var(--bg3);border:2px solid var(--accent);border-radius:8px;text-align:center;">
+            <p style="font-size:11px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Your Response Code &mdash; write this down</p>
+            <p id="act-ag-response-value" style="font-size:20px;font-weight:700;letter-spacing:0.12em;color:var(--accent);word-break:break-all;"></p>
+            <p style="font-size:11px;color:var(--dim);margin-top:12px;">Enter this code in the application on the air-gapped machine to complete activation.</p>
+          </div>
+        </form>
+
+        <div class="note-box">
+          <strong>No USB drives or file transfers required.</strong> Keep your air-gapped environment secure. The response code is cryptographically signed to your specific machine.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ DEACTIVATE PANEL ═══════════ -->
+    <div id="panel-deactivate" class="license-panel">
+      <div class="method-tabs">
+        <div class="method-tab active" onclick="switchTab('deactivate','online',this)">Online Deactivation</div>
+        <div class="method-tab" onclick="switchTab('deactivate','airgap',this)">Air-Gapped Deactivation</div>
+      </div>
+
+      <!-- Online Deactivation -->
+      <div id="deactivate-online" class="method-panel active">
+        <div class="workflow-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Enter your license key and email</h3>
+              <p>Provide the license key and the email used at purchase. We&rsquo;ll verify ownership and release the machine activation.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Receive a new activation</h3>
+              <p>Once deactivated, your license key is freed and can be activated on your new machine. Open Integrate or Admin Tools and enter your key.</p>
+            </div>
+          </div>
+        </div>
+
+        <form class="license-form" id="deact-online-form" onsubmit="return handleDeactOnline(event)">
+          <div class="form-group">
+            <label>License Key</label>
+            <input type="text" id="deact-ol-key" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+          </div>
+          <div class="form-group">
+            <label>Email (used at purchase)</label>
+            <input type="email" id="deact-ol-email" placeholder="jane@organization.mil" required>
+          </div>
+          <button type="submit" class="submit-btn btn-deactivate" id="deact-ol-btn">Deactivate License</button>
+          <div id="deact-ol-result" class="result-msg"></div>
+        </form>
+      </div>
+
+      <!-- Air-Gapped Deactivation -->
+      <div id="deactivate-airgap" class="method-panel">
+        <div class="workflow-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Generate a deactivation code</h3>
+              <p>In the application, navigate to the deactivation option. The app will display a short <strong>deactivation code</strong>. Write this code down.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Enter the code on this page</h3>
+              <p>On any internet-connected machine, navigate to this page and enter your deactivation code and email below.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>License released</h3>
+              <p>Once verified, the deactivation processes server-side. Your license key is now freed and can be activated on a new machine using the activation workflow above.</p>
+            </div>
+          </div>
+        </div>
+
+        <form class="license-form" id="deact-airgap-form" onsubmit="return handleDeactAirgap(event)">
+          <div class="form-group">
+            <label>Email (used at purchase)</label>
+            <input type="email" id="deact-ag-email" placeholder="jane@organization.mil" required>
+          </div>
+          <div class="form-group">
+            <label>Deactivation Code (from the air-gapped machine)</label>
+            <input type="text" id="deact-ag-code" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" required style="letter-spacing:0.1em;font-size:15px;">
+          </div>
+          <button type="submit" class="submit-btn btn-deactivate" id="deact-ag-btn">Submit Deactivation Code</button>
+          <div id="deact-ag-result" class="result-msg"></div>
+        </form>
+
+        <div class="note-box">
+          <strong>No USB drives or file transfers required.</strong> Keep your air-gapped environment secure. The deactivation code is cryptographically signed by your machine, proving you control the license.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script>
+var ACTIVATE_AIRGAP_ENDPOINT = 'https://integratermf.com/api/activate-airgap';
+var DEACTIVATE_ENDPOINT = 'https://integratermf.com/api/deactivate';
+var DEACTIVATE_AIRGAP_ENDPOINT = 'https://integratermf.com/api/deactivate-airgap';
+
+function selectAction(action) {
+  document.querySelectorAll('.action-card').forEach(function(c) { c.classList.remove('selected'); });
+  document.querySelectorAll('.license-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('card-' + action).classList.add('selected');
+  document.getElementById('panel-' + action).classList.add('active');
+}
+
+function switchTab(panel, method, el) {
+  var container = document.getElementById('panel-' + panel);
+  container.querySelectorAll('.method-tab').forEach(function(t) { t.classList.remove('active'); });
+  container.querySelectorAll('.method-panel').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById(panel + '-' + method).classList.add('active');
+}
+
+async function handleActivateAirgap(e) {
+  e.preventDefault();
+  var btn = document.getElementById('act-ag-btn');
+  var res = document.getElementById('act-ag-result');
+  var responseBox = document.getElementById('act-ag-response-code');
+  btn.disabled = true;
+  btn.textContent = 'Processing\u2026';
+  res.style.display = 'none';
+  responseBox.style.display = 'none';
+
+  try {
+    var resp = await fetch(ACTIVATE_AIRGAP_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: document.getElementById('act-ag-key').value.trim(),
+        email: document.getElementById('act-ag-email').value.trim(),
+        activationCode: document.getElementById('act-ag-code').value.trim().toUpperCase()
+      })
+    });
+    var json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || 'Activation failed');
+    res.className = 'result-msg ok';
+    res.textContent = 'Response code generated successfully. Write it down and enter it on the air-gapped machine.';
+    res.style.display = 'block';
+    document.getElementById('act-ag-response-value').textContent = json.responseCode || 'N/A';
+    responseBox.style.display = 'block';
+  } catch (err) {
+    res.className = 'result-msg err';
+    res.textContent = err.message || 'Something went wrong. Please try again or contact info@cyberrmf.com.';
+    res.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Generate Response Code';
+}
+
+async function handleDeactOnline(e) {
+  e.preventDefault();
+  var btn = document.getElementById('deact-ol-btn');
+  var res = document.getElementById('deact-ol-result');
+  btn.disabled = true;
+  btn.textContent = 'Processing\u2026';
+  res.style.display = 'none';
+
+  try {
+    var resp = await fetch(DEACTIVATE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: document.getElementById('deact-ol-key').value.trim(),
+        email: document.getElementById('deact-ol-email').value.trim()
+      })
+    });
+    var json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || 'Deactivation failed');
+    res.className = 'result-msg ok';
+    res.textContent = 'License deactivated successfully. You can now activate on your new machine.';
+    res.style.display = 'block';
+  } catch (err) {
+    res.className = 'result-msg err';
+    res.textContent = err.message || 'Something went wrong. Please try again or contact info@cyberrmf.com.';
+    res.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Deactivate License';
+}
+
+async function handleDeactAirgap(e) {
+  e.preventDefault();
+  var btn = document.getElementById('deact-ag-btn');
+  var res = document.getElementById('deact-ag-result');
+  btn.disabled = true;
+  btn.textContent = 'Processing\u2026';
+  res.style.display = 'none';
+
+  try {
+    var resp = await fetch(DEACTIVATE_AIRGAP_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('deact-ag-email').value.trim(),
+        deactivationCode: document.getElementById('deact-ag-code').value.trim().toUpperCase()
+      })
+    });
+    var json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || 'Verification failed');
+    res.className = 'result-msg ok';
+    res.textContent = 'License deactivated successfully. Your license key is now freed and can be activated on a new machine.';
+    res.style.display = 'block';
+  } catch (err) {
+    res.className = 'result-msg err';
+    res.textContent = err.message || 'Something went wrong. Please try again or contact info@cyberrmf.com.';
+    res.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Submit Deactivation Code';
+}
+  </script>
+</body>
+</html>

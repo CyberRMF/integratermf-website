@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberRMF Logo — Version 2 (Dots Outside)</title>
+<style>
+body { margin: 0; background: #1a1d23; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.logo-orbit {
+  transform-origin: 100px 100px;
+  animation: logo-spin 20s linear infinite;
+  animation-play-state: paused;
+}
+.logo-orbit.spinning { animation-play-state: running; }
+@keyframes logo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<svg id="logo-v2" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <g id="outer-dots-v2" class="logo-orbit"></g>
+  <circle cx="100" cy="100" r="5" fill="#16a34a">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>
+<script>
+(function() {
+  var g = document.getElementById('outer-dots-v2');
+  var cx = 100, cy = 100, r = 75, dotR = 8, count = 6;
+  var dots = [];
+  for (var i = 0; i < count; i++) {
+    var angle = (i * 2 * Math.PI / count) - Math.PI / 2;
+    var finalX = cx + r * Math.cos(angle);
+    var finalY = cy + r * Math.sin(angle);
+    var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', dotR);
+    circle.setAttribute('fill', Math.random() > 0.3 ? '#16a34a' : '#dc2626');
+    circle.style.filter = 'drop-shadow(0 0 4px ' + circle.getAttribute('fill') + ')';
+    circle.style.transition = 'fill 0.6s ease, filter 0.6s ease';
+    circle._finalX = finalX;
+    circle._finalY = finalY;
+    g.appendChild(circle);
+    dots.push(circle);
+  }
+  var start = null;
+  function ease(t) {
+    var c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+  function step(ts) {
+    if (!start) start = ts;
+    var t = Math.min((ts - start) / 1200, 1);
+    var p = ease(t);
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].setAttribute('cx', cx + (dots[i]._finalX - cx) * p);
+      dots[i].setAttribute('cy', cy + (dots[i]._finalY - cy) * p);
+    }
+    if (t < 1) requestAnimationFrame(step);
+    else g.classList.add('spinning');
+  }
+  requestAnimationFrame(step);
+  function randomFlip() {
+    var idx = Math.floor(Math.random() * count);
+    var color = Math.random() > 0.35 ? '#16a34a' : '#dc2626';
+    dots[idx].setAttribute('fill', color);
+    dots[idx].style.filter = 'drop-shadow(0 0 6px ' + color + ')';
+    setTimeout(randomFlip, 400 + Math.random() * 1200);
+  }
+  setTimeout(randomFlip, 800);
+})();
+</script>
+</body>
+</html>

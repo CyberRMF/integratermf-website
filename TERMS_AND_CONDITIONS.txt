@@ -1,0 +1,394 @@
+CYBERRMF INTEGRATE — TERMS AND CONDITIONS
+
+Last Updated: March 21, 2026
+
+
+1. ACCEPTANCE OF TERMS
+
+By installing, copying, or otherwise using CyberRMF Integrate and its bundled
+companion application CyberRMF Admin Tools (collectively, the "Software"), you
+("Licensee," "you," or "your") agree to be bound by these Terms and Conditions
+(this "Agreement"). If you do not agree to all of the terms of this Agreement,
+do not install or use the Software. If you are accepting this Agreement on behalf
+of an organization, you represent and warrant that you have the authority to bind
+that organization to these terms.
+
+
+2. DEFINITIONS
+
+"Software" means CyberRMF Integrate and CyberRMF Admin Tools, including all
+associated files, documentation, and reference materials distributed with the
+installation package.
+
+"CyberRMF Integrate" (or "Integrate") means the primary desktop application used
+for artifact management, inventory tracking, compliance workflows, and related
+functions.
+
+"CyberRMF Admin Tools" (or "Admin Tools") means the companion desktop
+application bundled with Integrate, used for performing administrative scans,
+generating system reports, and collecting data from networked devices.
+
+"Workspace" means a user-designated directory on the local file system where the
+Software stores and retrieves project data, artifacts, configuration, and scan
+results.
+
+"Information System Owner" ("ISO") means the individual or organization
+responsible for the information system(s) on which the Software is installed or
+against which the Software operates.
+
+"Third-Party Service" means any external software, platform, or API endpoint
+(such as Splunk, ELK/OpenSearch, Trellix, CrowdStrike, Microsoft Defender for
+Endpoint, Tenable.sc, Nessus, or similar products) to which the Software may
+connect at the Licensee's direction.
+
+
+3. LICENSE GRANT
+
+3.1 Grant. Subject to the terms of this Agreement and payment of the applicable
+license fee, CyberRMF grants you a limited, non-exclusive, non-transferable,
+revocable license to install and use the Software on a single device for the
+duration of your active subscription period.
+
+3.2 Annual Subscription. The license is valid for one (1) year from the date of
+activation. The Software's functionality ceases upon expiration of the
+subscription unless renewed.
+
+3.3 Device Binding. The license is tied to a unique hardware fingerprint derived
+from the device on which it is activated. You may not simultaneously activate the
+license on more than one device.
+
+3.4 License Transfer. To transfer a license to a different device, you must
+generate a deactivation code from within the Software and complete the
+deactivation process at cyberrmf.com/deactivate. CyberRMF reserves the right to
+limit the number of transfers within a subscription period.
+
+3.5 Restrictions. You shall not: (a) sublicense, sell, lease, or distribute the
+Software; (b) reverse engineer, decompile, or disassemble the Software except to
+the extent expressly permitted by applicable law; (c) remove or alter any
+proprietary notices or labels on the Software; or (d) use the Software to provide
+services to third parties on a bureau or time-sharing basis without prior written
+consent from CyberRMF.
+
+
+4. SOFTWARE DESCRIPTION
+
+4.1 CyberRMF Integrate provides the following core capabilities:
+
+    (a) Artifact management — interactive Security Control Traceability Matrix
+        (SCTM), Plan of Action and Milestones (POA&M), Continuous Monitoring
+        (CONMON), policy and procedure documents, and related compliance
+        artifacts.
+
+    (b) Inventory tracking — asset inventory with NIST SP 800-53 control
+        requirement mapping, native drag-and-drop floorplan layouts, and
+        end-of-life tracking.
+
+    (c) Third-party integration — optional outbound connections to SIEM, antivirus
+        / endpoint detection and response (EDR), and vulnerability management
+        platforms configured by the Licensee.
+
+    (d) STIG validation — import and parsing of XCCDF benchmark files for
+        Security Technical Implementation Guide compliance checks.
+
+    (e) Auditing — network diagnostics (ping, traceroute, DNS lookup) and
+        cyber hygiene health dashboards.
+
+    (f) Workspace export and import — full workspace packaging as ZIP archives
+        for transfer between users, organizations, or Security Control
+        Assessors (SCAs).
+
+4.2 CyberRMF Admin Tools provides the following capabilities:
+
+    (a) Ports, Protocols, and Services (PPS) generation — enumerates running
+        processes and active network connections on target hosts.
+
+    (b) Installed software inventory — collects software lists from Windows
+        (WMI/CIM) and Linux (package manager queries) systems.
+
+    (c) Encryption verification — checks BitLocker status (Windows) and block
+        device encryption (Linux) on target hosts.
+
+    (d) Log collection — enumerates and exports Windows event logs and Linux
+        system logs from remote systems.
+
+    (e) Active Directory user enumeration — queries AD for user accounts using
+        PowerShell or LDAP.
+
+    (f) DNS spot check — performs local nslookup operations to verify hostname
+        and IP consistency against inventory records.
+
+    (g) Domain join verification — queries Active Directory for domain-joined
+        computer objects.
+
+4.3 Admin Tools writes scan results to the shared Workspace directory. Integrate
+reads these results to populate dashboards, reports, and artifact views. The two
+applications communicate exclusively through the shared file system and do not
+use inter-process communication, network sockets, or any external relay.
+
+
+5. ADMIN TOOLS — CREDENTIALS AND ELEVATED PRIVILEGES
+
+5.1 Administrative Access Required. Admin Tools requires Windows domain
+administrator credentials or equivalent privileges to perform remote operations
+on target systems via Windows Management Instrumentation (WMI), Windows Remote
+Management (WinRM), and Secure Shell (SSH). The Licensee is solely responsible
+for ensuring that the credentials used have appropriate authorization for the
+systems being scanned.
+
+5.2 Credential Handling. Credentials entered into Admin Tools are stored
+exclusively in application memory (the main process of the Electron runtime).
+Credentials are NEVER written to disk, NEVER transmitted to CyberRMF or any
+third party, and are automatically cleared after ten (10) minutes of application
+inactivity or upon explicit user action. During active scan operations,
+credentials may be passed to child processes (PowerShell, SSH) via environment
+variables for the duration of the operation.
+
+5.3 No Credential Retention. By accepting this Agreement, the Licensee
+acknowledges and agrees that:
+
+    (a) CyberRMF Admin Tools does not retain, persist, or transmit user
+        credentials beyond the active application session as described in
+        Section 5.2.
+
+    (b) Any mishandling, unauthorized disclosure, or misuse of credentials
+        entered into Admin Tools is solely the responsibility of the
+        Information System Owner, the organization, or the end user.
+
+    (c) CyberRMF shall not be held liable for any security incident,
+        unauthorized access, data breach, or system compromise arising from the
+        use of Admin Tools on systems the Licensee is not authorized to
+        administer.
+
+    (d) The Licensee is responsible for complying with all applicable
+        organizational policies, regulations, and laws governing the use of
+        privileged credentials and remote system administration.
+
+5.4 Local System Modifications. Admin Tools includes an optional WinRM
+configuration helper that, with explicit User Account Control (UAC) approval,
+may modify the local machine's WinRM service settings and TrustedHosts list.
+The Licensee acknowledges that these changes affect the local system's security
+posture and accepts full responsibility for authorizing such modifications.
+
+
+6. THIRD-PARTY INTEGRATIONS
+
+6.1 Outbound Connections Only. Integrate can establish outbound network
+connections to Third-Party Services configured by the Licensee. These connections
+are initiated solely at the Licensee's direction using URLs and credentials
+provided by the Licensee. The Software does not expose an API, does not accept
+inbound connections, and does not function as a network service.
+
+6.2 Supported Integrations. As of this version, Integrate supports connections
+to: Splunk, ELK/OpenSearch, Trellix ePO, CrowdStrike Falcon, Microsoft Defender
+for Endpoint, Tenable.sc, Nessus, and generic REST API endpoints for SIEM,
+antivirus, and vulnerability management platforms.
+
+6.3 TLS Certificate Verification. To accommodate enterprise environments that
+use self-signed or internally issued TLS certificates, certain outbound HTTPS
+connections made by the Software may operate with TLS certificate verification
+disabled. The Licensee acknowledges this behavior and accepts the associated
+risk, including but not limited to the possibility of man-in-the-middle attacks
+on those connections.
+
+6.4 SSH Host Key Verification. SSH connections established by Admin Tools do not
+verify remote host keys. The Licensee accepts sole responsibility for ensuring
+the integrity and authenticity of remote hosts accessed via SSH.
+
+6.5 Third-Party Liability. CyberRMF is not responsible for the availability,
+accuracy, security, or performance of any Third-Party Service. The Licensee's
+use of Third-Party Services is governed by the respective third party's own terms
+of service and policies.
+
+
+7. FILE SYSTEM ACCESS AND DATA STORAGE
+
+7.1 File System Permissions. The Software requires permission to create, read,
+write, and delete files and directories within: (a) the Licensee's designated
+Workspace directories; and (b) the application's local data directory (Electron
+userData). The Licensee is responsible for ensuring that appropriate file system
+permissions are granted.
+
+7.2 Local Data Storage. All application data — including inventory records, scan
+results, artifacts, configuration settings, and workspace metadata — is stored
+locally on the Licensee's device in JSON format and standard file structures.
+
+7.3 Credential Encryption. Integration credentials (API tokens, passwords, and
+keys for Third-Party Services) may be encrypted at rest using the operating
+system's native secure storage facility (Electron safeStorage) when available.
+Scan results and general workspace data are stored as plaintext JSON.
+
+7.4 No Remote Storage. Unless the Licensee explicitly configures a Third-Party
+Service connection, no data is transmitted from the Software to CyberRMF servers,
+cloud services, or any external party.
+
+7.5 Workspace Locking. The Software uses cooperative file-based locking to
+prevent concurrent conflicting edits to the same Workspace. Lock files are stored
+in the Workspace's .cyberrmf directory and identify the active user by operating
+system username and hostname.
+
+
+8. NETWORK OPERATIONS
+
+8.1 Integrate Network Activity. Integrate performs local network diagnostic
+operations including ICMP ping, traceroute, and DNS lookups (nslookup) for
+auditing and cyber hygiene assessment purposes.
+
+8.2 Admin Tools Network Activity. Admin Tools performs targeted remote operations
+against hosts listed in the Licensee's inventory. These operations include WMI
+queries (TCP port 135 and dynamic RPC ports), WinRM sessions (TCP ports
+5985/5986), and SSH connections (TCP port 22). Admin Tools does NOT perform
+subnet sweeps, port scanning of arbitrary hosts, or network discovery beyond the
+hosts explicitly listed in the inventory.
+
+8.3 Log Collection. Admin Tools can copy Windows event log files (.evtx) and
+Linux system logs from remote hosts to a local directory selected by the
+Licensee. The Licensee is responsible for securing collected log data in
+accordance with organizational policies.
+
+
+9. INTELLECTUAL PROPERTY
+
+9.1 Ownership. The Software, including its source code, object code, user
+interface, documentation, and all associated intellectual property rights, is and
+shall remain the exclusive property of CyberRMF and its licensors.
+
+9.2 Government Reference Materials. The Software includes bundled reference
+materials derived from publicly available U.S. government publications, including
+but not limited to NIST Special Publications, CNSSI documents, OSCAL data, and
+DISA STIG benchmarks. These materials are public-domain works of the United
+States Government and are included for the Licensee's convenience. CyberRMF
+claims no ownership over such materials.
+
+9.3 Feedback. Any suggestions, ideas, or feedback provided by the Licensee
+regarding the Software may be used by CyberRMF without obligation or
+compensation.
+
+
+10. LIMITATION OF LIABILITY
+
+10.1 Disclaimer of Warranties. THE SOFTWARE IS PROVIDED "AS IS" AND "AS
+AVAILABLE" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NON-INFRINGEMENT. CYBERRMF DOES NOT WARRANT THAT THE SOFTWARE WILL
+BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS.
+
+10.2 Compliance Disclaimer. The Software is a tool designed to assist with
+compliance workflows. It does not guarantee compliance with any standard,
+regulation, or framework, including but not limited to NIST SP 800-53, DISA
+STIGs, or any organizational security policies. The Licensee is solely
+responsible for validating the accuracy and completeness of all compliance
+assessments, artifacts, and reports generated by the Software.
+
+10.3 Limitation. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT
+SHALL CYBERRMF, ITS OFFICERS, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY
+INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT
+NOT LIMITED TO LOSS OF DATA, LOSS OF REVENUE, SYSTEM DOWNTIME, CREDENTIAL
+EXPOSURE, UNAUTHORIZED ACCESS, OR SECURITY INCIDENTS, ARISING OUT OF OR RELATED
+TO THE USE OR INABILITY TO USE THE SOFTWARE, EVEN IF CYBERRMF HAS BEEN ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGES.
+
+10.4 Liability Cap. CYBERRMF'S TOTAL CUMULATIVE LIABILITY ARISING OUT OF OR
+RELATED TO THIS AGREEMENT SHALL NOT EXCEED THE TOTAL LICENSE FEES ACTUALLY PAID
+BY THE LICENSEE TO CYBERRMF IN THE TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE
+EVENT GIVING RISE TO THE CLAIM.
+
+10.5 Specific Exclusions. Without limiting the generality of the foregoing,
+CyberRMF expressly disclaims liability for:
+
+    (a) Any changes Admin Tools makes to the local machine's WinRM
+        configuration, TrustedHosts settings, or related system services.
+
+    (b) Any data exposure resulting from disabled TLS certificate verification
+        or unverified SSH host keys as described in Section 6.
+
+    (c) Any loss or corruption of data within Workspace directories.
+
+    (d) Any actions taken on remote systems as a result of Admin Tools
+        operations authorized by the Licensee.
+
+    (e) Any failures, inaccuracies, or security incidents involving Third-Party
+        Services connected through the Software.
+
+
+11. DATA PRIVACY
+
+11.1 No Telemetry. The Software does not collect telemetry, usage analytics,
+crash reports, or personal data of any kind.
+
+11.2 No Phone Home. The Software does not communicate with CyberRMF servers,
+cloud services, or any external party during normal operation. All processing
+occurs locally on the Licensee's device.
+
+11.3 Local Data Only. All user data — including inventory information, scan
+results, credentials (in memory only), configuration, and artifacts — remains
+exclusively on the Licensee's local machine and user-designated Workspace
+directories unless the Licensee explicitly initiates an export or configures a
+Third-Party Service connection.
+
+
+12. EXPORT AND COMPLIANCE
+
+12.1 Workspace Export. The Software allows the Licensee to export Workspace data
+as ZIP archives containing configuration, artifacts, scan results, and metadata.
+
+12.2 Licensee Responsibility. The Licensee is solely responsible for handling,
+transmitting, and storing exported data in accordance with their organization's
+security policies, classification requirements, and all applicable laws and
+regulations.
+
+12.3 Classification. The Software supports optional classification banners on
+Workspaces. The Licensee is responsible for correctly applying and enforcing
+classification markings.
+
+
+13. TERMINATION
+
+13.1 Expiration. This Agreement and the license granted herein automatically
+terminate upon expiration of the annual subscription period unless renewed.
+
+13.2 Breach. CyberRMF may terminate this Agreement immediately if the Licensee
+breaches any term of this Agreement.
+
+13.3 Voluntary Termination. The Licensee may terminate this Agreement at any time
+by uninstalling the Software and destroying all copies.
+
+13.4 Effect of Termination. Upon termination, the Licensee shall cease all use
+of the Software. Workspace data and files created by the Licensee remain the
+property of the Licensee. Sections 5.3, 9, 10, 11, and 15 survive termination.
+
+
+14. UPDATES AND MODIFICATIONS
+
+14.1 Software Updates. CyberRMF may release updates, patches, or new versions of
+the Software from time to time. Such updates may modify features, capabilities,
+or system requirements.
+
+14.2 Terms Modifications. CyberRMF reserves the right to modify these Terms and
+Conditions at any time. Updated terms will be made available with the Software or
+at cyberrmf.com. Continued use of the Software after such modifications
+constitutes acceptance of the revised terms.
+
+
+15. GOVERNING LAW
+
+This Agreement shall be governed by and construed in accordance with the laws of
+[JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL], without regard to its conflict
+of law provisions. Any dispute arising out of or relating to this Agreement shall
+be subject to the exclusive jurisdiction of the courts located in
+[JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL].
+
+
+16. CONTACT INFORMATION
+
+For questions regarding this Agreement, licensing, or the Software:
+
+    CyberRMF
+    [Address — TO BE SPECIFIED]
+    [Email — TO BE SPECIFIED]
+    [Website: cyberrmf.com]
+
+
+---
+
+By installing or using the Software, you acknowledge that you have read,
+understood, and agree to be bound by these Terms and Conditions.
