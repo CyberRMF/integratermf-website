@@ -118,6 +118,34 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, warning: 'License created but email failed to send' });
     }
 
+    /* ── 3. Notify info@cyberrmf.com ── */
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'CyberRMF <no-reply@integratermf.com>',
+        to: ['info@cyberrmf.com'],
+        subject: `New Beta Signup: ${fullName}`,
+        html: `
+          <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:24px;border-radius:8px;max-width:600px;">
+            <h2 style="color:#60a5fa;margin:0 0 16px;">New Beta Request</h2>
+            <table style="font-size:13px;border-collapse:collapse;width:100%;">
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Name</td><td style="padding:6px 0;">${fullName}</td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Email</td><td style="padding:6px 0;"><a href="mailto:${email}" style="color:#60a5fa;">${email}</a></td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Pulse Capability</td><td style="padding:6px 0;">${pulseCapability || 'N/A'}</td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Tools</td><td style="padding:6px 0;">${tools || 'N/A'}</td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Benefit</td><td style="padding:6px 0;">${benefit || 'N/A'}</td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">Comments</td><td style="padding:6px 0;">${comments || 'N/A'}</td></tr>
+              <tr><td style="color:#9ca3af;padding:6px 12px 6px 0;white-space:nowrap;">License Key</td><td style="padding:6px 0;color:#22c55e;font-weight:700;word-break:break-all;">${licenseKey}</td></tr>
+            </table>
+          </div>
+        `,
+      }),
+    }).catch(err => console.error('Admin notify error:', err));
+
     console.log(`Beta license created and emailed to ${email}: ${licenseKey}`);
     return res.status(200).json({ success: true });
 
