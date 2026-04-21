@@ -34,5 +34,5 @@ document.addEventListener('click', function(e) {
   var saved;
   try { saved = localStorage.getItem('site-theme'); } catch(e) {}
   if (saved === 'blue' || saved === 'midnight') saved = 'cyber';
-  setTheme(saved || 'cyber');
+  setTheme(saved || 'dark');
 })();
