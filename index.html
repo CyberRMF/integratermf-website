@@ -484,7 +484,7 @@ body { padding-top: 57px; }
   background: rgba(255,255,255,.04);
 }
 
-.panels-container { display: flex; flex-direction: column; gap: 60px; }
+.panels-container { display: flex; flex-direction: column; gap: 32px; }
 .tab-panel { display: block; }
 
 /* ── Features grid (on index) ── */
@@ -495,6 +495,7 @@ body { padding-top: 57px; }
   overflow: hidden;
   max-width: 900px;
   margin: 0 auto;
+  text-align: center;
 }
 .idx-feat-item {
   display: flex;
@@ -545,10 +546,11 @@ body { padding-top: 57px; }
 }
 .idx-feat-tabs {
   display: flex;
+  justify-content: center;
+  gap: 24px;
   border-bottom: none;
 }
 .idx-feat-tab {
-  flex: 1;
   text-align: center;
   font-family: var(--mono);
   font-size: 13px;
@@ -568,7 +570,7 @@ body { padding-top: 57px; }
   background: rgba(255,255,255,0.03);
   color: var(--text);
 }
-.idx-feat-panel { display: none; padding: 4px 32px 20px; }
+.idx-feat-panel { display: none; padding: 4px 32px 20px; text-align: left; }
 .idx-feat-panel.active {
   display: grid;
   grid-template-columns: 1fr 1fr;
