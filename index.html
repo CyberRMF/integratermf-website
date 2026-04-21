@@ -459,7 +459,7 @@ body { padding-top: 57px; }
 .product-tabs {
   display: flex;
   justify-content: center;
-  gap: 0;
+  gap: 12px;
   margin-bottom: 32px;
 }
 .product-tab {
@@ -473,8 +473,7 @@ body { padding-top: 57px; }
   background: transparent;
   transition: color .2s, background .2s, border-color .2s;
 }
-.product-tab:first-child { border-radius: 6px 0 0 6px; }
-.product-tab:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.product-tab { border-radius: 6px; }
 .product-tab.active {
   color: #fff;
   background: var(--blue);
@@ -485,13 +484,13 @@ body { padding-top: 57px; }
   background: rgba(255,255,255,.04);
 }
 
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+.panels-container { display: flex; flex-direction: column; gap: 60px; }
+.tab-panel { display: block; }
 
 /* ── Features grid (on index) ── */
 .idx-features-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: none;
   border-radius: 10px;
   overflow: hidden;
   max-width: 900px;
@@ -541,12 +540,12 @@ body { padding-top: 57px; }
   color: var(--dim);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,0.02);
+  border-bottom: none;
+  background: transparent;
 }
 .idx-feat-tabs {
   display: flex;
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
 }
 .idx-feat-tab {
   flex: 1;
@@ -561,7 +560,7 @@ body { padding-top: 57px; }
   cursor: pointer;
   transition: color .2s, background .2s;
 }
-.idx-feat-tab:first-child { border-right: 1px solid var(--border); }
+.idx-feat-tab:first-child { border-right: none; }
 .idx-feat-tab.active {
   color: var(--accent);
 }
@@ -569,8 +568,15 @@ body { padding-top: 57px; }
   background: rgba(255,255,255,0.03);
   color: var(--text);
 }
-.idx-feat-panel { display: none; padding: 10px 32px 20px; }
-.idx-feat-panel.active { display: block; }
+.idx-feat-panel { display: none; padding: 4px 32px 20px; }
+.idx-feat-panel.active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 40px;
+}
+.idx-feat-group {
+  break-inside: avoid;
+}
 .idx-sod-overlay {
   text-align: center;
   padding: 48px 32px;
@@ -599,8 +605,7 @@ body { padding-top: 57px; }
 }
 .show-all-wrap {
   text-align: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 4px 0 0;
 }
 .show-all-btn {
   font-family: var(--mono);
@@ -631,8 +636,8 @@ body { padding-top: 57px; }
 [data-theme="light"] .row-header h3 { color: var(--text); }
 [data-theme="light"] .row-text { color: #1a1a1a; }
 [data-theme="light"] .row-img { border-color: var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-[data-theme="light"] .idx-features-card { background: #fff; border-color: var(--border); }
-[data-theme="light"] .idx-sep-duties { border-bottom-color: var(--border); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .idx-features-card { background: transparent; }
+[data-theme="light"] .idx-sep-duties { background: transparent; }
 [data-theme="light"] .show-all-btn { background: #fff; border-color: var(--border); color: var(--accent); }
 [data-theme="light"] .show-all-btn:hover { background: #eff6ff; color: var(--accent); }
 [data-theme="light"] .product-tab { background: #fff; border-color: var(--border); color: #1a1a1a; }
@@ -693,6 +698,56 @@ body { padding-top: 57px; }
 [data-theme="light"] .trial-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
 [data-theme="light"] .trial-subtext { color: #6b7280; }
 
+/* ── Try beta button ── */
+.try-beta-btn {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  padding: 12px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.try-beta-btn:hover {
+  background: #1d4ed8;
+  box-shadow: 0 0 18px rgba(37,99,235,0.35);
+}
+/* ── Toggle button ── */
+.toggle-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(59,130,246,0.35);
+  padding: 6px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+.toggle-btn:hover {
+  background: rgba(59,130,246,.1);
+  border-color: var(--accent);
+  color: #fff;
+}
+.hero-caption {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  line-height: 1.6;
+  transition: opacity 0.2s ease;
+  text-align: center;
+  min-height: 2.4em;
+}
+[data-theme="light"] .hero-caption { color: #1a1a1a; }
+
 /* ── Hamburger menu ── */
 .nav-hamburger {
   display: none;
@@ -737,6 +792,7 @@ body { padding-top: 57px; }
   .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
   .container { padding: 0 20px; }
   .idx-feat-panel { padding: 20px 18px; }
+  .idx-feat-panel.active { grid-template-columns: 1fr; }
   #nist-text { white-space: normal; }
   .rows-section { padding: 28px 0 40px; }
 }
@@ -830,18 +886,16 @@ body { padding-top: 57px; }
             <p>Manage/generate artifacts, track inventory, integrate SIEM, AV, and Vuln Scanner, and much, much more.</p>
             <p>Export everything to your organization and SCAs.</p>
           </div>
-          <form class="hero-email-form" onsubmit="return false;">
-            <input class="hero-email-input" type="email" placeholder="Your work email" required>
-            <button class="hero-email-btn" type="submit">Receive updates</button>
+          <form class="hero-email-form" onsubmit="return handleTryBeta(event)">
+            <input class="hero-email-input" type="email" placeholder="Your work email">
+            <button class="hero-email-btn" type="submit">Try beta</button>
           </form>
           <p class="hero-airgap">Full air-gapped support</p>
         </div>
         <div class="hero-right">
+          <button class="toggle-btn" id="hero-toggle-btn" onclick="cycleHeroToggle()">Toggle</button>
           <img class="hero-img" src="images/pulse.png" alt="CyberRMF Integrate — Pulse Dashboard">
-          <div class="trial-row">
-            <a href="https://integratermf.com/trial" class="trial-btn">14-day trial</a>
-            <span class="trial-subtext">No credit card required</span>
-          </div>
+          <p class="hero-caption" id="hero-caption">Connect Integrate to SIEM, AV, and Vuln APIs to compare your health against your inventory</p>
         </div>
       </div>
     </div>
@@ -870,7 +924,8 @@ body { padding-top: 57px; }
       <button class="product-tab" onclick="switchProductTab('features')">Features</button>
     </div>
 
-    <div id="panel-workflow" class="tab-panel active">
+    <div class="panels-container" id="panels-container">
+    <div id="panel-workflow" class="tab-panel">
     <div class="expand-row">
       <div class="row-header" onclick="toggleRow(this)">
         <h3><span class="row-num">01</span>Create / Import a Workspace</h3>
@@ -1008,32 +1063,32 @@ body { padding-top: 57px; }
           <button class="show-all-btn" id="show-all-features-btn" onclick="toggleAllFeatures()">Show all features</button>
         </div>
         <div id="idx-panel-integrate" class="idx-feat-panel active">
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> 800-53 Cyber Hygiene Dashboard</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Full statistics on entire workspace</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> 800-53 Cyber Hygiene Dashboard</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Full statistics on entire workspace</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Artifact Manager</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload all RMF BoE</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native PDF, XLSX, and CSV viewer</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> SCTM builder</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> POA&amp;M database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Change Management Tracker</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> HW/SW list Database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native NIST Special Publications.</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Artifact Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload all RMF BoE</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native PDF, XLSX, and CSV viewer</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> SCTM builder</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> POA&amp;M database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Change Management Tracker</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> HW/SW list Database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native NIST Special Publications.</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> CONMON</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Create weekly plans for the year</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Reference SCTM on each control</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Add controls to POA&amp;M</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Sign with CAC/PKI</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> CONMON</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Create weekly plans for the year</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Reference SCTM on each control</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Add controls to POA&amp;M</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Sign with CAC/PKI</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Inventory Database</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on asset type</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> EOL Dates</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Inventory Database</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on asset type</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> EOL Dates</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Hard Drive Manager</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Link to assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track hard drive use</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Hard Drive Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Link to assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track hard drive use</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Drag-and-drop floorplans</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track all locations</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Drag and drop assets into floorplan</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Click Inventory entry to teleport to physical location</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Drag-and-drop floorplans</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Track all locations</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Drag and drop assets into floorplan</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Click Inventory entry to teleport to physical location</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Pulse</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import Inventory database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Ping all assets at once</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Check DNS accuracy for assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> API integration for SIEM, AV, and Vulnerability Management</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Last reported</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> DAT version</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Vulnerability stats</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show # of logs backed up for each asset</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show STIG score for each asset</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Pulse</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import Inventory database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Ping all assets at once</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Check DNS accuracy for assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> API integration for SIEM, AV, and Vulnerability Management</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Last reported</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> DAT version</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Vulnerability stats</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show # of logs backed up for each asset</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show STIG score for each asset</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> STIG Validator</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import STIG XCCDFs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show new score after remediation</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a table with all scores for all assets</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> STIG Validator</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import STIG XCCDFs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show new score after remediation</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a table with all scores for all assets</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> File Manager</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload organization&rsquo;s files</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> File Manager</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload organization&rsquo;s files</div></div></div>
         </div>
         <div id="idx-panel-admin" class="idx-feat-panel">
           <div id="idx-sod-overlay" class="idx-sod-overlay">
@@ -1043,24 +1098,25 @@ body { padding-top: 57px; }
             <div class="idx-sod-line" id="idx-sod-l3">Relevant data is populated into Pulse and Cyber Hygiene.</div>
           </div>
           <div id="idx-admin-features" style="display:none;">
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> AD Lookup</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pull reports of all users on a domain</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on account type</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> AD Lookup</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pull reports of all users on a domain</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on account type</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Encryption Check</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Scan for unencrypted assets on a network</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Encryption Check</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Scan for unencrypted assets on a network</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Ports, Protocols, and Services</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a PPS; shows open port, service running on it, and risk score</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Ports, Protocols, and Services</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Generate a PPS; shows open port, service running on it, and risk score</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> Logs</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Copy and back-up logs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify which logs are missing</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Logs</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Copy and back-up logs</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify which logs are missing</div></div></div>
 
-            <div class="idx-feat-item"><span class="ck">&#10003;</span> DNS Check</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify all assets are accurate in DNS</div></div>
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> DNS Check</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Verify all assets are accurate in DNS</div></div></div>
           </div>
         </div>
       </div>
     </div><!-- end panel-features -->
+    </div><!-- end panels-container -->
 
   </div>
 
@@ -1092,34 +1148,50 @@ function toggleRow(header) {
   }
 }
 
-/* ── Email form ── */
-var emailForm = document.querySelector('.hero-email-form');
-if (emailForm) {
-  emailForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    var input = emailForm.querySelector('.hero-email-input');
-    if (input && input.value) {
-      var btn = emailForm.querySelector('.hero-email-btn');
-      btn.textContent = 'Subscribed!';
-      btn.style.background = '#16a34a';
-      input.disabled = true;
-      setTimeout(function() {
-        btn.textContent = 'Receive updates';
-        btn.style.background = '';
-        input.disabled = false;
-        input.value = '';
-      }, 3000);
-    }
-  });
+/* ── Try beta form ── */
+function handleTryBeta(e) {
+  e.preventDefault();
+  var email = document.querySelector('.hero-email-input').value;
+  var url = 'purchase.html';
+  if (email) url += '?email=' + encodeURIComponent(email);
+  window.location.href = url;
+  return false;
+}
+
+/* ── Hero toggle ── */
+var heroToggleIndex = 0;
+var heroToggleTexts = [
+  'Connect Integrate to SIEM, AV, and Vuln APIs to compare your health against your inventory',
+  'Drag-and-drop your assets into floorplans',
+  'Upload your BoE to intuitive file structures',
+  'Add Inventory with relevant 800-53 data',
+  'Track hard drive status',
+  'Complete STIG checklists and organize results in a table'
+];
+function cycleHeroToggle() {
+  heroToggleIndex = (heroToggleIndex + 1) % heroToggleTexts.length;
+  var caption = document.getElementById('hero-caption');
+  caption.style.opacity = '0';
+  setTimeout(function() {
+    caption.textContent = heroToggleTexts[heroToggleIndex];
+    caption.style.opacity = '1';
+  }, 200);
 }
 
 /* ── Product tab switching ── */
 function switchProductTab(id) {
   document.querySelectorAll('.product-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-  document.getElementById('panel-' + id).classList.add('active');
   var tabs = document.querySelectorAll('.product-tab');
   tabs.forEach(function(t) { if (t.textContent.trim().toLowerCase() === id) t.classList.add('active'); });
+  var workflow = document.getElementById('panel-workflow');
+  var features = document.getElementById('panel-features');
+  if (id === 'features') {
+    features.style.order = '1';
+    workflow.style.order = '2';
+  } else {
+    workflow.style.order = '1';
+    features.style.order = '2';
+  }
 }
 
 var _featuresExpanded = false;
