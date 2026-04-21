@@ -277,7 +277,13 @@ a { color: inherit; text-decoration: none; }
         successMsg.classList.add('show');
         form.reset();
       } else {
-        errorMsg.textContent = data.error || 'Something went wrong. Please try again.';
+        var detail = data.error || 'Something went wrong.';
+        if (data.debug) detail += ' | Debug: ' + JSON.stringify(data.debug);
+        if (data.resendError) detail += ' | Resend: ' + JSON.stringify(data.resendError);
+        if (data.resendStatus) detail += ' | Status: ' + data.resendStatus;
+        if (data.keyPrefix) detail += ' | Key: ' + data.keyPrefix;
+        if (data.steps) detail += ' | Steps: ' + data.steps.join(', ');
+        errorMsg.textContent = detail;
         errorMsg.style.display = 'block';
       }
     } catch (err) {
