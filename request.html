@@ -191,28 +191,23 @@ a { color: inherit; text-decoration: none; }
     <h1>Request Beta Access</h1>
     <p class="subtitle">Fill out the form below and we will reach out with next steps.</p>
 
-    <form id="betaForm" action="https://formsubmit.co/info@cyberrmf.com" method="POST">
-      <input type="hidden" name="_subject" value="Beta Test Request — CyberRMF Integrate">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_next" id="formNextUrl" value="">
-
+    <form id="betaForm">
       <div class="form-group">
         <label>First Name <span class="req">*</span></label>
-        <input type="text" name="First Name" required>
+        <input type="text" id="firstName" required>
       </div>
       <div class="form-group">
         <label>Last Name <span class="req">*</span></label>
-        <input type="text" name="Last Name" required>
+        <input type="text" id="lastName" required>
       </div>
       <div class="form-group">
         <label>E-mail <span class="req">*</span></label>
-        <input type="email" name="Email" required>
+        <input type="email" id="email" required>
       </div>
       <div class="form-group">
         <label style="text-transform:none;line-height:1.6;font-size:12px;color:var(--muted);">Pulse requires input from a SIEM, Anti Virus, and/or Vulnerability Management application.</label>
         <label>Do you currently have the ability to integrate these functions to test on the beta? <span class="req">*</span></label>
-        <select name="Pulse Integration Capability" required>
+        <select id="pulseCapability" required>
           <option value="" disabled selected>Select</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -220,19 +215,20 @@ a { color: inherit; text-decoration: none; }
       </div>
       <div class="form-group">
         <label>What tools/integration may you test this application on? <span class="req">*</span></label>
-        <textarea name="Tools and Integration" required></textarea>
+        <textarea id="tools" required></textarea>
       </div>
       <div class="form-group">
         <label>How will this benefit your day-to-day functions? <span class="req">*</span></label>
-        <textarea name="Day-to-day Benefit" required></textarea>
+        <textarea id="benefit" required></textarea>
       </div>
       <div class="form-group">
         <label class="opt-label">Optional Comments</label>
-        <textarea name="Optional Comments"></textarea>
+        <textarea id="comments"></textarea>
       </div>
       <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
       <a href="index.html" class="back-link">&larr; Back</a>
-      <div class="success-msg" id="successMsg">Thank you! Your request has been submitted. We'll be in touch.</div>
+      <div class="success-msg" id="successMsg">Thank you! Check your email for your license key and download links.</div>
+      <div class="error-msg" id="errorMsg" style="display:none;padding:16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#ef4444;font-size:13px;margin-top:16px;text-align:center;"></div>
     </form>
   </div>
 
@@ -243,29 +239,55 @@ a { color: inherit; text-decoration: none; }
 
   <script>
 (function () {
-  var nextInput = document.getElementById('formNextUrl');
-  if (nextInput) {
-    nextInput.value = window.location.href.split('?')[0] + '?submitted=true';
-  }
-
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('submitted') === 'true') {
-    var msg = document.getElementById('successMsg');
-    if (msg) msg.classList.add('show');
-    var form = document.getElementById('betaForm');
-    if (form) form.reset();
-  }
-
   var form = document.getElementById('betaForm');
-  if (form) {
-    form.addEventListener('submit', function () {
-      var btn = document.getElementById('submitBtn');
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Submitting...';
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    var btn = document.getElementById('submitBtn');
+    var successMsg = document.getElementById('successMsg');
+    var errorMsg = document.getElementById('errorMsg');
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    successMsg.classList.remove('show');
+    errorMsg.style.display = 'none';
+
+    var payload = {
+      firstName:       document.getElementById('firstName').value.trim(),
+      lastName:        document.getElementById('lastName').value.trim(),
+      email:           document.getElementById('email').value.trim(),
+      pulseCapability: document.getElementById('pulseCapability').value,
+      tools:           document.getElementById('tools').value.trim(),
+      benefit:         document.getElementById('benefit').value.trim(),
+      comments:        document.getElementById('comments').value.trim(),
+    };
+
+    try {
+      var res = await fetch('/api/beta-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      var data = await res.json();
+
+      if (res.ok && data.success) {
+        successMsg.classList.add('show');
+        form.reset();
+      } else {
+        errorMsg.textContent = data.error || 'Something went wrong. Please try again.';
+        errorMsg.style.display = 'block';
       }
-    });
-  }
+    } catch (err) {
+      errorMsg.textContent = 'Network error. Please check your connection and try again.';
+      errorMsg.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Submit';
+  });
 })();
   </script>
 </body>

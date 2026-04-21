@@ -1,19 +1,25 @@
 const KEYGEN_ACCOUNT_ID = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const KEYGEN_POLICY_ID = process.env.KEYGEN_POLICY_ID;
+const KEYGEN_POLICY_ID  = process.env.KEYGEN_POLICY_ID;
+const RESEND_API_KEY    = process.env.RESEND_API_KEY;
+const DOWNLOAD_INTEGRATE = process.env.GITHUB_DOWNLOAD_INTEGRATE;
+const DOWNLOAD_ADMIN     = process.env.GITHUB_DOWNLOAD_ADMIN;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, organization, role } = req.body;
+  const { firstName, lastName, email, pulseCapability, tools, benefit, comments } = req.body;
 
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Name and email are required' });
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({ error: 'First name, last name, and email are required' });
   }
 
+  const fullName = `${firstName} ${lastName}`;
+
   try {
+    /* ── 1. Create license in Keygen ── */
     const licenseRes = await fetch(
       `https://api.keygen.sh/v1/accounts/${KEYGEN_ACCOUNT_ID}/licenses`,
       {
@@ -27,8 +33,16 @@ export default async function handler(req, res) {
           data: {
             type: 'licenses',
             attributes: {
-              name: `Beta - ${name}`,
-              metadata: { email, organization: organization || '', role: role || '' },
+              name: `Beta - ${fullName}`,
+              metadata: {
+                email,
+                organization: '',
+                role: '',
+                pulseCapability: pulseCapability || '',
+                tools: tools || '',
+                benefit: benefit || '',
+                comments: comments || '',
+              },
             },
             relationships: {
               policy: {
@@ -49,11 +63,64 @@ export default async function handler(req, res) {
     const licenseData = await licenseRes.json();
     const licenseKey = licenseData.data.attributes.key;
 
-    // TODO: Send email with licenseKey and download links via Resend/SendGrid.
-    // For now, log it and return success.
-    console.log(`Beta license created for ${email}: ${licenseKey}`);
+    /* ── 2. Send email via Resend ── */
+    const emailRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'CyberRMF <no-reply@integratermf.com>',
+        to: [email],
+        subject: 'Your CyberRMF Beta Access — License Key & Downloads',
+        html: `
+          <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
+            <h2 style="color:#60a5fa;margin:0 0 8px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
+            <p style="color:#9ca3af;font-size:13px;margin:0 0 24px;">Thank you for requesting access. Below is everything you need to get started.</p>
 
+            <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
+              <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Your License Key</p>
+              <p style="font-size:16px;font-weight:700;color:#60a5fa;margin:0;word-break:break-all;">${licenseKey}</p>
+              <p style="font-size:11px;color:#6b7280;margin:8px 0 0;">This key is valid for 14 days and works for both applications.</p>
+            </div>
+
+            <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
+              <p style="font-size:11px;color:#9ca3af;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Download Links</p>
+              <p style="margin:0 0 8px;">
+                <a href="${DOWNLOAD_INTEGRATE}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Integrate Setup (.exe)</a>
+              </p>
+              <p style="margin:0;">
+                <a href="${DOWNLOAD_ADMIN}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Admin Tools Setup (.exe)</a>
+              </p>
+            </div>
+
+            <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
+              <p style="font-size:11px;color:#9ca3af;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">Getting Started</p>
+              <ol style="font-size:13px;color:#e4e6eb;margin:0;padding-left:18px;line-height:1.8;">
+                <li>Download and install both applications above</li>
+                <li>When prompted, paste your license key</li>
+                <li>One license key activates both apps (up to 2 machines)</li>
+              </ol>
+            </div>
+
+            <p style="font-size:12px;color:#6b7280;margin:24px 0 0;text-align:center;">
+              Questions? Reply to this email or contact <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
+            </p>
+          </div>
+        `,
+      }),
+    });
+
+    if (!emailRes.ok) {
+      const err = await emailRes.json();
+      console.error('Resend error:', JSON.stringify(err));
+      return res.status(200).json({ success: true, warning: 'License created but email failed to send' });
+    }
+
+    console.log(`Beta license created and emailed to ${email}: ${licenseKey}`);
     return res.status(200).json({ success: true });
+
   } catch (err) {
     console.error('Beta signup error:', err);
     return res.status(500).json({ error: 'Internal server error' });
