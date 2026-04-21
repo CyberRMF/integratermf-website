@@ -77,7 +77,7 @@ export default async function handler(req, res) {
 
     /* ── 2. Send email to user via Resend ── */
     const userEmailBody = {
-      from: 'CyberRMF <no-reply@integratermf.com>',
+      from: 'CyberRMF <onboarding@resend.dev>',
       to: [email],
       subject: 'Your CyberRMF Beta Access — License Key & Downloads',
       html: `
@@ -154,8 +154,8 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'CyberRMF <no-reply@integratermf.com>',
-          to: ['info@cyberrmf.com'],
+        from: 'CyberRMF <onboarding@resend.dev>',
+        to: ['info@cyberrmf.com'],
           subject: `New Beta Signup: ${fullName}`,
           html: `
             <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:24px;border-radius:8px;max-width:600px;">

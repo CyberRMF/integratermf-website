@@ -648,7 +648,7 @@ body { padding-top: 57px; }
 
     <div class="purchase-sidebar">
       <div class="purchase-price">
-        <span class="amount" id="cascade-price" style="font-size:36px;">14-day free<br>Beta Test</span>
+        <span class="amount" style="font-size:36px;"><span id="cascade-line1">14-day free</span><br><span id="cascade-line2">Beta Test</span></span>
         <span class="period">Includes CyberRMF Integrate + Admin Tools</span>
       </div>
 
@@ -826,21 +826,23 @@ form.addEventListener('submit', async function(e) {
 });
 
 (function() {
-  var el = document.getElementById('cascade-price');
-  if (!el) return;
-  var text = el.textContent;
-  el.textContent = '';
-  var spans = [];
-  for (var i = 0; i < text.length; i++) {
-    var s = document.createElement('span');
-    s.className = 'cascade-letter';
-    s.textContent = text[i];
-    el.appendChild(s);
-    spans.push(s);
-  }
+  var lines = [document.getElementById('cascade-line1'), document.getElementById('cascade-line2')];
+  var allSpans = [];
+  lines.forEach(function(el) {
+    if (!el) return;
+    var text = el.textContent;
+    el.textContent = '';
+    for (var i = 0; i < text.length; i++) {
+      var s = document.createElement('span');
+      s.className = 'cascade-letter';
+      s.textContent = text[i];
+      el.appendChild(s);
+      allSpans.push(s);
+    }
+  });
   var BLUE = '#3b82f6';
   var GLOW_DURATION = 400;
-  for (var i = 0; i < spans.length; i++) {
+  for (var i = 0; i < allSpans.length; i++) {
     (function(span, delay) {
       setTimeout(function() {
         span.style.color = BLUE;
@@ -849,7 +851,7 @@ form.addEventListener('submit', async function(e) {
           span.style.textShadow = 'none';
         }, GLOW_DURATION);
       }, delay);
-    })(spans[i], 300 + i * 80);
+    })(allSpans[i], 300 + i * 80);
   }
 })();
 
