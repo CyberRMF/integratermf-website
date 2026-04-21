@@ -114,8 +114,8 @@ export default async function handler(req, res) {
 
     if (!emailRes.ok) {
       const err = await emailRes.json();
-      console.error('Resend error:', JSON.stringify(err));
-      return res.status(200).json({ success: true, warning: 'License created but email failed to send' });
+      console.error('Resend error:', JSON.stringify(err), 'Status:', emailRes.status);
+      return res.status(200).json({ success: true, warning: 'License created but email failed to send', resendError: err });
     }
 
     /* ── 3. Notify info@cyberrmf.com ── */
