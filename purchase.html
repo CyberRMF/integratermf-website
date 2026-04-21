@@ -635,11 +635,6 @@ body { padding-top: 57px; }
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Card Details</label>
-          <div id="card-element" class="stripe-card-mount"></div>
-        </div>
-
         <div class="tc-row">
           <input type="checkbox" id="tc-agree" required>
           <label for="tc-agree">I have read and accept the <a onclick="document.getElementById('tc-modal').classList.add('open')">Terms and Conditions</a></label>
@@ -647,17 +642,15 @@ body { padding-top: 57px; }
 
         <div id="form-error" class="form-error"></div>
 
-        <button type="submit" id="submit-btn" class="purchase-btn" disabled>Submit Order</button>
-        <p class="stripe-badge">Secured by Stripe &bull; PCI-DSS compliant</p>
+        <button type="submit" id="submit-btn" class="purchase-btn" disabled>Request Beta Access</button>
       </form>
     </div>
 
     <div class="purchase-sidebar">
       <div class="purchase-price">
-        <span class="amount" id="cascade-price">14-day free Beta Test</span>
+        <span class="amount" id="cascade-price" style="font-size:36px;">14-day free<br>Beta Test</span>
         <span class="period">Includes CyberRMF Integrate + Admin Tools</span>
       </div>
-      <p class="purchase-includes" id="cascade-target">Includes CyberRMF Integrate + Admin Tools</p>
 
       <div class="mini-features">
         <div class="feat-tabs">
@@ -694,8 +687,8 @@ body { padding-top: 57px; }
     </div>
 
     <div id="purchase-success" class="form-success" style="display:none;">
-      <h2>&#10003; Purchase Complete</h2>
-      <p>Your license key has been sent to your email. Check your inbox (and spam folder) for activation instructions.</p>
+      <h2>&#10003; Beta Access Granted</h2>
+      <p>Your license key and download links have been sent to your email. Check your inbox (and spam folder) to get started.</p>
       <p style="margin-top:16px;font-size:11px;color:var(--dim);">If you don&rsquo;t receive it within 5 minutes, contact <a href="mailto:info@cyberrmf.com" style="color:var(--accent);">info@cyberrmf.com</a></p>
     </div>
   </div>
@@ -768,19 +761,7 @@ By clicking "I have read and accept the Terms and Conditions" and submitting you
   </div>
 
   <script src="shared-themes.js"></script>
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
   <script>
-/* ────────────────────────────────────────────────────
-   Stripe integration
-   Replace STRIPE_PUBLISHABLE_KEY with your live/test key.
-   The form POSTs to YOUR backend which:
-     1. Creates a Stripe PaymentIntent ($400)
-     2. Emails info@cyberrmf.com with the customer details
-     3. On success, calls Keygen to create the license
-     4. Emails the license key to the customer
-   ──────────────────────────────────────────────────── */
-
 function toggleOtherIndustry() {
   var sel = document.getElementById('industry');
   var other = document.getElementById('industry-other');
@@ -793,31 +774,6 @@ function toggleOtherIndustry() {
     other.value = '';
   }
 }
-
-var STRIPE_PUBLISHABLE_KEY = 'pk_test_REPLACE_ME';
-var PAYMENT_ENDPOINT = 'https://integratermf.com/api/create-payment-intent';
-
-var stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-var elements = stripe.elements();
-var cardElement = elements.create('card', {
-  style: {
-    base: {
-      color: '#e4e6eb',
-      fontFamily: "'Consolas', 'Fira Code', monospace",
-      fontSize: '14px',
-      '::placeholder': { color: '#6b7280' }
-    },
-    invalid: { color: '#ef4444' }
-  }
-});
-cardElement.mount('#card-element');
-
-cardElement.on('focus', function() {
-  document.getElementById('card-element').classList.add('focused');
-});
-cardElement.on('blur', function() {
-  document.getElementById('card-element').classList.remove('focused');
-});
 
 var form = document.getElementById('purchase-form');
 var submitBtn = document.getElementById('submit-btn');
@@ -837,82 +793,37 @@ form.addEventListener('submit', async function(e) {
   }
   errorEl.style.display = 'none';
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Processing\u2026';
+  submitBtn.textContent = 'Submitting\u2026';
 
   var industryVal = document.getElementById('industry').value;
   if (industryVal === 'other') industryVal = document.getElementById('industry-other').value.trim();
-  var data = {
-    fname: document.getElementById('fname').value.trim(),
-    lname: document.getElementById('lname').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    org:   document.getElementById('org').value.trim(),
-    industry: industryVal,
-    phone: document.getElementById('phone').value.trim()
+
+  var payload = {
+    firstName: document.getElementById('fname').value.trim(),
+    lastName:  document.getElementById('lname').value.trim(),
+    email:     document.getElementById('email').value.trim(),
+    tools:     'Organization: ' + document.getElementById('org').value.trim() + ' | Industry: ' + industryVal,
+    benefit:   'Phone: ' + (document.getElementById('phone').value.trim() || 'N/A'),
   };
 
   try {
-    var res = await fetch(PAYMENT_ENDPOINT, {
+    var res = await fetch('/api/beta-signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
     var json = await res.json();
-    if (!json.clientSecret) throw new Error(json.error || 'Server error');
-
-    var result = await stripe.confirmCardPayment(json.clientSecret, {
-      payment_method: {
-        card: cardElement,
-        billing_details: {
-          name: data.fname + ' ' + data.lname,
-          email: data.email
-        }
-      }
-    });
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
+    if (!res.ok || !json.success) throw new Error(json.error || 'Server error');
 
     document.getElementById('purchase-form-area').style.display = 'none';
     document.getElementById('purchase-success').style.display = 'block';
   } catch (err) {
-    errorEl.textContent = err.message || 'Payment failed. Please try again.';
+    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
     errorEl.style.display = 'block';
     submitBtn.disabled = !tcCheckbox.checked;
-    submitBtn.textContent = 'Submit Order';
+    submitBtn.textContent = 'Request Beta Access';
   }
 });
-
-(function() {
-  var el = document.getElementById('cascade-target');
-  if (!el) return;
-  var text = el.textContent;
-  el.textContent = '';
-  var spans = [];
-  for (var i = 0; i < text.length; i++) {
-    var s = document.createElement('span');
-    s.className = 'cascade-letter';
-    s.textContent = text[i];
-    if (text[i] === ' ') s.innerHTML = '&nbsp;';
-    el.appendChild(s);
-    spans.push(s);
-  }
-  var BLUE = '#3b82f6';
-  var LETTER_DELAY = 40;
-  var GLOW_DURATION = 350;
-  var startDelay = 600;
-  for (var i = 0; i < spans.length; i++) {
-    (function(span, delay) {
-      setTimeout(function() {
-        span.style.color = BLUE;
-        span.style.textShadow = '0 0 8px ' + BLUE + ', 0 0 16px ' + BLUE;
-        setTimeout(function() {
-          span.style.textShadow = 'none';
-        }, GLOW_DURATION);
-      }, delay);
-    })(spans[i], startDelay + i * LETTER_DELAY);
-  }
-})();
 
 (function() {
   var el = document.getElementById('cascade-price');
