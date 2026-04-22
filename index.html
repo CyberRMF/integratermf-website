@@ -493,7 +493,6 @@ body { padding-top: 57px; }
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  max-width: 680px;
   margin: 0 auto;
   text-align: center;
 }
@@ -572,11 +571,10 @@ body { padding-top: 57px; }
 }
 .idx-feat-panel { display: none; padding: 4px 0 20px; text-align: left; }
 .idx-feat-panel.active {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 0 48px;
-  width: fit-content;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
 }
 .idx-feat-group {
   break-inside: avoid;
@@ -796,7 +794,7 @@ body { padding-top: 57px; }
   .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
   .container { padding: 0 20px; }
   .idx-feat-panel { padding: 20px 0; }
-  .idx-feat-panel.active { grid-template-columns: 1fr; width: auto; }
+  .idx-feat-panel.active { flex-direction: column; align-items: center; }
   #nist-text { white-space: normal; }
   .rows-section { padding: 28px 0 40px; }
 }
