@@ -648,6 +648,10 @@ body { padding-top: 57px; }
 
         <form class="license-form" id="deact-airgap-form" onsubmit="return handleDeactAirgap(event)">
           <div class="form-group">
+            <label>License Key</label>
+            <input type="text" id="deact-ag-key" placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX-V3" required>
+          </div>
+          <div class="form-group">
             <label>Email (used at purchase)</label>
             <input type="email" id="deact-ag-email" placeholder="jane@organization.mil" required>
           </div>
@@ -794,7 +798,7 @@ async function handleDeactOnline(e) {
     var json = await resp.json();
     if (!resp.ok) throw new Error(json.error || 'Deactivation failed');
     res.className = 'result-msg ok';
-    res.textContent = 'License deactivated successfully. You can now activate on your new machine.';
+    res.textContent = json.message || ('License deactivated successfully. ' + (json.machinesRemoved || 0) + ' machine slot(s) released. You can now activate on your new machine.');
     res.style.display = 'block';
   } catch (err) {
     res.className = 'result-msg err';
@@ -818,6 +822,7 @@ async function handleDeactAirgap(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        key: document.getElementById('deact-ag-key').value.trim(),
         email: document.getElementById('deact-ag-email').value.trim(),
         deactivationCode: document.getElementById('deact-ag-code').value.trim().toUpperCase()
       })
@@ -825,7 +830,7 @@ async function handleDeactAirgap(e) {
     var json = await resp.json();
     if (!resp.ok) throw new Error(json.error || 'Verification failed');
     res.className = 'result-msg ok';
-    res.textContent = 'License deactivated successfully. Your license key is now freed and can be activated on a new machine.';
+    res.textContent = json.message || 'Machine released successfully. Your license key can now be activated on a new machine.';
     res.style.display = 'block';
   } catch (err) {
     res.className = 'result-msg err';
