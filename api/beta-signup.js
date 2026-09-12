@@ -75,24 +75,78 @@ export default async function handler(req, res) {
     const licenseKey = licenseBody.data.attributes.key;
     steps.push('license_created');
 
-    /* ── 2. Send email to user via Resend ── */
+    /* ── 2. Send email to user via Resend ──
+     * Gmail auto-collapses "repeated content" it has seen from the same
+     * sender before. Two things we do to defeat that:
+     *   1. Every visible section carries the license key or a per-signup
+     *      unique reference, so no two emails look identical.
+     *   2. Critical activation instructions appear ABOVE the download
+     *      links, so even if Gmail decided to hide something the user
+     *      still sees what they need to actually activate.
+     */
+    const signupRef  = `${Date.now().toString(36).toUpperCase()}-${licenseKey.slice(0, 6)}`;
+    const signupDate = new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC';
+
     const userEmailBody = {
       from: 'CyberRMF <no-reply@integratermf.com>',
       to: [email],
-      subject: 'Your CyberRMF Beta Access — License Key & Downloads',
+      subject: `Your CyberRMF Beta License — ${licenseKey}`,
       html: `
-        <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
-          <h2 style="color:#60a5fa;margin:0 0 8px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
-          <p style="color:#9ca3af;font-size:13px;margin:0 0 24px;">Thank you for requesting access. Below is everything you need to get started.</p>
+        <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:640px;margin:0 auto;">
+          <h2 style="color:#60a5fa;margin:0 0 4px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
+          <p style="color:#6b7280;font-size:11px;margin:0 0 20px;">Signup ref ${signupRef} &middot; ${signupDate}</p>
 
+          <!-- ══════════ LICENSE KEY (unique per-signup) ══════════ -->
           <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
             <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Your License Key</p>
             <p style="font-size:16px;font-weight:700;color:#60a5fa;margin:0;word-break:break-all;">${licenseKey}</p>
-            <p style="font-size:11px;color:#6b7280;margin:8px 0 0;">This key is valid for 14 days and works for both applications.</p>
+            <p style="font-size:11px;color:#6b7280;margin:8px 0 0;">Valid for 14 days &middot; works for both apps &middot; up to 2 machines.</p>
           </div>
 
+          <!-- ══════════ WHAT TO DO NEXT (activation FIRST, before downloads) ══════════ -->
+          <p style="font-size:14px;color:#e4e6eb;margin:24px 0 12px;font-weight:600;">How to activate on ${firstName ? firstName + "'s" : 'your'} machine (ref ${signupRef.slice(0, 8)}):</p>
+
+          <!-- Option A — Online -->
+          <div style="background:#1e2a3a;border:1px solid #2563eb;border-radius:6px;padding:16px;margin-bottom:14px;">
+            <p style="font-size:11px;color:#60a5fa;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Option A &mdash; Online Activation</p>
+            <p style="font-size:12px;color:#9ca3af;margin:0 0 10px;line-height:1.5;">
+              Use this if the machine has internet access.
+            </p>
+            <ol style="font-size:13px;color:#e4e6eb;margin:0;padding-left:20px;line-height:1.75;">
+              <li>Launch the app and click <strong>Online Activation</strong></li>
+              <li>Paste your key: <span style="color:#60a5fa;font-family:monospace;">${licenseKey}</span></li>
+              <li>Click <strong>Activate License</strong> &mdash; done</li>
+            </ol>
+          </div>
+
+          <!-- Option B — Offline / Air-Gapped -->
+          <div style="background:#241d33;border:1px solid #8b5cf6;border-radius:6px;padding:16px;margin-bottom:20px;">
+            <p style="font-size:11px;color:#a78bfa;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Option B &mdash; Offline / Air-Gapped Activation</p>
+            <p style="font-size:12px;color:#9ca3af;margin:0 0 10px;line-height:1.5;">
+              Use this if the machine has <strong>no internet access</strong>. You do part of this from your phone or another online device &mdash; no USB drives or file transfers needed.
+            </p>
+            <ol style="font-size:13px;color:#e4e6eb;margin:0 0 14px;padding-left:20px;line-height:1.75;">
+              <li>Launch the app on the offline machine and click <strong>Air-Gapped Activation</strong></li>
+              <li>The app shows an <strong>activation code</strong> derived from that machine &mdash; write it down or copy it</li>
+              <li>On any online device (or phone), open the offline activation portal (button below)</li>
+              <li>Enter your license key <span style="color:#a78bfa;font-family:monospace;">${licenseKey}</span>, your email, and the activation code &mdash; you'll receive a <strong>response code</strong></li>
+              <li>Type the response code back into the offline app to complete activation</li>
+            </ol>
+            <div style="text-align:center;margin:14px 0 4px;">
+              <a href="https://integratermf.com/activate"
+                 style="display:inline-block;background:#8b5cf6;color:#fff;text-decoration:none;padding:12px 26px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:0.02em;">
+                Open Offline Activation Portal &rarr;
+              </a>
+            </div>
+            <p style="font-size:11px;color:#6b7280;margin:10px 0 0;text-align:center;line-height:1.5;">
+              Or paste this URL into any online device:<br/>
+              <span style="color:#a78bfa;font-family:monospace;font-size:12px;">https://integratermf.com/activate</span>
+            </p>
+          </div>
+
+          <!-- ══════════ DOWNLOADS (below activation, so users see instructions first) ══════════ -->
           <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
-            <p style="font-size:11px;color:#9ca3af;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Download Links</p>
+            <p style="font-size:11px;color:#9ca3af;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Downloads (Windows x64)</p>
             <p style="margin:0 0 8px;">
               <a href="${DOWNLOAD_INTEGRATE}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Integrate Setup (.exe)</a>
             </p>
@@ -101,20 +155,41 @@ export default async function handler(req, res) {
             </p>
           </div>
 
-          <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
-            <p style="font-size:11px;color:#9ca3af;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">Getting Started</p>
-            <ol style="font-size:13px;color:#e4e6eb;margin:0;padding-left:18px;line-height:1.8;">
-              <li>Download and install both applications above</li>
-              <li>When prompted, paste your license key</li>
-              <li>One license key activates both apps (up to 2 machines)</li>
-            </ol>
-          </div>
-
           <p style="font-size:12px;color:#6b7280;margin:24px 0 0;text-align:center;">
             Questions? Reply to this email or contact <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
+            <br/><span style="font-size:10px;color:#4b5563;">Signup ref ${signupRef}</span>
           </p>
         </div>
       `,
+      text: [
+        `Welcome to the CyberRMF Beta, ${firstName}!`,
+        `Signup ref: ${signupRef}   |   ${signupDate}`,
+        ``,
+        `YOUR LICENSE KEY`,
+        `  ${licenseKey}`,
+        `  (valid for 14 days, works for both apps, up to 2 machines)`,
+        ``,
+        `HOW TO ACTIVATE`,
+        ``,
+        `Option A - Online Activation (for machines with internet):`,
+        `  1. Launch the app and click "Online Activation"`,
+        `  2. Paste your license key: ${licenseKey}`,
+        `  3. Click "Activate License"`,
+        ``,
+        `Option B - Offline / Air-Gapped Activation (for isolated machines):`,
+        `  1. Launch the app on the offline machine, click "Air-Gapped Activation"`,
+        `  2. Write down the activation code the app displays`,
+        `  3. On any online device, open: https://integratermf.com/activate`,
+        `  4. Enter your license key, email, and activation code -> get a response code`,
+        `  5. Type the response code back into the offline app`,
+        ``,
+        `DOWNLOADS (Windows x64)`,
+        `  Integrate:   ${DOWNLOAD_INTEGRATE}`,
+        `  Admin Tools: ${DOWNLOAD_ADMIN}`,
+        ``,
+        `Questions? Reply to this email or contact info@cyberrmf.com`,
+        `-- Signup ref ${signupRef} --`,
+      ].join('\n'),
     };
 
     const emailRes = await fetch('https://api.resend.com/emails', {

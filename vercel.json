@@ -1,5 +1,9 @@
 {
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" }
+  ],
+  "redirects": [
+    { "source": "/activate",   "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false },
+    { "source": "/activate/",  "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false }
   ]
 }

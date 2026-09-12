@@ -700,6 +700,40 @@ function switchTab(panel, method, el) {
   document.getElementById(panel + '-' + method).classList.add('active');
 }
 
+/*
+ * Deep-link support so the beta welcome email (and the app's activation
+ * screen) can drop the user directly on the right form.
+ *
+ *   /deactivate.html?action=activate                — Activate License card
+ *   /deactivate.html?action=activate&mode=airgap    — Activate → Air-Gapped tab
+ *   /deactivate.html?action=deactivate&mode=airgap  — Deactivate → Air-Gapped tab
+ *   /deactivate.html?action=activate&mode=online    — Activate → Online tab
+ */
+(function applyUrlIntent() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var action = (params.get('action') || '').toLowerCase();
+    var mode   = (params.get('mode')   || '').toLowerCase();
+    var validActions = { activate: 1, deactivate: 1 };
+    var validModes   = { online: 1, airgap: 1 };
+    if (!validActions[action]) return;
+    selectAction(action);
+    if (!validModes[mode]) return;
+    var container = document.getElementById('panel-' + action);
+    if (!container) return;
+    var tabs = container.querySelectorAll('.method-tab');
+    // First tab is online, second is airgap — matches the DOM order.
+    var idx = (mode === 'airgap') ? 1 : 0;
+    var tab = tabs[idx];
+    if (tab) switchTab(action, mode, tab);
+    // Scroll the panel into view so the user isn't confused by the hero at top.
+    setTimeout(function() {
+      var target = document.getElementById(action + '-' + mode);
+      if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  } catch (e) { /* ignore */ }
+})();
+
 async function handleActivateAirgap(e) {
   e.preventDefault();
   var btn = document.getElementById('act-ag-btn');
