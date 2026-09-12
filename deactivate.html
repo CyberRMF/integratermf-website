@@ -681,9 +681,13 @@ body { padding-top: 57px; }
 
   <script src="shared-themes.js"></script>
   <script>
-var ACTIVATE_AIRGAP_ENDPOINT = 'https://integratermf.com/api/activate-airgap';
-var DEACTIVATE_ENDPOINT = 'https://integratermf.com/api/deactivate';
-var DEACTIVATE_AIRGAP_ENDPOINT = 'https://integratermf.com/api/deactivate-airgap';
+// Relative paths so the fetch inherits the same origin as the page.
+// The apex "integratermf.com" 307-redirects to "www.integratermf.com", and
+// browsers can't follow that hop during a CORS preflight — the fetch fails
+// with "NetworkError". Relative URLs sidestep the whole problem.
+var ACTIVATE_AIRGAP_ENDPOINT   = '/api/activate-airgap';
+var DEACTIVATE_ENDPOINT        = '/api/deactivate';
+var DEACTIVATE_AIRGAP_ENDPOINT = '/api/deactivate-airgap';
 
 function selectAction(action) {
   document.querySelectorAll('.action-card').forEach(function(c) { c.classList.remove('selected'); });
