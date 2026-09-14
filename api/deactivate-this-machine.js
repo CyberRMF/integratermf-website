@@ -72,7 +72,16 @@ export default async function handler(req, res) {
     if (!licenseId) {
       return res.status(404).json({ error: 'License key not found. Double-check for typos.' });
     }
-    if (licenseEmail && String(licenseEmail).toLowerCase() !== String(email).toLowerCase()) {
+    // Fail CLOSED if the license has no email on file — otherwise the
+    // check below is skipped and any caller could deactivate a machine
+    // just by knowing the key. If you hit this, add the email to the
+    // license's metadata in the Keygen dashboard and try again.
+    if (!licenseEmail) {
+      return res.status(409).json({
+        error: 'This license has no email on file, so single-machine deactivation cannot verify ownership. Please contact support at info@cyberrmf.com.',
+      });
+    }
+    if (String(licenseEmail).toLowerCase() !== String(email).toLowerCase()) {
       return res.status(403).json({ error: 'Email does not match the address the license was issued to.' });
     }
 
@@ -137,7 +146,12 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             from: 'CyberRMF <no-reply@integratermf.com>',
-            to: [email],
+            // Always send the receipt to the license's REGISTERED email
+            // from Keygen, never the input `email`. Even though the two
+            // must match to reach this point (verified above), routing to
+            // the registered address defensively prevents any future code
+            // change from turning this into an information-leak vector.
+            to: [licenseEmail],
             subject: 'CyberRMF Machine Deactivated',
             html: `
               <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
