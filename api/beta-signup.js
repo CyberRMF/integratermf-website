@@ -96,6 +96,17 @@ export default async function handler(req, res) {
           <h2 style="color:#60a5fa;margin:0 0 4px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
           <p style="color:#6b7280;font-size:11px;margin:0 0 20px;">Signup ref ${signupRef} &middot; ${signupDate}</p>
 
+          <!-- ══════════ DOWNLOADS (top of email per user feedback) ══════════ -->
+          <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
+            <p style="font-size:11px;color:#9ca3af;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Downloads (Windows x64)</p>
+            <p style="margin:0 0 8px;">
+              <a href="${DOWNLOAD_INTEGRATE}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Integrate Setup (.exe)</a>
+            </p>
+            <p style="margin:0;">
+              <a href="${DOWNLOAD_ADMIN}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Admin Tools Setup (.exe)</a>
+            </p>
+          </div>
+
           <!-- ══════════ LICENSE KEY (unique per-signup) ══════════ -->
           <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
             <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Your License Key</p>
@@ -144,17 +155,6 @@ export default async function handler(req, res) {
             </p>
           </div>
 
-          <!-- ══════════ DOWNLOADS (below activation, so users see instructions first) ══════════ -->
-          <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:20px;">
-            <p style="font-size:11px;color:#9ca3af;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Downloads (Windows x64)</p>
-            <p style="margin:0 0 8px;">
-              <a href="${DOWNLOAD_INTEGRATE}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Integrate Setup (.exe)</a>
-            </p>
-            <p style="margin:0;">
-              <a href="${DOWNLOAD_ADMIN}" style="color:#60a5fa;font-size:13px;text-decoration:none;">&#10515; CyberRMF Admin Tools Setup (.exe)</a>
-            </p>
-          </div>
-
           <p style="font-size:12px;color:#6b7280;margin:24px 0 0;text-align:center;">
             Questions? Reply to this email or contact <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
             <br/><span style="font-size:10px;color:#4b5563;">Signup ref ${signupRef}</span>
@@ -164,6 +164,10 @@ export default async function handler(req, res) {
       text: [
         `Welcome to the CyberRMF Beta, ${firstName}!`,
         `Signup ref: ${signupRef}   |   ${signupDate}`,
+        ``,
+        `DOWNLOADS (Windows x64)`,
+        `  Integrate:   ${DOWNLOAD_INTEGRATE}`,
+        `  Admin Tools: ${DOWNLOAD_ADMIN}`,
         ``,
         `YOUR LICENSE KEY`,
         `  ${licenseKey}`,
@@ -182,10 +186,6 @@ export default async function handler(req, res) {
         `  3. On any online device, open: https://integratermf.com/activate`,
         `  4. Enter your license key, email, and activation code -> get a response code`,
         `  5. Type the response code back into the offline app`,
-        ``,
-        `DOWNLOADS (Windows x64)`,
-        `  Integrate:   ${DOWNLOAD_INTEGRATE}`,
-        `  Admin Tools: ${DOWNLOAD_ADMIN}`,
         ``,
         `Questions? Reply to this email or contact info@cyberrmf.com`,
         `-- Signup ref ${signupRef} --`,
