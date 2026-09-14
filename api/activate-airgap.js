@@ -37,16 +37,44 @@ function formatGroups(hex, groupSize = 4) {
   return (hex.match(re) || []).join('-');
 }
 
-function computeResponseCode(activationCode, licenseKey) {
+/*
+ * Fixed reference point for the "days from epoch" field encoded into the
+ * last 4 hex chars of a v2 response code. Must match AIRGAP_EPOCH_MS in
+ * the app-side shared/shared/ipc/keygen.ts.
+ */
+const AIRGAP_EPOCH_MS = Date.UTC(2020, 0, 1);
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/*
+ * Fallback validity when the Keygen license itself has no `expiry` set.
+ * BETA:       14  days
+ * PRODUCTION: 365 days — flip the env var AIRGAP_DEFAULT_VALIDITY_DAYS
+ *                       on Vercel when going to prod.
+ */
+const AIRGAP_DEFAULT_VALIDITY_DAYS = Number(process.env.AIRGAP_DEFAULT_VALIDITY_DAYS) || 14;
+
+/**
+ * v2 response code with embedded expiry.
+ *
+ * Format:  XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-YYYY  (7 groups)
+ *   groups 1..6: HMAC-SHA256(secret, "response-v2|ac|key|expiry").slice(0,24)
+ *   group   7 :  expiryEpochDays (uint16, 4 hex)
+ *
+ * The expiry is signed alongside (ac, key) so re-pasting the code after
+ * it expires does NOT reset the local validity window in the app.
+ */
+function computeResponseCodeV2(activationCode, licenseKey, expiryEpochDays) {
   const ac = stripFormat(activationCode);
   const lk = normalizeLicenseKey(licenseKey);
-  const raw = crypto
+  const eed = Math.max(0, Math.min(0xFFFF, Math.floor(expiryEpochDays)));
+  const hmac = crypto
     .createHmac('sha256', AIRGAP_SECRET)
-    .update(`response|${ac}|${lk}`)
+    .update(`response-v2|${ac}|${lk}|${eed}`)
     .digest('hex')
     .slice(0, 24)
     .toUpperCase();
-  return formatGroups(raw, 4);
+  const expHex = eed.toString(16).padStart(4, '0').toUpperCase();
+  return formatGroups(hmac + expHex, 4);
 }
 
 export default async function handler(req, res) {
@@ -105,6 +133,7 @@ export default async function handler(req, res) {
     const meta         = validateJson?.meta;
     const licenseId    = validateJson?.data?.id;
     const licenseEmail = validateJson?.data?.attributes?.metadata?.email;
+    const licenseExpiry = validateJson?.data?.attributes?.expiry; // ISO string or null
 
     if (!licenseId) {
       return res.status(404).json({ error: 'License key not found. Double-check for typos.' });
@@ -169,8 +198,23 @@ export default async function handler(req, res) {
       }
     }
 
-    /* ── 3. Compute the offline response code. ── */
-    const responseCode = computeResponseCode(fingerprint, normalizedKey);
+    /* ── 3. Compute the offline response code (v2 with embedded expiry). ── */
+    // Prefer the license's own expiry attribute from Keygen (authoritative);
+    // fall back to now + AIRGAP_DEFAULT_VALIDITY_DAYS otherwise (beta = 14,
+    // production = 365 — set via env var).
+    let expiryMs;
+    if (licenseExpiry) {
+      const parsed = new Date(licenseExpiry).getTime();
+      expiryMs = Number.isFinite(parsed) ? parsed : Date.now() + AIRGAP_DEFAULT_VALIDITY_DAYS * MS_PER_DAY;
+    } else {
+      expiryMs = Date.now() + AIRGAP_DEFAULT_VALIDITY_DAYS * MS_PER_DAY;
+    }
+    const expiryEpochDays = Math.max(0, Math.min(0xFFFF, Math.floor((expiryMs - AIRGAP_EPOCH_MS) / MS_PER_DAY)));
+    // Round expiryMs to match what the app will derive from expiryEpochDays
+    // (so the display date matches exactly on both sides).
+    const canonicalExpiryMs = AIRGAP_EPOCH_MS + expiryEpochDays * MS_PER_DAY;
+    const responseCode = computeResponseCodeV2(fingerprint, normalizedKey, expiryEpochDays);
+    const expiryDisplay = new Date(canonicalExpiryMs).toLocaleDateString('en-US', { dateStyle: 'long' });
 
     /* ── 4. Best-effort email receipt (never fail the request on this). ── */
     if (RESEND_API_KEY) {
@@ -201,6 +245,13 @@ export default async function handler(req, res) {
                   <p style="font-size:11px;color:#6b7280;margin:8px 0 0;">This code is bound to your machine and license key. It only works in the CyberRMF app.</p>
                 </div>
 
+                <div style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:6px;padding:12px 16px;margin-bottom:20px;">
+                  <p style="font-size:12px;color:#fde68a;margin:0;">
+                    <strong>License valid until ${expiryDisplay}.</strong>
+                    After that date the app will require a fresh response code.
+                  </p>
+                </div>
+
                 <p style="font-size:12px;color:#6b7280;margin:24px 0 0;text-align:center;">
                   Questions? <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
                 </p>
@@ -217,6 +268,8 @@ export default async function handler(req, res) {
       success: true,
       responseCode,
       activationCode: fingerprint.match(/.{1,4}/g).join('-'),
+      expiresAt: canonicalExpiryMs,
+      expiresAtDisplay: expiryDisplay,
     });
 
   } catch (err) {
