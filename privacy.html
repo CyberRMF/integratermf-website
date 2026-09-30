@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Statement — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav (shared pattern) ── */
+.nav {
+  padding: 0; border-bottom: 1px solid var(--border);
+  background: var(--nav-bg); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+.nav-hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: 57px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 8px 0; z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block; padding: 12px 32px; font-size: 13px; color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+
+/* ── Doc layout ── */
+.doc-wrap {
+  max-width: 820px; margin: 0 auto; padding: 48px 32px 64px;
+  flex: 1; width: 100%;
+}
+.doc-eyebrow {
+  font-size: 11px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.doc-title {
+  font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+}
+.doc-meta {
+  font-size: 12px; color: var(--muted); margin-bottom: 8px;
+}
+.doc-meta strong { color: var(--text); font-weight: 600; }
+.doc-lead {
+  font-size: 14px; color: var(--text); margin-top: 20px; margin-bottom: 32px;
+  padding: 16px 20px; background: var(--bg2); border-left: 3px solid var(--accent);
+  border-radius: 4px;
+}
+.doc-body h2 {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin-top: 40px; margin-bottom: 12px; letter-spacing: 0.01em;
+}
+.doc-body h3 {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-top: 24px; margin-bottom: 8px; letter-spacing: 0.01em;
+}
+.doc-body p { margin-bottom: 12px; color: var(--text); }
+.doc-body ul, .doc-body ol { margin: 8px 0 16px 24px; }
+.doc-body li { margin-bottom: 6px; color: var(--text); }
+.doc-body a { color: var(--accent); text-decoration: underline; }
+.doc-body a:hover { color: #93c5fd; }
+.doc-body code {
+  font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+.doc-body table {
+  width: 100%; margin: 16px 0; border-collapse: collapse;
+  font-size: 12px; border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.doc-body th, .doc-body td {
+  padding: 10px 12px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.doc-body th {
+  background: var(--bg2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+}
+.doc-body tr:last-child td { border-bottom: none; }
+.callout {
+  margin: 24px 0; padding: 14px 18px; font-size: 12px;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 6px; color: var(--text);
+}
+.callout strong { color: var(--accent); }
+.placeholder {
+  color: #f59e0b; font-weight: 700; font-family: var(--mono);
+  background: rgba(245,158,11,0.1); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 28px 32px; background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-center { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.footer-center a {
+  font-size: 11px; color: var(--muted); transition: color .2s;
+}
+.footer-center a:hover { color: var(--text); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .doc-lead { background: #e0e0e0; }
+[data-theme="light"] .doc-body th { background: #e0e0e0; color: #1a1a1a; }
+[data-theme="light"] .doc-body code { background: #e8e8e8; border-color: var(--border); }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+
+@media (max-width: 768px) {
+  .doc-wrap { padding: 32px 20px 48px; }
+  .doc-title { font-size: 24px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .doc-wrap { padding: 24px 16px 40px; }
+  .doc-title { font-size: 20px; }
+  .footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="doc-wrap">
+    <div class="doc-eyebrow">Legal</div>
+    <h1 class="doc-title">Privacy Statement</h1>
+    <p class="doc-meta"><strong>Effective date:</strong> September 29, 2026</p>
+    <p class="doc-meta"><strong>Last updated:</strong> September 29, 2026</p>
+
+    <div class="doc-lead">
+      This Privacy Statement explains how <strong>CyberRMF LLC</strong> ("CyberRMF," "we," "us," or "our") collects, uses, protects, and shares personal information when you visit <strong>integratermf.com</strong> or request access to our beta or trial programs. We publish this notice to satisfy applicable transparency obligations under the EU/UK GDPR, the California Consumer Privacy Act (CCPA/CPRA), and comparable US state privacy laws.
+    </div>
+
+    <div class="doc-body">
+
+      <h2>1. Who we are</h2>
+      <p>CyberRMF LLC is a US-based company that develops CyberRMF Integrate and CyberRMF Admin Tools &mdash; desktop applications for cyber compliance workflow, Risk Management Framework (RMF) artifact management, inventory, STIG validation, and related functions. For purposes of the GDPR, CyberRMF is the <strong>data controller</strong> for the personal information described in this Statement.</p>
+      <p><strong>Contact:</strong> <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a> &middot; <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a></p>
+      <p><strong>Mailing address:</strong> <span class="placeholder">[MAILING ADDRESS &mdash; TO BE FILLED IN]</span></p>
+
+      <h2>2. What we collect</h2>
+      <p>When you submit the beta or trial request form, we collect the following information you provide:</p>
+      <ul>
+        <li>First and last name</li>
+        <li>Work email address</li>
+        <li>Organization name</li>
+        <li>Industry (from a drop-down, or free-text if you select "Other")</li>
+        <li>Phone number (<em>optional</em>)</li>
+        <li>Whether you have consented to our Terms and Conditions and to this Privacy Statement, and (if provided) your consent to receive optional marketing communications</li>
+        <li>Date and time of your submission</li>
+      </ul>
+      <p>Automatically when you visit the site or use the beta/trial application server-side endpoints, we may collect:</p>
+      <ul>
+        <li>IP address, user agent string, referring URL, and general geographic region (city/country level)</li>
+        <li>Strictly-necessary technical cookies and local storage entries (for example, your selected color theme)</li>
+        <li>Timestamps and status codes for form submissions and license activation/deactivation events</li>
+      </ul>
+      <p><strong>Software telemetry:</strong> The CyberRMF Integrate and Admin Tools desktop applications themselves <strong>do not</strong> collect telemetry, usage analytics, or crash reports, and do not transmit data to CyberRMF servers during normal operation. See our <a href="TERMS_AND_CONDITIONS.txt">Terms and Conditions</a> &sect; 11 for the full statement on in-application data handling.</p>
+      <p>The site and services are intended for business use by adults. We do <strong>not</strong> knowingly collect personal information from anyone under 18.</p>
+
+      <h2>3. Why we use it and our legal basis</h2>
+      <table>
+        <thead>
+          <tr><th>Purpose</th><th>Legal basis (GDPR)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Evaluate your beta or trial request and provide you with a license key, download links, and activation instructions.</td><td>Performance of a contract / pre-contractual steps at your request; our legitimate interest in operating the beta and trial programs.</td></tr>
+          <tr><td>Send you transactional messages: license issuance, activation and deactivation confirmations, security notices, and important service announcements about the application you requested.</td><td>Performance of a contract; our legitimate interest in securely operating the service.</td></tr>
+          <tr><td>Send you optional product news, release announcements, and articles (only if you affirmatively opt in on the form or elsewhere).</td><td>Your consent, which you can withdraw at any time.</td></tr>
+          <tr><td>Detect, prevent, and respond to fraud, abuse, unauthorized access, or misuse of the site or the licensing service.</td><td>Our legitimate interest in security; legal obligation.</td></tr>
+          <tr><td>Comply with applicable law, respond to lawful government requests, and defend or exercise legal claims.</td><td>Legal obligation; our legitimate interest in defending our rights.</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Purpose limitation:</strong> We use the information you provide through the beta/trial form only for the purposes above. <strong>We do not sell or rent your personal information, and we do not share it for cross-context behavioral advertising or targeted advertising.</strong></p>
+
+      <h2>4. Who we share it with</h2>
+      <p>We share personal information only with vetted service providers ("processors" / "service providers") who are bound by written agreements to process it solely on our instructions and for the purposes we specify. Our current subprocessors are:</p>
+      <table>
+        <thead>
+          <tr><th>Provider</th><th>What it does</th><th>Data involved</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vercel Inc.</td><td>Website hosting, static asset delivery, serverless functions for the beta signup, activation, and deactivation endpoints.</td><td>All form fields, IP address, request metadata.</td></tr>
+          <tr><td>Keygen (Rockstar Games / Keygen Software)</td><td>License key issuance, activation, deactivation, and license lifecycle management.</td><td>Name, email, organization, industry, license metadata.</td></tr>
+          <tr><td>Resend Inc.</td><td>Transactional email delivery (license keys, activation emails, admin notifications).</td><td>Name, email, message body.</td></tr>
+          <tr><td>GitHub, Inc. (a Microsoft company)</td><td>Hosting of application installer downloads referenced from our transactional emails.</td><td>None directly &mdash; only when you click a download link, GitHub may log your IP address per its own policies.</td></tr>
+        </tbody>
+      </table>
+      <p>A current subprocessor list is available on request at <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a>.</p>
+      <p>We may disclose personal information without your further consent when required by law, subpoena, court order, or lawful request from a governmental, regulatory, or law enforcement authority with competent jurisdiction, or when we believe in good faith that disclosure is necessary to protect our rights, the safety of individuals, or the integrity of our systems. Where permitted by law, we will make reasonable efforts to notify affected individuals before responding.</p>
+
+      <h2>5. How we protect it</h2>
+      <p>We use administrative, technical, and physical safeguards designed to protect personal information, including:</p>
+      <ul>
+        <li>TLS 1.2+ encryption in transit and encryption at rest with our hosting and email providers.</li>
+        <li>Access to production data limited to authorized personnel on a need-to-know basis, protected by multi-factor authentication.</li>
+        <li>Environment isolation between development and production, with secrets managed as environment variables and never committed to source control.</li>
+        <li>Logging and monitoring of administrative access to production systems.</li>
+        <li>Written data processing agreements with our subprocessors.</li>
+        <li>A documented incident-response and breach-notification process.</li>
+      </ul>
+      <p>No system is perfectly secure. If we experience a personal data breach that is likely to result in a risk to your rights and freedoms, we will notify affected individuals and applicable regulatory authorities within the timeframes required by law.</p>
+
+      <h2>6. International data transfers</h2>
+      <p>Our infrastructure and personnel are located in the <strong>United States</strong>. If you access the site or submit information from outside the U.S. &mdash; including from the European Economic Area, the United Kingdom, or Switzerland &mdash; your personal information will be transferred to and processed in the U.S. Where required, we rely on the <strong>EU Standard Contractual Clauses (2021 modules)</strong> and the <strong>UK International Data Transfer Addendum</strong> with our processors as a lawful transfer mechanism.</p>
+
+      <h2>7. How long we keep it</h2>
+      <p>We retain beta and trial application information for <span class="placeholder">[RETENTION PERIOD &mdash; DEFAULT: 24 MONTHS]</span> after your last engagement with the beta/trial program, after which we delete or anonymize it, except where a longer retention period is required by law (for example, for tax, accounting, or legitimate legal-defense purposes). License records, activation logs, and billing records may be retained for the life of the license and for a reasonable period thereafter for support, warranty, audit, and dispute-resolution purposes. If you request deletion earlier, we will honor it subject to any legal retention obligations.</p>
+
+      <h2>8. Your rights</h2>
+      <p>Depending on where you live, you may have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> the personal information we hold about you and receive a copy.</li>
+        <li><strong>Correct</strong> inaccurate or incomplete information.</li>
+        <li><strong>Delete</strong> your personal information.</li>
+        <li><strong>Port</strong> a copy of your information to another provider in a structured, machine-readable format.</li>
+        <li><strong>Object to</strong> or <strong>restrict</strong> certain processing based on our legitimate interests.</li>
+        <li><strong>Withdraw consent</strong> at any time, without affecting the lawfulness of processing before withdrawal.</li>
+        <li><strong>Opt out of "sale," "sharing," or targeted advertising</strong> &mdash; CyberRMF does none of these, but you may still submit a request through our <a href="do-not-sell.html">Do Not Sell or Share My Personal Information</a> page.</li>
+        <li><strong>Not be subject to solely automated decisions</strong> that have a legal or similarly significant effect on you &mdash; we do not make such decisions with your data.</li>
+        <li><strong>Appeal</strong> a denial of a privacy rights request (residents of Virginia, Colorado, Connecticut, and certain other states).</li>
+        <li><strong>Lodge a complaint</strong> with your local data protection authority.</li>
+      </ul>
+      <p>To exercise any of these rights, email <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a> with the phrase <em>"Privacy request"</em> in the subject line. We will respond within the timeframe required by applicable law &mdash; generally 30 days under GDPR, and 45 days under CCPA (extendable by an additional 45 days where permitted and with notice to you). We may need to verify your identity by asking you to confirm information already on file before we act on your request.</p>
+      <p><strong>Authorized agents (California):</strong> California residents may designate an authorized agent to submit requests on their behalf. We will require proof of authorization and, where appropriate, direct verification with the consumer.</p>
+      <p><strong>"Shine the Light" (California Civil Code &sect; 1798.83):</strong> California residents may request information about disclosures of personal information to third parties for their direct-marketing purposes. We do not make such disclosures.</p>
+
+      <h2>9. Cookies and similar technologies</h2>
+      <p>We use only a minimal set of technologies necessary to operate the site, including:</p>
+      <ul>
+        <li><strong>Strictly-necessary local storage</strong> to remember your selected color theme across visits.</li>
+        <li><strong>Server-side logs</strong> generated by our hosting provider (Vercel) that record standard request information such as IP address, user agent, and timestamps.</li>
+      </ul>
+      <p>We do <strong>not</strong> currently use third-party analytics, advertising, or tracking cookies. If we add non-essential analytics or measurement technologies in the future, we will request your consent through a banner or preference center where required by applicable law and will update this Statement accordingly.</p>
+
+      <h2>10. Do Not Track and Global Privacy Control</h2>
+      <p>Our site does not currently respond to browser "Do Not Track" signals because there is no consistent industry standard. We honor <strong>Global Privacy Control (GPC)</strong> signals as opt-out-of-sale/share requests where applicable, though we do not sell or share personal information for cross-context behavioral advertising in any case.</p>
+
+      <h2>11. Children</h2>
+      <p>The site and the CyberRMF applications are directed to businesses and are not intended for anyone under 18. We do not knowingly collect personal information from minors. If you believe a minor has provided us information, please contact <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a> and we will delete it.</p>
+
+      <h2>12. Federal, state, and local government use</h2>
+      <p>CyberRMF supports customers in defense, federal civilian, state and local government, and government-contractor environments. Personal information submitted through our beta or trial forms is treated as commercial contact information (not Controlled Unclassified Information / CUI) and is not designed to hold data subject to DFARS 252.204-7012 or CMMC controls. If you have questions about our security posture for federal customers, please see our <a href="security.html">Security &amp; Trust</a> page or contact <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a>.</p>
+
+      <h2>13. Changes to this Statement</h2>
+      <p>We may update this Privacy Statement from time to time. When we do, we will revise the "Last updated" date at the top of the page and, for material changes, provide additional notice by email to the address you provided (where practicable) at least <span class="placeholder">[15 DAYS]</span> before the change takes effect. Your continued use of the site or services after the effective date of an update constitutes acceptance of the revised Statement.</p>
+
+      <h2>14. Contact</h2>
+      <p>For privacy questions, requests, or complaints:</p>
+      <p>
+        <strong>CyberRMF Privacy Team</strong><br>
+        Email: <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a><br>
+        General: <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a><br>
+        Security disclosures: <a href="mailto:security@integratermf.com">security@integratermf.com</a> (see <a href="/.well-known/security.txt">security.txt</a>)<br>
+        Mail: <span class="placeholder">[MAILING ADDRESS &mdash; TO BE FILLED IN]</span>, United States
+      </p>
+
+      <div class="callout">
+        <strong>Note to CyberRMF administrators:</strong> Several fields on this page are marked with orange placeholders and must be replaced with actual values before this Statement is considered production-ready. See the <code>/* PLACEHOLDERS TO FILL IN */</code> comment inside <code>privacy.html</code> for a checklist.
+      </div>
+
+      <!--
+        /* PLACEHOLDERS TO FILL IN before treating this notice as final:
+           1. [MAILING ADDRESS — TO BE FILLED IN]  (appears in Section 1 and Section 14)
+           2. [RETENTION PERIOD — DEFAULT: 24 MONTHS]  (Section 7)
+           3. [15 DAYS] advance-notice window for material changes  (Section 13)
+           4. Confirm privacy@integratermf.com and security@integratermf.com are provisioned to a real inbox.
+           5. Have counsel review Sections 3, 4, 8 for jurisdiction-specific language you may want to add/remove.
+           6. If you begin using non-essential analytics or cookies, revise Section 9 and add a cookie banner.
+        */
+      -->
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-center">
+        <a href="privacy.html">Privacy</a>
+        <a href="TERMS_AND_CONDITIONS.txt">Terms</a>
+        <a href="do-not-sell.html">Do Not Sell or Share</a>
+        <a href="security.html">Security</a>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+</body>
+</html>

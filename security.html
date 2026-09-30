@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security &amp; Trust — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono); background: var(--bg); color: var(--text);
+  line-height: 1.7; font-size: 13px; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+.nav {
+  padding: 0; border-bottom: 1px solid var(--border);
+  background: var(--nav-bg); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+.nav-hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: 57px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 8px 0; z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block; padding: 12px 32px; font-size: 13px; color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+
+.doc-wrap {
+  max-width: 820px; margin: 0 auto; padding: 48px 32px 64px;
+  flex: 1; width: 100%;
+}
+.doc-eyebrow {
+  font-size: 11px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.doc-title {
+  font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+}
+.doc-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.doc-lead {
+  font-size: 14px; color: var(--text); margin-top: 20px; margin-bottom: 32px;
+  padding: 16px 20px; background: var(--bg2); border-left: 3px solid var(--accent);
+  border-radius: 4px;
+}
+.doc-body h2 {
+  font-size: 18px; font-weight: 700; margin-top: 40px; margin-bottom: 12px;
+}
+.doc-body h3 {
+  font-size: 14px; font-weight: 700; margin-top: 24px; margin-bottom: 8px;
+}
+.doc-body p { margin-bottom: 12px; }
+.doc-body ul, .doc-body ol { margin: 8px 0 16px 24px; }
+.doc-body li { margin-bottom: 6px; }
+.doc-body a { color: var(--accent); text-decoration: underline; }
+.doc-body a:hover { color: #93c5fd; }
+.doc-body code {
+  font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+.doc-body table {
+  width: 100%; margin: 16px 0; border-collapse: collapse;
+  font-size: 12px; border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.doc-body th, .doc-body td {
+  padding: 10px 12px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.doc-body th {
+  background: var(--bg2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+}
+.doc-body tr:last-child td { border-bottom: none; }
+.card-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px; margin: 20px 0;
+}
+.card {
+  padding: 16px 18px; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.card h3 {
+  font-size: 12px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.06em; margin: 0 0 10px; font-weight: 700;
+}
+.card p { font-size: 12px; color: var(--text); margin: 0; line-height: 1.6; }
+.callout {
+  margin: 24px 0; padding: 14px 18px; font-size: 12px;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 6px; color: var(--text);
+}
+.callout strong { color: var(--accent); }
+
+.footer {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 28px 32px; background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-center { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.footer-center a { font-size: 11px; color: var(--muted); transition: color .2s; }
+.footer-center a:hover { color: var(--text); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .doc-lead, [data-theme="light"] .card { background: #e0e0e0; }
+[data-theme="light"] .doc-body th { background: #e0e0e0; color: #1a1a1a; }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+
+@media (max-width: 768px) {
+  .doc-wrap { padding: 32px 20px 48px; }
+  .doc-title { font-size: 24px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .doc-wrap { padding: 24px 16px 40px; }
+  .doc-title { font-size: 20px; }
+  .footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="doc-wrap">
+    <div class="doc-eyebrow">Trust</div>
+    <h1 class="doc-title">Security &amp; Trust</h1>
+    <p class="doc-meta"><strong>Last updated:</strong> September 29, 2026</p>
+
+    <div class="doc-lead">
+      CyberRMF is built by cyber-compliance practitioners for cyber-compliance practitioners. This page summarizes how we protect our platform, our customers' data, and the desktop applications we distribute. For a dedicated privacy notice, see our <a href="privacy.html">Privacy Statement</a>. To report a security concern, see the <a href="#report">Report a Vulnerability</a> section below.
+    </div>
+
+    <div class="doc-body">
+
+      <h2>1. Application security posture</h2>
+      <p>CyberRMF Integrate and CyberRMF Admin Tools are desktop applications that run on the Licensee's own machines. This design deliberately keeps operational and inventory data inside the customer environment:</p>
+      <div class="card-grid">
+        <div class="card">
+          <h3>No telemetry</h3>
+          <p>The applications collect no usage analytics, crash reports, or telemetry of any kind.</p>
+        </div>
+        <div class="card">
+          <h3>No phone home</h3>
+          <p>No connections to CyberRMF servers during normal operation. Third-party integrations are strictly opt-in and outbound only.</p>
+        </div>
+        <div class="card">
+          <h3>Local data only</h3>
+          <p>All artifacts, scan results, and inventory data are stored in the Licensee's designated Workspace directory.</p>
+        </div>
+        <div class="card">
+          <h3>Credential handling</h3>
+          <p>Domain administrator credentials used by Admin Tools remain in memory only and are cleared after 10 minutes of inactivity. Never persisted, never transmitted.</p>
+        </div>
+        <div class="card">
+          <h3>Integration credentials at rest</h3>
+          <p>API tokens for SIEM, EDR, and vulnerability management platforms are encrypted using Electron's <code>safeStorage</code> (OS-native secure storage) when available.</p>
+        </div>
+        <div class="card">
+          <h3>Read-only by default</h3>
+          <p>Admin Tools performs only enumeration and read operations against inventory-listed hosts. It does not perform subnet sweeps or discovery beyond the assets you explicitly list.</p>
+        </div>
+      </div>
+      <p>The full behavioral specification &mdash; including handling of TLS certificate verification, SSH host keys, and WinRM configuration changes &mdash; is documented in our <a href="TERMS_AND_CONDITIONS.txt">Terms and Conditions</a>, Sections 5&ndash;8.</p>
+
+      <h2>2. Website and licensing infrastructure</h2>
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Provider / Approach</th><th>Region</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Website hosting</td><td>Vercel (edge network + serverless functions)</td><td>United States</td></tr>
+          <tr><td>TLS</td><td>Automatic HTTPS with modern cipher suites (managed by Vercel)</td><td>&mdash;</td></tr>
+          <tr><td>License issuance and lifecycle</td><td>Keygen</td><td>United States</td></tr>
+          <tr><td>Transactional email</td><td>Resend</td><td>United States</td></tr>
+          <tr><td>Application installer distribution</td><td>GitHub Releases</td><td>United States (Microsoft global CDN)</td></tr>
+          <tr><td>Source control</td><td>GitHub (private organization repositories)</td><td>United States</td></tr>
+        </tbody>
+      </table>
+      <p>All production secrets (API tokens for Keygen, Resend, and download links) are managed as environment variables in the hosting provider and are never committed to source control. Access to production is limited to authorized personnel protected by multi-factor authentication.</p>
+
+      <h2>3. Compliance posture</h2>
+      <h3>What CyberRMF is</h3>
+      <p>CyberRMF is a tool that helps <em>you</em> demonstrate compliance with NIST SP 800-53, DISA STIGs, and related U.S. Government cyber frameworks. Its output (artifacts, POA&amp;Ms, SCTM, CONMON, STIG results) is designed to feed your ATO package or organizational compliance program.</p>
+      <h3>What CyberRMF is not</h3>
+      <p>The current product is a locally-installed desktop application. It does not process Controlled Unclassified Information (CUI) on our infrastructure and does not itself require a FedRAMP authorization to operate. The beta signup form and license-issuance endpoints described in this page handle commercial contact information only.</p>
+      <h3>Alignment</h3>
+      <p>Our internal engineering and business practices are aligned with the following frameworks. Formal attestations are on our roadmap:</p>
+      <ul>
+        <li><strong>NIST SP 800-171</strong> &mdash; internal controls for handling any customer-provided CUI we may receive under specific engagement terms.</li>
+        <li><strong>CMMC 2.0 Level 2</strong> &mdash; alignment for future DoD subcontracting where applicable.</li>
+        <li><strong>SOC 2 Type I / Type II</strong> &mdash; on our roadmap once the beta enters general availability.</li>
+        <li><strong>GDPR / CCPA / peer US state privacy laws</strong> &mdash; see the <a href="privacy.html">Privacy Statement</a>.</li>
+      </ul>
+
+      <h2>4. Incident response and breach notification</h2>
+      <p>We maintain a documented incident-response process covering triage, containment, eradication, recovery, and post-incident review. If we experience a personal-data breach that is likely to result in risk to the rights and freedoms of individuals, we will notify affected individuals and applicable regulators within the timeframes required by law (generally 72 hours to the supervisory authority under GDPR, and "without unreasonable delay" under CCPA and state breach-notification laws).</p>
+
+      <h2 id="report">5. Report a Vulnerability</h2>
+      <p>We welcome coordinated disclosure from security researchers, customers, and the public. If you believe you have found a security vulnerability in <code>integratermf.com</code>, the CyberRMF Integrate application, or CyberRMF Admin Tools:</p>
+      <ol>
+        <li>Email <a href="mailto:security@integratermf.com">security@integratermf.com</a> with a description of the issue, the affected component and version, and steps to reproduce.</li>
+        <li>Please do <strong>not</strong> perform any testing that would degrade service for other customers, exfiltrate customer data, or access data beyond the minimum necessary to demonstrate the vulnerability.</li>
+        <li>We will acknowledge receipt within <strong>5 business days</strong>, provide a substantive response within <strong>15 business days</strong>, and coordinate with you on a disclosure timeline.</li>
+        <li>We appreciate responsible disclosure and will credit reporters (with your permission) when a fix ships.</li>
+      </ol>
+      <p>Our machine-readable security contact is published at <a href="/.well-known/security.txt">/.well-known/security.txt</a> per RFC 9116.</p>
+
+      <h2>6. Data-processing agreements and enterprise inquiries</h2>
+      <p>Customers who need a signed <strong>Data Processing Agreement (DPA)</strong>, a <strong>Business Associate Agreement (BAA)</strong>, a completed <strong>vendor security questionnaire</strong> (CAIQ, SIG, or custom), a <strong>subprocessor list</strong>, an <strong>Insurance Certificate</strong>, or a copy of our <strong>W-9</strong>, please email <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a> with your request and organization name.</p>
+
+      <div class="callout">
+        <strong>For DoD and federal buyers:</strong> we can provide additional materials on our NIST 800-171 self-assessment status, subprocessor location, and CMMC alignment on request. Please contact us early in your evaluation cycle so we can respond within your acquisition timeline.
+      </div>
+
+      <h2>7. Contact</h2>
+      <p>
+        <strong>Security disclosures:</strong> <a href="mailto:security@integratermf.com">security@integratermf.com</a><br>
+        <strong>Privacy questions:</strong> <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a><br>
+        <strong>General:</strong> <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+      </p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-center">
+        <a href="privacy.html">Privacy</a>
+        <a href="TERMS_AND_CONDITIONS.txt">Terms</a>
+        <a href="do-not-sell.html">Do Not Sell or Share</a>
+        <a href="security.html">Security</a>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+</body>
+</html>

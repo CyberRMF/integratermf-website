@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Do Not Sell or Share My Personal Information — CyberRMF Integrate</title>
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono); background: var(--bg); color: var(--text);
+  line-height: 1.7; font-size: 13px; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+.nav {
+  padding: 0; border-bottom: 1px solid var(--border);
+  background: var(--nav-bg); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+.nav-hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: 57px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 8px 0; z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block; padding: 12px 32px; font-size: 13px; color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+
+.doc-wrap {
+  max-width: 720px; margin: 0 auto; padding: 48px 32px 64px;
+  flex: 1; width: 100%;
+}
+.doc-eyebrow {
+  font-size: 11px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.doc-title {
+  font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+}
+.doc-lead {
+  font-size: 14px; color: var(--text); margin-top: 20px; margin-bottom: 32px;
+  padding: 16px 20px; background: var(--bg2); border-left: 3px solid var(--accent);
+  border-radius: 4px;
+}
+.doc-body h2 {
+  font-size: 16px; font-weight: 700; margin-top: 32px; margin-bottom: 10px;
+}
+.doc-body p { margin-bottom: 12px; }
+.doc-body ul, .doc-body ol { margin: 8px 0 16px 24px; }
+.doc-body li { margin-bottom: 6px; }
+.doc-body a { color: var(--accent); text-decoration: underline; }
+.doc-body a:hover { color: #93c5fd; }
+.action-card {
+  margin: 28px 0; padding: 20px 24px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.action-card h3 {
+  font-size: 12px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 12px; font-weight: 700;
+}
+.action-btn {
+  display: inline-block; font-family: var(--mono); font-size: 13px;
+  font-weight: 700; color: #fff; background: var(--blue);
+  padding: 12px 24px; border-radius: 6px; text-decoration: none;
+  transition: background .2s, box-shadow .2s;
+}
+.action-btn:hover { background: #1d4ed8; box-shadow: 0 0 16px rgba(37,99,235,0.3); }
+.callout {
+  margin: 20px 0; padding: 14px 18px; font-size: 12px;
+  background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 6px; color: var(--text);
+}
+.callout strong { color: #22c55e; }
+
+.footer {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 28px 32px; background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-center { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.footer-center a { font-size: 11px; color: var(--muted); transition: color .2s; }
+.footer-center a:hover { color: var(--text); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .doc-lead, [data-theme="light"] .action-card { background: #e0e0e0; }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+
+@media (max-width: 768px) {
+  .doc-wrap { padding: 32px 20px 48px; }
+  .doc-title { font-size: 22px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .doc-wrap { padding: 24px 16px 40px; }
+  .doc-title { font-size: 18px; }
+  .footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        CyberRMF
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span class="gradient-text">Integrate</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="deactivate.html">License Management</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">5 themes</div>
+            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="deactivate.html">License Management</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="doc-wrap">
+    <div class="doc-eyebrow">Privacy Rights</div>
+    <h1 class="doc-title">Do Not Sell or Share My Personal Information</h1>
+
+    <div class="callout">
+      <strong>&#10003; The short answer:</strong> CyberRMF LLC does not sell your personal information for money, and does not share it for cross-context behavioral advertising or targeted advertising. There is nothing to opt out of &mdash; that is our default and only setting.
+    </div>
+
+    <div class="doc-body">
+      <h2>What this page is for</h2>
+      <p>California Consumer Privacy Act / California Privacy Rights Act (CCPA/CPRA), and similar laws in Colorado, Connecticut, Virginia, Utah, Texas, Oregon, and other US states, give consumers the right to opt out of the "sale" or "sharing" of their personal information, and to opt out of "targeted advertising." This page exists to make that opt-out available even though our answer to the underlying question is <em>we don't do those things</em>.</p>
+
+      <h2>What "sale" and "share" mean, and what we actually do</h2>
+      <ul>
+        <li><strong>"Sale"</strong> under CCPA means disclosing personal information to a third party for monetary or other valuable consideration. <strong>We do not do this.</strong></li>
+        <li><strong>"Sharing"</strong> under CPRA means disclosing personal information to a third party for cross-context behavioral advertising, whether or not for money. <strong>We do not do this.</strong></li>
+        <li><strong>"Targeted advertising"</strong> under the Colorado, Connecticut, Virginia, and similar laws means using personal information from your interactions with unaffiliated websites/apps to serve you ads based on inferred interests. <strong>We do not do this.</strong></li>
+        <li>We <em>do</em> share personal information with a small set of vetted <strong>service providers / processors</strong> strictly to operate the site and service &mdash; hosting (Vercel), license management (Keygen), transactional email (Resend), source and download hosting (GitHub). Under CCPA these providers are "service providers" (not third parties), and under GDPR they are "processors." See our <a href="privacy.html#section-4">Privacy Statement &sect; 4</a> for the full list.</li>
+      </ul>
+
+      <h2>Submit an opt-out request anyway</h2>
+      <p>If you would like a formal record of your opt-out, or you're a compliance team documenting due-diligence for your own program, submit a request one of the following ways:</p>
+
+      <div class="action-card">
+        <h3>By email</h3>
+        <p>Send an email to <a href="mailto:privacy@integratermf.com?subject=Do%20Not%20Sell%20or%20Share%20Request&amp;body=I%20am%20submitting%20a%20request%20under%20applicable%20US%20state%20privacy%20law%20to%20opt%20out%20of%20any%20sale%20or%20sharing%20of%20my%20personal%20information%20by%20CyberRMF.%0A%0AMy%20contact%20details%20on%20file%20(so%20you%20can%20match%20me%20to%20a%20record):%0A%20-%20Name:%0A%20-%20Work%20email:%0A%20-%20Organization:%0A%20-%20State%20of%20residence%20(for%20processing%20eligibility):%0A">privacy@integratermf.com</a> with subject line <code>Do Not Sell or Share Request</code>. Include your name, the work email you used when signing up, and (for eligibility) your US state of residence.</p>
+        <p style="margin-top:16px;">
+          <a class="action-btn" href="mailto:privacy@integratermf.com?subject=Do%20Not%20Sell%20or%20Share%20Request&amp;body=I%20am%20submitting%20a%20request%20under%20applicable%20US%20state%20privacy%20law%20to%20opt%20out%20of%20any%20sale%20or%20sharing%20of%20my%20personal%20information%20by%20CyberRMF.%0A%0AMy%20contact%20details%20on%20file%20(so%20you%20can%20match%20me%20to%20a%20record):%0A%20-%20Name:%0A%20-%20Work%20email:%0A%20-%20Organization:%0A%20-%20State%20of%20residence%20(for%20processing%20eligibility):%0A">Open pre-filled email &rarr;</a>
+        </p>
+      </div>
+
+      <div class="action-card">
+        <h3>Via Global Privacy Control (GPC)</h3>
+        <p>We honor <a href="https://globalprivacycontrol.org" target="_blank" rel="noopener">Global Privacy Control</a> browser signals as opt-out requests for California residents. If your browser or extension sends a GPC signal, we will treat that as an opt-out for the browser session, and no further action from you is required.</p>
+      </div>
+
+      <h2>What happens after you submit</h2>
+      <ol>
+        <li>We will confirm receipt within a reasonable timeframe.</li>
+        <li>We will verify your identity by matching the information you provide against our records. Because most CyberRMF signups use a business email, we may ask you to reply from that email address to confirm ownership.</li>
+        <li>We will respond within <strong>45 days</strong> of the request (extendable by an additional 45 days where permitted, with notice to you).</li>
+        <li>Because CyberRMF does not sell or share personal information, we will confirm that no changes to our processing are required to honor your opt-out.</li>
+      </ol>
+
+      <h2>Related rights</h2>
+      <p>For requests to <strong>access</strong>, <strong>correct</strong>, <strong>delete</strong>, or <strong>port</strong> your personal information, or to <strong>appeal</strong> a denied request, see <a href="privacy.html#section-8">Section 8 of our Privacy Statement</a> and email <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a>.</p>
+
+      <h2>Authorized agents (California)</h2>
+      <p>You may designate an authorized agent to submit a request on your behalf. We will require written proof of authorization (for example, a signed letter of authorization or a power of attorney) and, where appropriate, direct verification with you before acting on the agent's request.</p>
+
+      <h2>Contact</h2>
+      <p>
+        <strong>Privacy team:</strong> <a href="mailto:privacy@integratermf.com">privacy@integratermf.com</a><br>
+        <strong>General:</strong> <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+      </p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-center">
+        <a href="privacy.html">Privacy</a>
+        <a href="TERMS_AND_CONDITIONS.txt">Terms</a>
+        <a href="do-not-sell.html">Do Not Sell or Share</a>
+        <a href="security.html">Security</a>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+</body>
+</html>
