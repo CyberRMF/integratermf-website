@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Coming soon &mdash; CyberRMF Integrate</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Consolas', 'Fira Code', 'SF Mono', 'Courier New', monospace;
+      background: #111111;
+      color: #e4e6eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .cs-wrap {
+      text-align: center;
+      max-width: 520px;
+      width: 100%;
+    }
+    .cs-logo {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .cs-brand {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 56px;
+      color: #e4e6eb;
+    }
+    .cs-brand .accent { color: #3b82f6; }
+    .cs-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #3b82f6;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+      text-shadow: 0 0 24px rgba(59, 130, 246, 0.35);
+    }
+    .cs-tag {
+      font-size: 13px;
+      color: #8b8b8b;
+      line-height: 1.6;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .cs-contact {
+      margin-top: 48px;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.04em;
+    }
+    .cs-contact a {
+      color: #3b82f6;
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .cs-contact a:hover { color: #93c5fd; }
+
+    @media (max-width: 480px) {
+      .cs-title { font-size: 26px; }
+      .cs-brand { font-size: 18px; margin-bottom: 40px; }
+      .cs-contact { margin-top: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="cs-wrap">
+    <div class="cs-logo" aria-hidden="true">
+      <svg width="88" height="88" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="logo-glow">
+            <feGaussianBlur stdDeviation="3.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+          <polyline points="58,80 58,58 80,58"/>
+          <polyline points="120,58 142,58 142,80"/>
+          <polyline points="142,120 142,142 120,142"/>
+          <polyline points="80,142 58,142 58,120"/>
+        </g>
+        <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+      </svg>
+    </div>
+    <div class="cs-brand">CyberRMF <span class="accent">Integrate</span></div>
+
+    <h1 class="cs-title">Coming soon&hellip;</h1>
+    <p class="cs-tag">All-in-one Cyber compliance workflow.</p>
+
+    <p class="cs-contact">
+      Questions? <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+    </p>
+  </main>
+</body>
+</html>
