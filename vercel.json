@@ -1,13 +1,9 @@
 {
-  "rewrites": [
-    { "source": "/api/:path*",         "destination": "/api/:path*" },
-    { "source": "/.well-known/:path*", "destination": "/.well-known/:path*" },
-    { "source": "/images/:path*",      "destination": "/images/:path*" },
-    { "source": "/coming-soon.html",   "destination": "/coming-soon.html" },
-    { "source": "/:path*",             "destination": "/coming-soon.html" }
-  ],
-  "redirects": [
-    { "source": "/activate",  "destination": "/deactivate.html?action=activate&mode=airgap", "permanent": false },
-    { "source": "/activate/", "destination": "/deactivate.html?action=activate&mode=airgap", "permanent": false }
+  "routes": [
+    { "src": "/api/(.*)",            "dest": "/api/$1" },
+    { "src": "/\\.well-known/(.*)",  "dest": "/.well-known/$1" },
+    { "src": "/images/(.*)",         "dest": "/images/$1" },
+    { "src": "/coming-soon\\.html",  "dest": "/coming-soon.html" },
+    { "src": "/.*",                  "dest": "/coming-soon.html" }
   ]
 }
