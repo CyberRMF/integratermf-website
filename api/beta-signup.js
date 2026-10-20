@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
 const KEYGEN_POLICY_ID   = process.env.KEYGEN_POLICY_ID;
@@ -10,6 +12,22 @@ const DOWNLOAD_ADMIN     = process.env.GITHUB_DOWNLOAD_ADMIN;
 // (street, suite / PO Box, city, state, ZIP). Set it as a Vercel env var.
 const BUSINESS_ADDRESS   = process.env.BUSINESS_ADDRESS ||
   'CyberRMF LLC &middot; [MAILING ADDRESS NOT SET - set BUSINESS_ADDRESS env var in Vercel]';
+
+// Resend Audiences + HMAC-signed unsubscribe. Both envs must be set for
+// Tier 1 unsubscribe to be fully automated; if either is missing we fall
+// back to mailto-only unsubscribe (still works, just manual processing).
+const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID;
+const UNSUBSCRIBE_SECRET = process.env.UNSUBSCRIBE_SECRET;
+
+function buildUnsubUrl(email) {
+  if (!UNSUBSCRIBE_SECRET) return null;
+  const token = crypto
+    .createHmac('sha256', UNSUBSCRIBE_SECRET)
+    .update(email.toLowerCase())
+    .digest('hex')
+    .slice(0, 24);
+  return `https://integratermf.com/api/unsubscribe?e=${encodeURIComponent(email)}&t=${token}`;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -93,20 +111,24 @@ export default async function handler(req, res) {
     const signupRef  = `${Date.now().toString(36).toUpperCase()}-${licenseKey.slice(0, 6)}`;
     const signupDate = new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC';
 
-    // RFC 2369 / RFC 8058 unsubscribe metadata. We expose a mailto today
-    // (works everywhere, no infra). To upgrade to Gmail/Yahoo one-click
-    // unsubscribe, add an HTTPS endpoint and include it as a second URL
-    // in List-Unsubscribe, then re-enable the List-Unsubscribe-Post header.
+    // RFC 2369 / RFC 8058 unsubscribe metadata.
+    //   - mailto fallback is always present (works on every client)
+    //   - if UNSUBSCRIBE_SECRET is set, we also include a signed HTTPS URL
+    //     and enable List-Unsubscribe-Post for Gmail/Yahoo one-click
     const unsubMailto = `mailto:info@cyberrmf.com?subject=${encodeURIComponent('Unsubscribe: ' + email)}&body=${encodeURIComponent('Please remove ' + email + ' from all CyberRMF mailing lists. (Signup ref ' + signupRef + ')')}`;
+    const unsubUrl    = buildUnsubUrl(email);              // null if secret missing
+    const unsubLink   = unsubUrl || unsubMailto;           // what the visible button points to
+    const listUnsubHeader = unsubUrl
+      ? `<${unsubUrl}>, <${unsubMailto}>`
+      : `<${unsubMailto}>`;
+    const emailHeaders = { 'List-Unsubscribe': listUnsubHeader };
+    if (unsubUrl) emailHeaders['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
 
     const userEmailBody = {
       from: 'CyberRMF <no-reply@integratermf.com>',
       to: [email],
       subject: `Your CyberRMF Beta License — ${licenseKey}`,
-      headers: {
-        'List-Unsubscribe': `<${unsubMailto}>`,
-        // 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click', // enable only when an HTTPS unsubscribe endpoint exists
-      },
+      headers: emailHeaders,
       html: `
         <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:640px;margin:0 auto;">
           <h2 style="color:#60a5fa;margin:0 0 4px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
@@ -181,7 +203,7 @@ export default async function handler(req, res) {
           <p style="font-size:11px;color:#6b7280;line-height:1.6;margin:0 0 10px;text-align:center;">
             You're receiving this because you requested a CyberRMF Integrate beta license. This is a transactional message tied to that request.
             If you'd prefer not to receive any future CyberRMF emails (including beta updates, release announcements, or product news),
-            <a href="${unsubMailto}" style="color:#60a5fa;text-decoration:underline;">unsubscribe here</a>.
+            <a href="${unsubLink}" style="color:#60a5fa;text-decoration:underline;">unsubscribe here</a>.
           </p>
           <p style="font-size:10px;color:#4b5563;line-height:1.5;margin:10px 0 0;text-align:center;">
             ${BUSINESS_ADDRESS}<br/>
@@ -222,8 +244,9 @@ export default async function handler(req, res) {
         ``,
         `--`,
         `You're receiving this because you requested a CyberRMF Integrate beta license.`,
-        `To unsubscribe from all future CyberRMF emails, reply "UNSUBSCRIBE" or email:`,
-        `  ${unsubMailto}`,
+        `To unsubscribe from all future CyberRMF emails, visit:`,
+        `  ${unsubLink}`,
+        `(or reply "UNSUBSCRIBE", or email ${unsubMailto})`,
         ``,
         `${BUSINESS_ADDRESS.replace(/&middot;/g, '-')}`,
         `Privacy: https://integratermf.com/privacy.html`,
@@ -298,6 +321,45 @@ export default async function handler(req, res) {
     } catch (adminErr) {
       console.error('Admin notify error:', adminErr);
       steps.push('admin_email_error');
+    }
+
+    /* ── 4. Add contact to Resend Audience (soft-fail) ──
+     * This lets future broadcasts automatically skip people who later
+     * unsubscribe, and gives /api/unsubscribe a contact to flip. If
+     * RESEND_AUDIENCE_ID isn't set, this is skipped silently.
+     */
+    if (RESEND_AUDIENCE_ID) {
+      try {
+        const contactRes = await fetch(
+          `https://api.resend.com/audiences/${RESEND_AUDIENCE_ID}/contacts`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email,
+              first_name: firstName,
+              last_name: lastName,
+              unsubscribed: false,
+            }),
+          }
+        );
+        if (contactRes.ok || contactRes.status === 409) {
+          // 409 = already in audience (re-signup), treat as success
+          steps.push('contact_added');
+        } else {
+          const contactErrBody = await contactRes.text();
+          console.warn('Resend contact creation failed:', contactRes.status, contactErrBody);
+          steps.push('contact_failed');
+        }
+      } catch (contactErr) {
+        console.error('Resend contact creation error:', contactErr);
+        steps.push('contact_error');
+      }
+    } else {
+      steps.push('contact_skipped_no_audience_id');
     }
 
     return res.status(200).json({ success: true, steps });
