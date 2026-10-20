@@ -5,6 +5,12 @@ const RESEND_API_KEY     = process.env.RESEND_API_KEY;
 const DOWNLOAD_INTEGRATE = process.env.GITHUB_DOWNLOAD_INTEGRATE;
 const DOWNLOAD_ADMIN     = process.env.GITHUB_DOWNLOAD_ADMIN;
 
+// CAN-SPAM / CASL / Gmail-bulk-sender compliance footer.
+// BUSINESS_ADDRESS should be a real, deliverable physical postal address
+// (street, suite / PO Box, city, state, ZIP). Set it as a Vercel env var.
+const BUSINESS_ADDRESS   = process.env.BUSINESS_ADDRESS ||
+  'CyberRMF LLC &middot; [MAILING ADDRESS NOT SET - set BUSINESS_ADDRESS env var in Vercel]';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -87,10 +93,20 @@ export default async function handler(req, res) {
     const signupRef  = `${Date.now().toString(36).toUpperCase()}-${licenseKey.slice(0, 6)}`;
     const signupDate = new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC';
 
+    // RFC 2369 / RFC 8058 unsubscribe metadata. We expose a mailto today
+    // (works everywhere, no infra). To upgrade to Gmail/Yahoo one-click
+    // unsubscribe, add an HTTPS endpoint and include it as a second URL
+    // in List-Unsubscribe, then re-enable the List-Unsubscribe-Post header.
+    const unsubMailto = `mailto:info@cyberrmf.com?subject=${encodeURIComponent('Unsubscribe: ' + email)}&body=${encodeURIComponent('Please remove ' + email + ' from all CyberRMF mailing lists. (Signup ref ' + signupRef + ')')}`;
+
     const userEmailBody = {
       from: 'CyberRMF <no-reply@integratermf.com>',
       to: [email],
       subject: `Your CyberRMF Beta License — ${licenseKey}`,
+      headers: {
+        'List-Unsubscribe': `<${unsubMailto}>`,
+        // 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click', // enable only when an HTTPS unsubscribe endpoint exists
+      },
       html: `
         <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:640px;margin:0 auto;">
           <h2 style="color:#60a5fa;margin:0 0 4px;">Welcome to the CyberRMF Beta, ${firstName}!</h2>
@@ -159,6 +175,20 @@ export default async function handler(req, res) {
             Questions? Reply to this email or contact <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
             <br/><span style="font-size:10px;color:#4b5563;">Signup ref ${signupRef}</span>
           </p>
+
+          <!-- ══════════ COMPLIANCE FOOTER (CAN-SPAM / CASL / GDPR) ══════════ -->
+          <hr style="border:none;border-top:1px solid #3a3f4b;margin:28px 0 16px;">
+          <p style="font-size:11px;color:#6b7280;line-height:1.6;margin:0 0 10px;text-align:center;">
+            You're receiving this because you requested a CyberRMF Integrate beta license. This is a transactional message tied to that request.
+            If you'd prefer not to receive any future CyberRMF emails (including beta updates, release announcements, or product news),
+            <a href="${unsubMailto}" style="color:#60a5fa;text-decoration:underline;">unsubscribe here</a>.
+          </p>
+          <p style="font-size:10px;color:#4b5563;line-height:1.5;margin:10px 0 0;text-align:center;">
+            ${BUSINESS_ADDRESS}<br/>
+            <a href="https://integratermf.com/privacy.html" style="color:#6b7280;text-decoration:underline;">Privacy</a> &middot;
+            <a href="https://integratermf.com/do-not-sell.html" style="color:#6b7280;text-decoration:underline;">Do Not Sell or Share</a> &middot;
+            <a href="https://integratermf.com/security.html" style="color:#6b7280;text-decoration:underline;">Security</a>
+          </p>
         </div>
       `,
       text: [
@@ -189,6 +219,15 @@ export default async function handler(req, res) {
         ``,
         `Questions? Reply to this email or contact info@cyberrmf.com`,
         `-- Signup ref ${signupRef} --`,
+        ``,
+        `--`,
+        `You're receiving this because you requested a CyberRMF Integrate beta license.`,
+        `To unsubscribe from all future CyberRMF emails, reply "UNSUBSCRIBE" or email:`,
+        `  ${unsubMailto}`,
+        ``,
+        `${BUSINESS_ADDRESS.replace(/&middot;/g, '-')}`,
+        `Privacy: https://integratermf.com/privacy.html`,
+        `Do Not Sell or Share: https://integratermf.com/do-not-sell.html`,
       ].join('\n'),
     };
 
