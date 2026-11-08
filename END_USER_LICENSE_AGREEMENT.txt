@@ -184,7 +184,7 @@ You shall defend, indemnify, and hold harmless CyberRMF LLC, its affiliates, and
 
 14. GENERAL PROVISIONS
 
-14.1 Governing Law and Venue. This Agreement is governed by the laws of [JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL] and the applicable federal laws of the United States, without regard to conflict-of-law principles. Any dispute arising out of or relating to this Agreement shall be brought exclusively in the state or federal courts located in [JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL], and each party consents to the personal jurisdiction of those courts. The United Nations Convention on Contracts for the International Sale of Goods does not apply to this Agreement.
+14.1 Governing Law and Venue. This Agreement is governed by the laws of the State of Arizona and the applicable federal laws of the United States, without regard to conflict-of-law principles. Any dispute arising out of or relating to this Agreement shall be brought exclusively in the state or federal courts located in the State of Arizona, and each party consents to the personal jurisdiction of those courts. The United Nations Convention on Contracts for the International Sale of Goods does not apply to this Agreement.
 
 14.2 Equitable Relief. A breach of Section 3, 4, or 7 may cause CyberRMF LLC irreparable harm for which monetary damages would be inadequate, and CyberRMF LLC may seek injunctive or other equitable relief for any such breach in addition to any other remedy.
 
