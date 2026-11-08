@@ -1,0 +1,214 @@
+CYBERRMF END USER LICENSE AGREEMENT
+
+Effective Date: November 8, 2026
+
+IMPORTANT — PLEASE READ CAREFULLY. This End User License Agreement (this "Agreement") is a legally binding agreement between you, either an individual or the organization on whose behalf you are acting ("Licensee," "you," or "your"), and CyberRMF LLC ("CyberRMF LLC," "we," "us," or "our"). It governs your purchase, installation, activation, and use of CyberRMF Integrate and CyberRMF Admin Tools. This Agreement is the "Software License Agreement" referred to in the CyberRMF Purchase Terms and Conditions.
+
+BY PURCHASING A LICENSE TO THE SOFTWARE, BY INSTALLING, ACTIVATING, ACCESSING, OR USING THE SOFTWARE, OR BY SELECTING "ACCEPT AND CONTINUE," YOU ACKNOWLEDGE THAT YOU HAVE READ AND UNDERSTOOD THIS AGREEMENT AND THE CYBERRMF TERMS AND CONDITIONS, AND YOU AGREE TO BE BOUND BY THEM. IF YOU DO NOT AGREE, DO NOT ACTIVATE OR USE THE SOFTWARE.
+
+If you accept this Agreement on behalf of an organization, you represent and warrant that you have the authority to bind that organization, and "you" refers to that organization.
+
+
+1. DEFINITIONS
+
+The following terms have the meanings set out below wherever they appear in this Agreement.
+
+"Software" means CyberRMF Integrate and CyberRMF Admin Tools in object-code form, together with any updates, upgrades, patches, bundled reference materials, and Documentation that CyberRMF LLC provides, and all copies of any of them.
+
+"Documentation" means the user guides, in-application help, tours, and instructions that CyberRMF LLC makes available for the Software.
+
+"Terms and Conditions" means the CyberRMF Terms and Conditions presented with this Agreement, which describe how the Software operates and handles data and which are incorporated into this Agreement by reference.
+
+"License Key" means the license key, response code, or other activation credential that CyberRMF LLC issues to enable the Software.
+
+"Device" means a single physical or virtual computer on which the Software is installed and activated.
+
+"Subscription Term" means the period stated in your order, or encoded in your License Key, during which you are licensed to use the Software.
+
+"Authorized User" means an employee or contractor of yours whom you permit to use the Software on your behalf.
+
+"User Data" means all data, content, and information that you or your Authorized Users enter into the Software, import into it, or direct it to collect, retrieve, or process, including inventory records, scan results, control and assessment information, plans of action, configuration settings, credentials, and data obtained from Target Systems or Third-Party Services.
+
+"Target System" means any computer, server, network device, directory service, or other system against which you direct the Software to perform a query, scan, connection, or other operation.
+
+"Third-Party Service" means any software, platform, application programming interface, or service that is not provided by CyberRMF LLC, including security information and event management, endpoint protection, and vulnerability management products to which you connect the Software.
+
+"Output" means any report, matrix, Security Control Traceability Matrix (SCTM), Plan of Action and Milestones (POA&M), continuous monitoring record, inventory, STIG result, scan result, dashboard, export, or other artifact produced by or with the Software.
+
+
+2. LICENSE GRANT
+
+2.1 Grant. Subject to your continuous compliance with this Agreement and your payment of all applicable fees, CyberRMF LLC grants you a limited, non-exclusive, non-transferable, non-sublicensable, revocable license, during the Subscription Term, to install, activate, and use the Software in accordance with the Documentation for your own internal business purposes.
+
+2.2 Devices and Activations. Unless your order states otherwise, each License Key permits you to activate CyberRMF Integrate on one (1) Device and CyberRMF Admin Tools on one (1) Device. The two applications may be activated on the same Device or on separate Devices within the same network environment. Activation binds the License Key to a machine identifier derived from the Device's hardware.
+
+2.3 Pre-Release Versions. If the Software, or any feature of it, is identified as beta, preview, evaluation, trial, or otherwise pre-release (a "Pre-Release Version"), it is provided for evaluation only, may contain errors and defects, may be modified or discontinued at any time without notice, and may stop functioning at the end of the evaluation period. CyberRMF LLC has no obligation to provide support for, or to release a commercial version of, any Pre-Release Version.
+
+2.4 Authorized Users. You may permit Authorized Users to use the Software on your behalf, provided that you remain responsible for their compliance with this Agreement and for all activity that occurs under your License Key.
+
+2.5 Reservation of Rights. The Software is licensed, not sold. All rights not expressly granted to you in this Agreement are reserved by CyberRMF LLC and its licensors.
+
+
+3. RESTRICTIONS
+
+Except as expressly permitted by this Agreement or by applicable law that cannot be waived by contract, you shall not, and shall not permit any third party to:
+(a) copy the Software, except for a reasonable number of backup or archival copies;
+(b) modify, translate, adapt, or create derivative works of the Software;
+(c) reverse engineer, decompile, disassemble, or otherwise attempt to derive the source code of the Software, except to the extent that this restriction is expressly prohibited by applicable law;
+(d) sell, resell, rent, lease, lend, sublicense, distribute, or otherwise transfer the Software or any License Key;
+(e) use the Software to provide services to third parties on a service bureau or time-sharing basis without CyberRMF LLC's prior written consent;
+(f) circumvent, disable, or interfere with license validation, device binding, expiration, or any other technical protection measure in the Software, or share, publish, or reuse a License Key beyond the activations your license permits;
+(g) remove, alter, or obscure any proprietary notice or label on the Software; or
+(h) use the Software in violation of Section 4.
+
+
+4. ACCEPTABLE AND LAWFUL USE
+
+4.1 Lawful Use. You shall use the Software only for lawful purposes and in compliance with all applicable federal, state, local, and international laws and regulations, and with all organizational policies, contracts, and authorizations that govern your systems and data. These include laws concerning computer access and misuse (such as the U.S. Computer Fraud and Abuse Act, 18 U.S.C. § 1030), privacy and data protection, electronic communications, export control, and the handling of classified, controlled, or otherwise sensitive information.
+
+4.2 Authorization Required. Before you direct the Software to scan, query, connect to, collect data from, or otherwise operate on any Target System or Third-Party Service, you must own it or have obtained every authorization required from its owner, including, where applicable, the Information System Owner and Authorizing Official. You represent and warrant that you have obtained, and will maintain, all such authorizations, and you are solely responsible for the scope of every operation you initiate.
+
+4.3 Prohibited Uses. You shall not use the Software to:
+(a) gain, or attempt to gain, unauthorized access to any system, network, account, or data;
+(b) conduct reconnaissance, surveillance, or attacks against systems that you are not authorized to assess;
+(c) collect, store, or process personal, classified, or controlled information in violation of law or of your obligations to others;
+(d) interfere with or disrupt the integrity, availability, or performance of any system or network;
+(e) infringe, misappropriate, or violate the rights of any third party; or
+(f) facilitate any other unlawful activity.
+
+4.4 Credentials. You are solely responsible for the credentials that you and your Authorized Users supply to the Software, for ensuring that those credentials are used only within the scope of their authorization, and for every action taken with them.
+
+4.5 Suspension. CyberRMF LLC may suspend or revoke your License Key, without liability, if CyberRMF LLC reasonably believes that the Software is being used in violation of this Section 4 or of applicable law.
+
+
+5. USER DATA AND ACCURACY OF REPORTING
+
+5.1 Nature of the Software. The Software is a tool. It collects, organizes, calculates, and displays only the data that you and your Authorized Users enter into it, import into it, or direct it to retrieve from the Target Systems, Third-Party Services, files, and other sources that you select. CyberRMF LLC does not create, supply, review, verify, or validate User Data, and the Software does not independently confirm that any data it retrieves is accurate, complete, or current.
+
+5.2 Your Responsibility for Accuracy. You are solely responsible for the accuracy, completeness, currency, and lawfulness of all User Data, and for ensuring that User Data accurately reflects the systems, controls, and conditions that it is used to report on. You must review and verify every Output before you rely on it or distribute or submit it to any assessor, authorizing official, regulator, customer, or other party. Outputs are only as accurate as the User Data, the source systems from which it was obtained, and the configuration that you provide, and any error or omission in them will be reflected in the Outputs.
+
+5.3 No Compliance Determination. The Software does not make, and no Output constitutes, any determination, certification, accreditation, Authorization to Operate, or assurance that any system complies with NIST SP 800-53, the Risk Management Framework, DISA Security Technical Implementation Guides, CNSSI 1253, FedRAMP, or any other law, regulation, standard, or framework. All compliance, security, risk, and authorization decisions are yours and those of your organization's responsible officials.
+
+5.4 Ownership of User Data. As between you and CyberRMF LLC, you retain all right, title, and interest in and to User Data. The Software does not transmit User Data to CyberRMF LLC, and CyberRMF LLC does not access User Data unless you choose to provide it, for example when requesting support.
+
+5.5 Backups and Security. You are solely responsible for maintaining backups of User Data and Workspaces and for the security of the Devices, storage locations, networks, and accounts on which they reside. The Software is not a backup or archival system.
+
+
+6. ACTIVATION AND LICENSE VALIDATION
+
+6.1 Activation Required. The Software requires a valid License Key and may be activated either online or by the air-gapped method described in the Terms and Conditions.
+
+6.2 Information Transmitted. Online activation and periodic re-validation transmit your License Key and a machine identifier derived from the Device's hardware to CyberRMF LLC's license-management service provider, and the first online activation of a Device also transmits the Device's computer name. Online deactivation from within the Software transmits your License Key, the machine identifier, and the email address you enter to CyberRMF LLC. Air-gapped activation transmits no data from the Device. You consent to these transmissions, which are described further in the Terms and Conditions.
+
+6.3 Loss of Function. The Software may stop functioning, without liability to CyberRMF LLC, if your License Key expires, is suspended or revoked, is deactivated, or cannot be re-validated within the offline grace period described in the Terms and Conditions.
+
+
+7. OWNERSHIP AND INTELLECTUAL PROPERTY
+
+7.1 Ownership. The Software and Documentation, all copies of them, and all intellectual property rights in them are and shall remain the exclusive property of CyberRMF LLC and its licensors.
+
+7.2 Third-Party Components. The Software includes open-source and other third-party components that are licensed under their own terms. Those terms govern your use of those components, and nothing in this Agreement limits any right you have under them.
+
+7.3 Government Reference Materials. The Software includes reference materials derived from publicly available U.S. Government publications, such as NIST Special Publications, CNSSI documents, OSCAL catalogs, and DISA STIG benchmarks. CyberRMF LLC claims no ownership of those materials and does not warrant that they are complete or current.
+
+7.4 Feedback. CyberRMF LLC may use any suggestion, idea, or other feedback that you provide about the Software for any purpose, without obligation or compensation to you.
+
+
+8. FEES, TERM, AND TERMINATION
+
+8.1 Fees. Fees and payment terms are governed by the CyberRMF Purchase Terms and Conditions in effect at the time of purchase. Except as stated in those terms, all fees are non-refundable.
+
+8.2 Term. This Agreement takes effect when you first accept it or first use the Software, whichever is earlier, and continues for the Subscription Term, including any renewal, unless terminated earlier under this Section 8.
+
+8.3 Termination by CyberRMF LLC. CyberRMF LLC may terminate this Agreement and your license immediately, by notice to you or by revoking your License Key, if you breach this Agreement, fail to pay any applicable fee when due, or make a fraudulent or unauthorized payment.
+
+8.4 Termination by You. You may terminate this Agreement at any time by ceasing all use of the Software, deactivating it, and uninstalling and destroying all copies in your possession or control. Termination by you does not entitle you to a refund except as stated in the CyberRMF Purchase Terms and Conditions.
+
+8.5 Effect of Termination. When this Agreement expires or is terminated, your license ends, you must stop using the Software, and the Software may stop functioning. User Data stored in your Workspaces remains yours and is not deleted by CyberRMF LLC, and you are responsible for retaining it. Sections 1, 3, 4, 5, 7, 8.5, 9, 10, 11, 12, and 14 survive any expiration or termination of this Agreement.
+
+
+9. DISCLAIMER OF WARRANTIES
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE, THE DOCUMENTATION, AND ALL OUTPUTS ARE PROVIDED "AS IS," "AS AVAILABLE," AND "WITH ALL FAULTS," WITHOUT WARRANTY OF ANY KIND. CYBERRMF LLC AND ITS LICENSORS AND SUPPLIERS EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY, AND QUIET ENJOYMENT, AND ALL WARRANTIES ARISING FROM COURSE OF DEALING OR USAGE OF TRADE.
+
+WITHOUT LIMITING THE FOREGOING, CYBERRMF LLC DOES NOT WARRANT THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS; THAT IT WILL OPERATE WITHOUT INTERRUPTION OR ERROR; THAT IT WILL BE COMPATIBLE WITH ANY SYSTEM OR THIRD-PARTY SERVICE; THAT IT WILL BE FREE OF VULNERABILITIES OR HARMFUL COMPONENTS; THAT IT WILL PRESERVE OR PROTECT ANY DATA; THAT ANY OUTPUT WILL BE ACCURATE, COMPLETE, OR RELIABLE; OR THAT USE OF THE SOFTWARE WILL RESULT IN COMPLIANCE, ACCREDITATION, OR AUTHORIZATION. NO ADVICE OR INFORMATION, WHETHER ORAL OR WRITTEN, OBTAINED FROM CYBERRMF LLC CREATES ANY WARRANTY THAT IS NOT EXPRESSLY STATED IN THIS AGREEMENT.
+
+SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO SOME OF THE ABOVE EXCLUSIONS MAY NOT APPLY TO YOU. IN THAT CASE, ANY IMPLIED WARRANTY IS LIMITED TO THE SHORTEST PERIOD AND THE NARROWEST SCOPE PERMITTED BY APPLICABLE LAW.
+
+
+10. LIMITATION OF LIABILITY
+
+10.1 Exclusion of Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL CYBERRMF LLC, ITS AFFILIATES, OR ITS OR THEIR OWNERS, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, LICENSORS, OR SUPPLIERS BE LIABLE FOR ANY OF THE FOLLOWING, HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR OTHERWISE, ARISING OUT OF OR RELATING TO THIS AGREEMENT, THE SOFTWARE, ANY OUTPUT, OR THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND EVEN IF A LIMITED REMEDY FAILS OF ITS ESSENTIAL PURPOSE:
+(a) LOSS, CORRUPTION, DELETION, OR UNAVAILABILITY OF DATA, INCLUDING USER DATA AND WORKSPACES;
+(b) FINANCIAL LOSS OF ANY KIND, INCLUDING LOSS OF PROFITS, REVENUE, BUSINESS, CONTRACTS, GOODWILL, OR ANTICIPATED SAVINGS;
+(c) COSTS OF PROCURING SUBSTITUTE GOODS, SERVICES, OR SOFTWARE;
+(d) BUSINESS INTERRUPTION, SYSTEM DOWNTIME, OR FAILURE OF ANY SYSTEM OR NETWORK;
+(e) ANY SECURITY INCIDENT, DATA BREACH, CREDENTIAL EXPOSURE, OR UNAUTHORIZED ACCESS;
+(f) THE DENIAL, DELAY, SUSPENSION, OR REVOCATION OF ANY AUTHORIZATION, ACCREDITATION, CERTIFICATION, CONTRACT, OR AWARD, OR ANY FINE, PENALTY, OR ASSESSMENT;
+(g) ANY LOSS OR DAMAGE ARISING FROM INACCURATE, INCOMPLETE, OR OUTDATED USER DATA OR OUTPUTS; OR
+(h) ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES.
+
+10.2 Liability Cap. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, CYBERRMF LLC'S TOTAL CUMULATIVE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT OR THE SOFTWARE SHALL NOT EXCEED THE LICENSE FEES ACTUALLY PAID BY YOU TO CYBERRMF LLC FOR THE SOFTWARE DURING THE TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
+
+10.3 Basis of the Bargain. You acknowledge that the fees for the Software reflect the allocation of risk set out in this Agreement, and that CyberRMF LLC would not provide the Software without these limitations.
+
+10.4 Applicable Law. Some jurisdictions do not allow the exclusion or limitation of certain damages. In those jurisdictions, CyberRMF LLC's liability is excluded and limited to the fullest extent permitted by applicable law.
+
+
+11. INDEMNIFICATION
+
+You shall defend, indemnify, and hold harmless CyberRMF LLC, its affiliates, and its and their owners, officers, directors, employees, and agents from and against all claims, demands, actions, losses, liabilities, damages, fines, penalties, costs, and expenses, including reasonable attorneys' fees, arising out of or relating to:
+(a) your or your Authorized Users' use or misuse of the Software;
+(b) User Data, including its accuracy and your right to collect and process it;
+(c) any operation that you direct the Software to perform against any Target System or Third-Party Service, including any claim that the operation was not authorized;
+(d) any Output that you rely on or submit to any third party;
+(e) your breach of this Agreement; or
+(f) your violation of any law or of the rights of any third party.
+
+
+12. EXPORT CONTROL AND GOVERNMENT USE
+
+12.1 Export Control. The Software may be subject to U.S. export control and economic sanctions laws, including the Export Administration Regulations and the regulations administered by the U.S. Department of the Treasury's Office of Foreign Assets Control. You shall not export, re-export, or transfer the Software, directly or indirectly, to any prohibited country, entity, or person, or for any prohibited end use. You represent that you are not located in, or a national of, any embargoed country, and that you are not on any U.S. Government list of restricted parties.
+
+12.2 Government End Users. The Software and Documentation are "commercial products," "commercial computer software," and "commercial computer software documentation" as those terms are used in FAR 2.101, FAR 12.212, and DFARS 227.7202. Consistent with those regulations, they are licensed to U.S. Government end users only as commercial items, and with only those rights that are granted to all other end users under this Agreement.
+
+12.3 Federal Agencies. If you are an agency or instrumentality of the United States Government, this Agreement is governed by U.S. federal law, and any provision of this Agreement that is prohibited by federal law, including any indemnification or governing-law obligation, applies to you only to the extent that federal law permits.
+
+
+13. UPDATES AND CHANGES TO THIS AGREEMENT
+
+13.1 Updates. CyberRMF LLC may, but is not obligated to, provide updates, patches, or new versions of the Software. Each update is governed by this Agreement unless it is accompanied by separate terms.
+
+13.2 Changes to This Agreement. CyberRMF LLC may modify this Agreement or the Terms and Conditions from time to time. When a change is material, the Software will present the revised documents and ask you to accept them before you continue to use it. If you do not accept the revised documents, you must stop using the Software. Until you accept a revised version, the version you most recently accepted continues to apply.
+
+
+14. GENERAL PROVISIONS
+
+14.1 Governing Law and Venue. This Agreement is governed by the laws of [JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL] and the applicable federal laws of the United States, without regard to conflict-of-law principles. Any dispute arising out of or relating to this Agreement shall be brought exclusively in the state or federal courts located in [JURISDICTION — TO BE SPECIFIED BY LEGAL COUNSEL], and each party consents to the personal jurisdiction of those courts. The United Nations Convention on Contracts for the International Sale of Goods does not apply to this Agreement.
+
+14.2 Equitable Relief. A breach of Section 3, 4, or 7 may cause CyberRMF LLC irreparable harm for which monetary damages would be inadequate, and CyberRMF LLC may seek injunctive or other equitable relief for any such breach in addition to any other remedy.
+
+14.3 Assignment. You may not assign or transfer this Agreement or any right under it, by operation of law or otherwise, without CyberRMF LLC's prior written consent, and any attempt to do so is void. CyberRMF LLC may assign this Agreement in connection with a merger, acquisition, reorganization, or sale of all or substantially all of the assets to which this Agreement relates.
+
+14.4 Severability. If any provision of this Agreement is held to be unenforceable, that provision shall be enforced to the maximum extent permissible and the remaining provisions shall remain in full force and effect.
+
+14.5 No Waiver. CyberRMF LLC's failure to enforce any provision of this Agreement is not a waiver of its right to enforce that or any other provision later.
+
+14.6 Force Majeure. CyberRMF LLC is not liable for any delay or failure to perform that results from causes beyond its reasonable control, including outages of third-party licensing, hosting, or network services.
+
+14.7 Entire Agreement and Order of Precedence. This Agreement, together with the Terms and Conditions and the CyberRMF Purchase Terms and Conditions, is the entire agreement between you and CyberRMF LLC concerning the Software and supersedes all prior or contemporaneous understandings concerning its subject matter. If this Agreement conflicts with the Terms and Conditions, this Agreement controls. The Purchase Terms and Conditions control with respect to payment and purchase matters.
+
+14.8 Electronic Acceptance. Selecting "Accept and Continue," or any similar control, is your electronic signature and has the same legal effect as a handwritten signature. The Software records the version of this Agreement that you accepted, and the date and time of acceptance, on the Device.
+
+14.9 Notices. You may send notices to CyberRMF LLC at info@cyberrmf.com. CyberRMF LLC may send notices to you at the email address associated with your license or through the Software.
+
+14.10 Relationship of the Parties. The parties are independent contractors. Nothing in this Agreement creates a partnership, joint venture, agency, or employment relationship, and this Agreement confers no rights on any third party.
+
+14.11 Headings. Headings are for convenience only and do not affect the interpretation of this Agreement.
+
+
+15. CONTACT INFORMATION
+
+Questions about this Agreement, the Software, or licensing may be directed to CyberRMF LLC at info@cyberrmf.com or through integratermf.com.
+
+BY SELECTING "ACCEPT AND CONTINUE," YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS.
