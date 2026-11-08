@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>License Management — CyberRMF Integrate</title>
   <link rel="stylesheet" href="shared-themes.css">
-  <script>try{var t=localStorage.getItem('site-theme');if(t==='blue'||t==='midnight')t='cyber';if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
   <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
@@ -449,11 +449,8 @@ body { padding-top: 57px; }
         <div class="theme-picker-wrap" id="theme-picker-wrap">
           <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
           <div class="theme-dropdown" id="theme-dropdown">
-            <div class="theme-dropdown-label">5 themes</div>
-            <button class="theme-swatch" onclick="setTheme('cyber')" title="Integrate" style="background:linear-gradient(to right,#111 50%,#2563eb 50%)"></button>
+            <div class="theme-dropdown-label">2 themes</div>
             <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
-            <button class="theme-swatch" onclick="setTheme('mono')" title="Mono" style="background:linear-gradient(to right,#000 50%,#fff 50%)"></button>
-            <button class="theme-swatch" onclick="setTheme('dark-green')" title="Simulation" style="background:linear-gradient(to right,#000 50%,#4a8a4a 50%)"></button>
             <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
           </div>
         </div>
