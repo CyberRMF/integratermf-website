@@ -537,7 +537,7 @@ body { padding-top: 57px; }
             <div class="step-num">1</div>
             <div class="step-body">
               <h3>Generate an activation code</h3>
-              <p>On the air-gapped machine, open the application. It will display a short <strong>activation code</strong> derived from the machine&rsquo;s hardware fingerprint. Write this code down.</p>
+              <p>On the air-gapped machine, open the application. It will display a short <strong>activation code</strong> unique to that machine. Write this code down.</p>
             </div>
           </div>
           <div class="step">
@@ -573,8 +573,9 @@ body { padding-top: 57px; }
           <div id="act-ag-result" class="result-msg"></div>
           <div id="act-ag-response-code" style="display:none;margin-top:20px;padding:24px;background:var(--bg3);border:2px solid var(--accent);border-radius:8px;text-align:center;">
             <p style="font-size:11px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Your Response Code &mdash; write this down</p>
-            <p id="act-ag-response-value" style="font-size:20px;font-weight:700;letter-spacing:0.12em;color:var(--accent);word-break:break-all;"></p>
-            <p style="font-size:11px;color:var(--dim);margin-top:12px;">Enter this code in the application on the air-gapped machine to complete activation.</p>
+            <p id="act-ag-response-value" style="font-size:17px;font-weight:700;letter-spacing:0.08em;line-height:1.8;color:var(--accent);word-break:normal;overflow-wrap:break-word;font-family:'Consolas','Courier New',monospace;"></p>
+            <button type="button" id="act-ag-copy" onclick="copyResponseCode()" style="margin-top:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:12px;">Copy</button>
+            <p style="font-size:11px;color:var(--dim);margin-top:12px;">Enter this code in the application on the air-gapped machine to complete activation. It is 110 characters long; O and 0 are the same, as are I, L and 1.</p>
           </div>
         </form>
 
@@ -672,14 +673,14 @@ body { padding-top: 57px; }
           </div>
           <div class="form-group">
             <label>Deactivation Code (from the air-gapped machine)</label>
-            <input type="text" id="deact-ag-code" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" required style="letter-spacing:0.1em;font-size:15px;">
+            <input type="text" id="deact-ag-code" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" required style="letter-spacing:0.1em;font-size:15px;">
           </div>
           <button type="submit" class="submit-btn btn-deactivate" id="deact-ag-btn">Submit Deactivation Code</button>
           <div id="deact-ag-result" class="result-msg"></div>
         </form>
 
         <div class="note-box">
-          <strong>No USB drives or file transfers required.</strong> Keep your air-gapped environment secure. The deactivation code is cryptographically signed by your machine, proving you control the license.
+          <strong>No USB drives or file transfers required.</strong> Keep your air-gapped environment secure. Only the machine itself can produce its deactivation code.
         </div>
       </div>
     </div>
@@ -797,6 +798,16 @@ async function handleActivateAirgap(e) {
   }
   btn.disabled = false;
   btn.textContent = 'Generate Response Code';
+}
+
+function copyResponseCode() {
+  var btn = document.getElementById('act-ag-copy');
+  var text = document.getElementById('act-ag-response-value').textContent || '';
+  if (!navigator.clipboard) return;
+  navigator.clipboard.writeText(text).then(function () {
+    btn.textContent = 'Copied';
+    setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+  }).catch(function () { /* ignore */ });
 }
 
 async function handleDeactOnline(e) {

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const AIRGAP_SECRET      = process.env.AIRGAP_SECRET;
+const AIRGAP_SIGNING_KEY = process.env.AIRGAP_SIGNING_KEY;
 const RESEND_API_KEY     = process.env.RESEND_API_KEY;
 
 /*
@@ -15,13 +15,15 @@ const RESEND_API_KEY     = process.env.RESEND_API_KEY;
  *        a. Verifies license exists in Keygen and belongs to the given email.
  *        b. Registers a Keygen machine whose fingerprint == activationCode
  *           (or reuses one if already registered — idempotent).
- *        c. Computes an HMAC response code bound to (activationCode, licenseKey).
+ *        c. Signs a response code bound to (activationCode, licenseKey, end date)
+ *           with the Ed25519 private key in AIRGAP_SIGNING_KEY.
  *        d. Returns the response code (and optionally emails it as a receipt).
- *   5. User types the response code into the offline app; the app verifies the
- *      HMAC with the same shared secret and unlocks.
+ *   5. User types the response code into the offline app; the app checks the
+ *      signature with the public key built into it and unlocks.
  *
  * The response code is *not* a license transport — it's an offline proof that
  * this specific machine + this specific license was accepted by Keygen.
+ * Only this server can make one: the app holds no secret.
  */
 
 function stripFormat(s) {
@@ -38,9 +40,8 @@ function formatGroups(hex, groupSize = 4) {
 }
 
 /*
- * Fixed reference point for the "days from epoch" field encoded into the
- * last 4 hex chars of a v2 response code. Must match AIRGAP_EPOCH_MS in
- * the app-side shared/shared/ipc/keygen.ts.
+ * Fixed reference point for the day counts in a response code. Must match
+ * AIRGAP_EPOCH_MS in the app's shared/ipc/keygen.ts.
  */
 const AIRGAP_EPOCH_MS = Date.UTC(2020, 0, 1);
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -53,28 +54,56 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
  */
 const AIRGAP_DEFAULT_VALIDITY_DAYS = Number(process.env.AIRGAP_DEFAULT_VALIDITY_DAYS) || 14;
 
+/* Crockford base32, matching the app. */
+const BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+function toBase32(bytes) {
+  let out = '';
+  let bits = 0;
+  let value = 0;
+  for (const byte of bytes) {
+    value = ((value << 8) | byte) & 0xFFF;
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += BASE32[(value << (5 - bits)) & 31];
+  return out;
+}
+
+let signingKey;
+function airgapSigningKey() {
+  if (!signingKey) {
+    signingKey = crypto.createPrivateKey({ key: Buffer.from(AIRGAP_SIGNING_KEY, 'base64'), format: 'der', type: 'pkcs8' });
+  }
+  return signingKey;
+}
+
 /**
- * v2 response code with embedded expiry.
+ * v3 response code. Must match verifyResponseCode in the app's
+ * shared/ipc/keygen.ts.
+ *   bytes 0-1   end date, days since 2020-01-01 (big-endian)
+ *   bytes 2-3   issue date, same encoding
+ *   bytes 4-67  Ed25519 signature over
+ *               "cyberrmf-response-v3|<activation code>|<license key>|<end day>|<issue day>"
+ * written as 109 base32 characters plus 1 check character (a hash of the
+ * 68 bytes), in 22 groups of 5.
  *
- * Format:  XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-YYYY  (7 groups)
- *   groups 1..6: HMAC-SHA256(secret, "response-v2|ac|key|expiry").slice(0,24)
- *   group   7 :  expiryEpochDays (uint16, 4 hex)
- *
- * The expiry is signed alongside (ac, key) so re-pasting the code after
+ * The end date is signed alongside (ac, key) so re-pasting the code after
  * it expires does NOT reset the local validity window in the app.
  */
-function computeResponseCodeV2(activationCode, licenseKey, expiryEpochDays) {
+function computeResponseCodeV3(activationCode, licenseKey, expiryEpochDays, issuedEpochDays) {
   const ac = stripFormat(activationCode);
   const lk = normalizeLicenseKey(licenseKey);
-  const eed = Math.max(0, Math.min(0xFFFF, Math.floor(expiryEpochDays)));
-  const hmac = crypto
-    .createHmac('sha256', AIRGAP_SECRET)
-    .update(`response-v2|${ac}|${lk}|${eed}`)
-    .digest('hex')
-    .slice(0, 24)
-    .toUpperCase();
-  const expHex = eed.toString(16).padStart(4, '0').toUpperCase();
-  return formatGroups(hmac + expHex, 4);
+  const head = Buffer.alloc(4);
+  head.writeUInt16BE(expiryEpochDays, 0);
+  head.writeUInt16BE(issuedEpochDays, 2);
+  const message = Buffer.from(`cyberrmf-response-v3|${ac}|${lk}|${expiryEpochDays}|${issuedEpochDays}`, 'utf8');
+  const bytes = Buffer.concat([head, crypto.sign(null, message, airgapSigningKey())]);
+  const check = BASE32[crypto.createHash('sha256').update(bytes).digest()[0] & 31];
+  return formatGroups(toBase32(bytes) + check, 5);
 }
 
 export default async function handler(req, res) {
@@ -85,10 +114,16 @@ export default async function handler(req, res) {
   const missing = [];
   if (!KEYGEN_ACCOUNT_ID)  missing.push('KEYGEN_ACCOUNT_ID');
   if (!KEYGEN_ADMIN_TOKEN) missing.push('KEYGEN_ADMIN_TOKEN');
-  if (!AIRGAP_SECRET)      missing.push('AIRGAP_SECRET');
+  if (!AIRGAP_SIGNING_KEY) missing.push('AIRGAP_SIGNING_KEY');
   if (missing.length) {
     console.error('Missing env vars:', missing);
     return res.status(500).json({ error: 'Server configuration error', debug: `Missing: ${missing.join(', ')}` });
+  }
+  try {
+    airgapSigningKey();
+  } catch (keyErr) {
+    console.error('AIRGAP_SIGNING_KEY is not a valid Ed25519 private key:', keyErr?.message);
+    return res.status(500).json({ error: 'Server configuration error', debug: 'AIRGAP_SIGNING_KEY is not a valid key' });
   }
 
   const { key, email, activationCode } = req.body || {};
@@ -100,8 +135,8 @@ export default async function handler(req, res) {
   const normalizedKey = normalizeLicenseKey(key);
   const fingerprint   = stripFormat(activationCode); // used as Keygen fingerprint
 
-  if (fingerprint.length < 16) {
-    return res.status(400).json({ error: 'Activation code appears to be too short. Copy the entire code shown by the app.' });
+  if (!/^[0-9A-F]{20}$/.test(fingerprint)) {
+    return res.status(400).json({ error: 'The activation code should be 20 characters (0-9 and A-F). Copy the entire code shown by the app.' });
   }
 
   try {
@@ -198,7 +233,7 @@ export default async function handler(req, res) {
       }
     }
 
-    /* ── 3. Compute the offline response code (v2 with embedded expiry). ── */
+    /* ── 3. Sign the offline response code (v3 with embedded end date). ── */
     // Prefer the license's own expiry attribute from Keygen (authoritative);
     // fall back to now + AIRGAP_DEFAULT_VALIDITY_DAYS otherwise (beta = 14,
     // production = 365 — set via env var).
@@ -213,7 +248,8 @@ export default async function handler(req, res) {
     // Round expiryMs to match what the app will derive from expiryEpochDays
     // (so the display date matches exactly on both sides).
     const canonicalExpiryMs = AIRGAP_EPOCH_MS + expiryEpochDays * MS_PER_DAY;
-    const responseCode = computeResponseCodeV2(fingerprint, normalizedKey, expiryEpochDays);
+    const issuedEpochDays = Math.max(0, Math.min(0xFFFF, Math.floor((Date.now() - AIRGAP_EPOCH_MS) / MS_PER_DAY)));
+    const responseCode = computeResponseCodeV3(fingerprint, normalizedKey, expiryEpochDays, issuedEpochDays);
     const expiryDisplay = new Date(canonicalExpiryMs).toLocaleDateString('en-US', { dateStyle: 'long' });
 
     /* ── 4. Best-effort email receipt (never fail the request on this). ── */
@@ -241,7 +277,7 @@ export default async function handler(req, res) {
 
                 <div style="background:#23272e;border:2px solid #a78bfa;border-radius:6px;padding:16px;margin-bottom:20px;">
                   <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Response Code</p>
-                  <p style="font-size:18px;font-weight:700;color:#a78bfa;margin:0;font-family:monospace;letter-spacing:0.1em;word-break:break-all;">${responseCode}</p>
+                  <p style="font-size:15px;font-weight:700;color:#a78bfa;margin:0;font-family:monospace;letter-spacing:0.06em;line-height:1.7;word-break:normal;overflow-wrap:break-word;">${responseCode}</p>
                   <p style="font-size:11px;color:#6b7280;margin:8px 0 0;">This code is bound to your machine and license key. It only works in the CyberRMF app.</p>
                 </div>
 

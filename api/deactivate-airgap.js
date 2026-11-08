@@ -5,15 +5,15 @@ import crypto from 'crypto';
  *
  * Flow:
  *   1. On the air-gapped machine, the user generates a deactivation code
- *      in the app. The code is:
- *
- *        HMAC(AIRGAP_SECRET, "deactivate|" + machineFingerprintAsStoredInKeygen)
- *          .slice(0, 20).toUpperCase()  formatted as XXXX-XXXX-XXXX-XXXX-XXXX
- *
- *      `machineFingerprintAsStoredInKeygen` is either the raw SHA-256
- *      hardware fingerprint (if the machine was activated online) or the
- *      stripped activation code (if it was activated air-gapped). The app
- *      knows which by consulting its local .license.json's `mode` field.
+ *      in the app: 20 Crockford base32 characters, XXXXX-XXXXX-XXXXX-XXXXX.
+ *      Must match getDeactivationCode in the app's shared/ipc/keygen.ts.
+ *        - Activated air-gapped: Keygen's fingerprint for the machine is
+ *          its activation code, which is the first 20 hex of
+ *          SHA-256("cyberrmf-ac-v3|" + deactivationCode). The code is a
+ *          secret only that machine knows; we hash it and compare.
+ *        - Activated online: Keygen's fingerprint is the 64-hex hardware
+ *          fingerprint, and the code is the first 20 base32 characters of
+ *          SHA-256("cyberrmf-dc-online-v3|" + fingerprint).
  *
  *   2. The user comes to integratermf.com/deactivate (Air-Gapped tab) with:
  *        { key, email, deactivationCode }
@@ -21,39 +21,61 @@ import crypto from 'crypto';
  *   3. This endpoint:
  *        a. Validates the license & verifies the email matches.
  *        b. Lists every machine currently attached to the license.
- *        c. Re-derives the expected deactivation code from each machine's
- *           stored fingerprint and compares to the one the user provided
- *           using a timing-safe compare.
+ *        c. Checks the code against each machine's stored fingerprint, both
+ *           ways above, using a timing-safe compare.
  *        d. Deletes only the matching machine (surgical release of a
  *           single slot). If the user has more than one active machine and
  *           wants to release them all, they should use the Online tab.
  *
- *   The deactivation code alone does not carry the fingerprint — the
- *   fingerprint stays on the machine. The server only ever holds the
- *   *hash* under an HMAC keyed with the shared secret, which is enough to
- *   prove the request came from the physical machine.
+ *   No secret is needed here or in the app.
  */
 
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const AIRGAP_SECRET      = process.env.AIRGAP_SECRET;
 const RESEND_API_KEY     = process.env.RESEND_API_KEY;
+
+const BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 function stripFormat(s) {
   return String(s || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+}
+
+/* What the user typed, as Crockford base32: O read as 0, I and L as 1. */
+function normalizeBase32(s) {
+  return stripFormat(s).replace(/O/g, '0').replace(/[IL]/g, '1');
 }
 
 function normalizeLicenseKey(s) {
   return String(s || '').trim().toUpperCase().replace(/\s+/g, '');
 }
 
-function expectedDeactivationCode(machineFingerprint) {
-  return crypto
-    .createHmac('sha256', AIRGAP_SECRET)
-    .update(`deactivate|${machineFingerprint}`)
-    .digest('hex')
-    .slice(0, 20)
-    .toUpperCase();
+function toBase32(bytes) {
+  let out = '';
+  let bits = 0;
+  let value = 0;
+  for (const byte of bytes) {
+    value = ((value << 8) | byte) & 0xFFF;
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += BASE32[(value << (5 - bits)) & 31];
+  return out;
+}
+
+function codeReleasesMachine(code, machineFingerprint) {
+  const fp = String(machineFingerprint || '');
+  if (/^[0-9A-F]{20}$/i.test(fp)) {
+    const expected = crypto.createHash('sha256').update(`cyberrmf-ac-v3|${code}`).digest('hex').slice(0, 20).toUpperCase();
+    return codesMatch(fp.toUpperCase(), expected);
+  }
+  if (/^[0-9a-f]{64}$/i.test(fp)) {
+    const expected = toBase32(crypto.createHash('sha256').update(`cyberrmf-dc-online-v3|${fp.toLowerCase()}`).digest()).slice(0, 20);
+    return codesMatch(code, expected);
+  }
+  return false;
 }
 
 function codesMatch(userStripped, expectedStripped) {
@@ -76,7 +98,6 @@ export default async function handler(req, res) {
   const missing = [];
   if (!KEYGEN_ACCOUNT_ID)  missing.push('KEYGEN_ACCOUNT_ID');
   if (!KEYGEN_ADMIN_TOKEN) missing.push('KEYGEN_ADMIN_TOKEN');
-  if (!AIRGAP_SECRET)      missing.push('AIRGAP_SECRET');
   if (missing.length) {
     console.error('Missing env vars:', missing);
     return res.status(500).json({ error: 'Server configuration error', debug: `Missing: ${missing.join(', ')}` });
@@ -88,10 +109,10 @@ export default async function handler(req, res) {
   }
 
   const normalizedKey  = normalizeLicenseKey(key);
-  const strippedCode   = stripFormat(deactivationCode);
+  const strippedCode   = normalizeBase32(deactivationCode);
 
-  if (strippedCode.length < 16) {
-    return res.status(400).json({ error: 'Deactivation code appears to be too short. Copy the entire code shown by the app.' });
+  if (!/^[0-9A-HJKMNP-TV-Z]{20}$/.test(strippedCode)) {
+    return res.status(400).json({ error: 'The deactivation code should be 20 characters in groups of 5. Copy the entire code shown by the app.' });
   }
 
   try {
@@ -145,13 +166,10 @@ export default async function handler(req, res) {
       });
     }
 
-    /* ── 3. Find the machine whose HMAC(SECRET, "deactivate|" + fingerprint) matches ── */
+    /* ── 3. Find the machine the code belongs to ── */
     let match = null;
     for (const m of machines) {
-      const fp = m?.attributes?.fingerprint || '';
-      if (!fp) continue;
-      const expected = expectedDeactivationCode(fp);
-      if (codesMatch(strippedCode, expected)) {
+      if (codeReleasesMachine(strippedCode, m?.attributes?.fingerprint)) {
         match = m;
         break;
       }
