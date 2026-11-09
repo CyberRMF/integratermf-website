@@ -115,7 +115,7 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 8.2 Admin Tools Network Activity. Admin Tools performs targeted remote operations against hosts listed in the Licensee's inventory. These operations include WMI queries (TCP port 135 and dynamic RPC ports), WinRM sessions (TCP ports 5985/5986), and SSH connections (TCP port 22). Admin Tools does not perform subnet sweeps, port scanning of arbitrary hosts, or network discovery beyond the hosts explicitly listed in the inventory.
 
-8.3 Log Collection. Admin Tools can copy Windows event log files (.evtx) and Linux system logs from remote hosts to a local directory selected by the Licensee. The Licensee is responsible for securing collected log data in accordance with organizational policies.
+8.3 Log Collection. Admin Tools can copy Windows event log files (.evtx) and Linux system logs from remote hosts to a local directory selected by the Licensee. To collect Windows event logs, Admin Tools exports them on the remote host into a temporary folder it creates under that host's Windows Temp folder, copies them from there, and then deletes that folder; over WMI it starts the Windows event log utility (wevtutil.exe) on the remote host to do so. The Licensee is responsible for securing collected log data in accordance with organizational policies.
 
 8.4 Licensing Traffic. The only connections the Software makes to CyberRMF LLC or its service providers are the license activation, re-validation, and deactivation requests described in Section 3.
 
