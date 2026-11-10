@@ -1,6 +1,6 @@
 CYBERRMF INTEGRATE AND ADMIN TOOLS — TERMS AND CONDITIONS
 
-Last Updated: November 8, 2026
+Last Updated: November 10, 2026
 
 These Terms and Conditions describe how CyberRMF Integrate and CyberRMF Admin Tools operate, the data they handle, and the responsibilities that come with using them. They form part of, and are incorporated into, the CyberRMF End User License Agreement (the "EULA"). Capitalized terms that are not defined here have the meanings given in the EULA. If these Terms and Conditions conflict with the EULA, the EULA controls.
 
@@ -106,7 +106,9 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 7.5 Workspace Locking. The Software uses cooperative file-based locking to prevent concurrent conflicting edits to the same Workspace. Lock files are stored in the Workspace's .cyberrmf directory and identify the active user by operating system username and hostname.
 
-7.6 Activity Log. Each application keeps an Activity Log of actions taken in a Workspace, such as data saved or deleted, files added or removed, scans run, integrations used, and errors. Each entry records the time, the application and its version, and the operating system user name, domain, and computer name of the person who took the action. Entries are written to the Workspace's .cyberrmf directory, where other users of the Workspace can view them, and are chained so that later edits can be detected. Technical details of errors, such as stack traces, are kept only on the device where they occurred, for up to fourteen (14) days. The Activity Log is not transmitted to CyberRMF LLC.
+7.6 Activity Log. Each application keeps an Activity Log of actions taken in a Workspace, such as data saved or deleted, files added or removed, scans run, integrations used, and errors. Each entry records the time, the application and its version, and the operating system user name, domain, and computer name of the person who took the action. Entries are written to the Workspace's .cyberrmf directory, where other users of the Workspace can view them, and are chained so that later edits can be detected. Technical details of errors, such as stack traces, are kept only on the device where they occurred, for up to fourteen (14) days. Each application also records, once per launch, basic system details (the Windows version, application and runtime versions, memory and free disk space) and, if an application or one of its processes crashes, a crash dump file, which can contain memory contents from the time of the crash. These are also kept only on the device; crash dumps are kept for up to fourteen (14) days. The Activity Log is not transmitted to CyberRMF LLC.
+
+7.7 Support Bundles. A user may choose to create a support bundle: a ZIP file, saved where the user chooses, containing the device's recent Activity Log entries, error details, system details, license status and, only if the user selects it, crash dumps. Support bundles never contain Workspace file contents, saved credentials or the license key. The Software does not send support bundles anywhere; the user decides whether and how to share one. If a user sends a support bundle to CyberRMF LLC, CyberRMF LLC uses it only to investigate the reported problem.
 
 
 8. NETWORK OPERATIONS
@@ -122,9 +124,9 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 9. DATA PRIVACY
 
-9.1 No Telemetry. The Software does not collect telemetry, usage analytics, or crash reports, and sends no information about how it is used to CyberRMF LLC or anyone else. Errors are recorded only in the Activity Log described in Section 7.6, which stays in the Workspace and on the device.
+9.1 No Telemetry. The Software does not send telemetry, usage analytics, crash reports or any other information about how it is used to CyberRMF LLC or anyone else. Errors and crashes are recorded only on the device and in the Workspace, as described in Sections 7.6 and 7.7.
 
-9.2 Limited Communication. Apart from the licensing requests described in Section 3, the Software does not communicate with CyberRMF LLC servers, cloud services, or any external party unless the Licensee configures a Third-Party Service or initiates an operation that requires a network connection. User-Controlled Data is never sent to CyberRMF LLC.
+9.2 Limited Communication. Apart from the licensing requests described in Section 3, the Software does not communicate with CyberRMF LLC servers, cloud services, or any external party unless the Licensee configures a Third-Party Service or initiates an operation that requires a network connection. User-Controlled Data is never sent to CyberRMF LLC by the Software.
 
 9.3 Local Data Only. All user data — including inventory information, scan results, credentials (in memory only), configuration, and artifacts — remains on the Licensee's devices and user-designated Workspace directories unless the Licensee explicitly initiates an export or configures a Third-Party Service connection.
 
