@@ -105,7 +105,7 @@ function renderPage({ ok, email }) {
     <p>${message}</p>
     <div class="footer-links">
       <a href="https://integratermf.com/privacy.html">Privacy</a> &middot;
-      <a href="https://integratermf.com/do-not-sell.html">Do Not Sell or Share</a> &middot;
+      <a href="https://integratermf.com/legal.html">Legal</a> &middot;
       <a href="https://integratermf.com/security.html">Security</a>
     </div>
   </div>

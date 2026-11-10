@@ -208,7 +208,7 @@ export default async function handler(req, res) {
           <p style="font-size:10px;color:#4b5563;line-height:1.5;margin:10px 0 0;text-align:center;">
             ${BUSINESS_ADDRESS}<br/>
             <a href="https://integratermf.com/privacy.html" style="color:#6b7280;text-decoration:underline;">Privacy</a> &middot;
-            <a href="https://integratermf.com/do-not-sell.html" style="color:#6b7280;text-decoration:underline;">Do Not Sell or Share</a> &middot;
+            <a href="https://integratermf.com/legal.html" style="color:#6b7280;text-decoration:underline;">Legal</a> &middot;
             <a href="https://integratermf.com/security.html" style="color:#6b7280;text-decoration:underline;">Security</a>
           </p>
         </div>
@@ -250,7 +250,7 @@ export default async function handler(req, res) {
         ``,
         `${BUSINESS_ADDRESS.replace(/&middot;/g, '-')}`,
         `Privacy: https://integratermf.com/privacy.html`,
-        `Do Not Sell or Share: https://integratermf.com/do-not-sell.html`,
+        `Legal: https://integratermf.com/legal.html`,
       ].join('\n'),
     };
 
