@@ -244,8 +244,8 @@ body { padding-top: 57px; }
           <p>The applications do not send telemetry, usage analytics, crash reports or any other information about how they are used to CyberRMF LLC or anyone else.</p>
         </div>
         <div class="card">
-          <h3>No phone home</h3>
-          <p>No connections to CyberRMF LLC servers during normal operation. Third-party integrations are strictly opt-in and outbound only.</p>
+          <h3>Only licensing connects to us</h3>
+          <p>The only connections to CyberRMF LLC's services are to activate, check and deactivate a license, and they send only what licensing needs, such as the license key and a one-way hashed machine ID. Air-gapped installations never connect to CyberRMF LLC or its license service: they are activated and deactivated with codes copied by hand, and their license is checked entirely offline. Third-party integrations are strictly opt-in and outbound only.</p>
         </div>
         <div class="card">
           <h3>Local data only</h3>
@@ -253,7 +253,7 @@ body { padding-top: 57px; }
         </div>
         <div class="card">
           <h3>Credential handling</h3>
-          <p>Domain administrator credentials used by Admin Tools remain in memory only and are cleared after 10 minutes of inactivity. Never persisted, never transmitted.</p>
+          <p>Domain administrator credentials used by Admin Tools remain in memory only and are cleared after 10 minutes of inactivity. Never written to disk, and never sent to CyberRMF LLC or anyone else; they are used only to sign in to the hosts you scan.</p>
         </div>
         <div class="card">
           <h3>Integration credentials at rest</h3>
