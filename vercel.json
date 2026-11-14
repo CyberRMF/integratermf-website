@@ -5,6 +5,8 @@
   "redirects": [
     { "source": "/activate",   "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false },
     { "source": "/activate/",  "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false },
+    { "source": "/updates",    "destination": "/updates.html", "permanent": false },
+    { "source": "/updates/",   "destination": "/updates.html", "permanent": false },
     { "source": "/purchase.html", "destination": "/coming-soon.html", "permanent": false },
     { "source": "/request.html",  "destination": "/coming-soon.html", "permanent": false },
     { "source": "/trial.html",    "destination": "/coming-soon.html", "permanent": false },
