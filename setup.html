@@ -539,22 +539,20 @@ body { padding-top: 57px; }
         <h3>Air-Gapped Activation</h3>
         <p>For systems without internet access, CyberRMF supports offline activation using cryptographic license verification.</p>
         <ol>
-          <li>Open the app on the air-gapped machine. It will display your <strong>Hardware ID</strong>.</li>
-          <li>On an internet-connected machine, navigate to the activation portal and enter your license key and the Hardware ID.</li>
-          <li>Download the signed activation certificate file.</li>
-          <li>Transfer the certificate to the air-gapped machine via USB or other approved media.</li>
-          <li>Import the certificate into the app to complete activation.</li>
+          <li>Open the app on the air-gapped machine and choose <strong>Air-Gapped Activation</strong>. It shows an <strong>activation code</strong>. Write it down.</li>
+          <li>On any device with internet access, go to <code>integratermf.com/activate</code> and enter your license key, your email and the activation code. You receive a <strong>response code</strong>.</li>
+          <li>On the air-gapped machine, type the response code into the app to complete activation.</li>
         </ol>
-        <p>Offline validation uses ED25519 cryptographic signatures — the app verifies the certificate locally without any network call.</p>
+        <p>Both codes are typed by hand, so the air-gapped machine never needs a network connection or a USB drive. The response code only works on that machine with that license key. It carries an ED25519 signature, which the app verifies locally without any network call.</p>
       </section>
 
       <section id="deactivation-transfer">
         <h3>Deactivation and Transfer</h3>
         <p>To move your license to a new machine:</p>
         <ol>
-          <li>Open the app on the current machine and select <strong>Deactivate License</strong>.</li>
-          <li>The app generates a deactivation code and directs you to <code>integratermf.com/deactivate</code>.</li>
-          <li>Submit the deactivation code. The machine is unregistered from your license.</li>
+          <li>Open the app on the current machine, open License Management and select <strong>Deactivate License</strong>.</li>
+          <li><strong>Online:</strong> enter your email and click <strong>Deactivate This Machine</strong>. The machine is unregistered from your license straight away.</li>
+          <li><strong>Air-gapped:</strong> click <strong>Generate Deactivation Code</strong>, then enter that code at <code>integratermf.com/deactivate</code> (Air-Gapped Deactivation) from any device with internet access.</li>
           <li>Install on the new machine and activate with the same license key.</li>
         </ol>
         <p>Your license expiration date does <strong>not</strong> reset — the remaining time carries over to the new machine.</p>
@@ -566,14 +564,14 @@ body { padding-top: 57px; }
         <h3>Create a Workspace</h3>
         <p>A workspace is the central container for all your compliance data. To create one:</p>
         <ol>
-          <li>From the <strong>Programs</strong> screen, click <strong>New Workspace</strong>.</li>
+          <li>On the <strong>Welcome</strong> screen, click <strong>Create a Workspace</strong>. (Once you have a workspace, the <strong>Workspaces</strong> page has a <strong>Create Workspace</strong> button.)</li>
           <li>Enter a workspace name (e.g., "Program Alpha").</li>
           <li>Select a classification level.</li>
           <li>Choose a security baseline overlay (this drives the SCTM controls).</li>
           <li>Optionally set the ATO date and next assessment date.</li>
-          <li>Choose a parent folder on disk where the workspace data will live.</li>
+          <li>Choose the folder to keep the workspace in. A new folder with the workspace's name is made inside it.</li>
         </ol>
-        <p>The workspace is created immediately and appears as a tile on the Programs screen.</p>
+        <p>The workspace is created immediately and appears as a tile on the Workspaces page.</p>
       </section>
 
       <section id="folder-structure">
@@ -591,7 +589,7 @@ body { padding-top: 57px; }
 
       <section id="import-export-workspace">
         <h3>Import / Export Workspace</h3>
-        <p><strong>Export:</strong> From the Programs screen, select a workspace and click Export. A ZIP file is created containing:</p>
+        <p><strong>Export:</strong> On the Workspaces page, click the export button on a workspace's tile. A ZIP file is created containing:</p>
         <ul>
           <li>A <code>manifest.json</code> with all workspace metadata</li>
           <li>Inventory, POA&amp;M, SCTM overrides, CONMON schedules, appointments, integrations config</li>
@@ -608,7 +606,7 @@ body { padding-top: 57px; }
           <li>Create the workspace from Integrate on any machine.</li>
           <li>Place the workspace folder on a shared network drive (e.g., <code>\\server\share\Program Alpha</code>).</li>
           <li>In Integrate, set the workspace parent folder to the network path.</li>
-          <li>In Admin Tools, click <strong>Select Folder</strong> and point to the same workspace folder.</li>
+          <li>In Admin Tools, click <strong>Link to workspace</strong> and choose the same folder.</li>
         </ol>
         <p>Both apps read and write to the same <code>.cyberrmf</code> data directory. Admin Tools writes scan results; Integrate reads them on focus or reload.</p>
       </section>
@@ -621,7 +619,7 @@ body { padding-top: 57px; }
         <ul>
           <li>Name, Location, Room, Type, Make, Model, Serial Number, Asset Tag</li>
           <li>DNS Name, Domain, IP Address, Operating System</li>
-          <li>Cyber (Yes/No) — marks the asset for inclusion in Pulse and auditing</li>
+          <li>Audit Asset? (Yes/No) — marks the asset for inclusion in Pulse and auditing</li>
           <li>Virtual (Yes/No), Connection type, Router assignment</li>
           <li>EOL Date, STIG Score, Memory type (Volatile/Non-Volatile)</li>
         </ul>
@@ -630,7 +628,7 @@ body { padding-top: 57px; }
 
       <section id="inventory-to-pulse">
         <h3>Inventory to Pulse</h3>
-        <p>Any inventory item with <code>Cyber = Yes</code> automatically appears in <strong>Pulse</strong>. Pulse is the operational view that shows connectivity, reference compliance, and integration status for your cyber assets.</p>
+        <p>Any inventory item with <code>Audit Asset? = Yes</code> automatically appears in <strong>Pulse</strong>. Pulse is the operational view that shows connectivity, reference compliance, and integration status for your cyber assets.</p>
         <p>To populate Pulse, ensure your cyber assets have at minimum: DNS Name, IP Address, and OS fields filled in. These are used for scans, integrations, and STIG matching.</p>
       </section>
 
@@ -638,7 +636,7 @@ body { padding-top: 57px; }
         <h3>Hard Drive Tracking</h3>
         <p>For assets that contain hard drives:</p>
         <ol>
-          <li>Set <code>Hard Drives = Yes</code> on the inventory item.</li>
+          <li>Set <code>Contains a hard drive? = Yes</code> on the inventory item.</li>
           <li>A sub-panel appears to add individual drives with serial numbers and status (In Use / Out of Use).</li>
           <li>Drives can be assigned to <strong>safes</strong> in the Floor Plans (Places) view.</li>
           <li>The Hard Drives sub-tab shows all drives across all assets with their current assignments.</li>
@@ -655,7 +653,7 @@ body { padding-top: 57px; }
       <section id="pulse-overview">
         <h2>Pulse</h2>
         <h3>Pulse Overview</h3>
-        <p>Pulse is the real-time operational view of all devices marked as <code>Cyber = Yes</code> in your inventory. Each device row shows:</p>
+        <p>Pulse is the real-time operational view of all devices marked as <code>Audit Asset? = Yes</code> in your inventory. Each device row shows:</p>
         <ul>
           <li><strong>Connectivity:</strong> Ping status (reachable/unreachable)</li>
           <li><strong>Reference columns:</strong> DNS, SIEM, AV, Vuln, Logs — each shows Yes/No</li>
@@ -854,8 +852,8 @@ body { padding-top: 57px; }
       </section>
 
       <section id="admin-link-workspace">
-        <h3>Linking to Shared Workspace</h3>
-        <p>In Admin Tools, click <strong>Select Folder</strong> and navigate to the Integrate workspace folder on the shared drive. The app validates that the folder contains a <code>.cyberrmf</code> data directory. Once linked, all scan results are written to this shared location.</p>
+        <h3>Linking to Workspace</h3>
+        <p>In Admin Tools, click <strong>Link to workspace</strong> and choose the folder you picked when you created the workspace in Integrate (for example <code>Documents\CyberRMF Workspaces</code>), or the workspace's own folder inside it. It can be on this PC or on a network drive. If the folder holds more than one workspace, Admin Tools asks which one. Once linked, all scan results are written to the workspace folder.</p>
         <p>The workspace path appears in the Admin Tools header. Both apps must point to the same folder for data to flow correctly.</p>
       </section>
 
@@ -970,8 +968,9 @@ body { padding-top: 57px; }
         <p>Validates DNS consistency for all cyber inventory items. For each device, the app runs <code>nslookup</code> from the Admin Tools host and compares the resolved IP and hostname against inventory records. Results are classified as:</p>
         <ul>
           <li><strong>Match:</strong> DNS resolution matches inventory</li>
-          <li><strong>Mismatch:</strong> Resolved IP or name differs from inventory</li>
-          <li><strong>Unreachable:</strong> DNS query failed</li>
+          <li><strong>No match:</strong> the resolved IP address or name differs from inventory (shown as IP mismatch, Name mismatch, or No DNS name in Inventory when the device has no DNS name)</li>
+          <li><strong>Not in DNS:</strong> DNS has no record for the device</li>
+          <li><strong>Unreachable:</strong> the DNS query failed</li>
         </ul>
       </section>
 

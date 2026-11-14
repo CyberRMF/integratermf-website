@@ -558,7 +558,7 @@ body { padding-top: 57px; }
         <form class="license-form" id="activate-airgap-form" onsubmit="return handleActivateAirgap(event)">
           <div class="form-group">
             <label>License Key (received via email at purchase)</label>
-            <input type="text" id="act-ag-key" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+            <input type="text" id="act-ag-key" placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX-V3" required>
           </div>
           <div class="form-group">
             <label>Email (used at purchase)</label>
@@ -596,7 +596,7 @@ body { padding-top: 57px; }
 
         <div class="note-box" style="border-color:#eab308;background:rgba(234,179,8,0.08);color:#fde68a;">
           <strong>Heads up — this releases <em>every</em> machine currently activated on this license key.</strong>
-          If your key is on 3 machines, all 3 slots are freed and every one of those installs will require re-activation.
+          All of the key's machine slots are freed, and every one of those installs will require re-activation.
           <br><br>
           To release <strong>only one specific machine</strong>, open CyberRMF Integrate or Admin Tools on that machine and use
           <em>License Management &rarr; Deactivate License &rarr; Online &rarr; Deactivate This Machine</em>, or use the
@@ -624,7 +624,7 @@ body { padding-top: 57px; }
         <form class="license-form" id="deact-online-form" onsubmit="return handleDeactOnline(event)">
           <div class="form-group">
             <label>License Key</label>
-            <input type="text" id="deact-ol-key" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+            <input type="text" id="deact-ol-key" placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX-V3" required>
           </div>
           <div class="form-group">
             <label>Email (used at purchase)</label>
