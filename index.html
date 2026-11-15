@@ -917,11 +917,6 @@ body { padding-top: 57px; }
           <p class="hero-email-status" id="hero-email-status" role="status" aria-live="polite"></p>
           <p class="hero-airgap">Full air-gapped support</p>
         </div>
-        <div class="hero-right">
-          <button class="toggle-btn" id="hero-toggle-btn" onclick="cycleHeroToggle()">Next feature &rsaquo;</button>
-          <img class="hero-img" src="images/pulse.png" alt="CyberRMF Integrate — Pulse Dashboard">
-          <p class="hero-caption" id="hero-caption">Connect Integrate to SIEM, AV, and Vuln APIs to compare your health against your inventory</p>
-        </div>
       </div>
     </div>
   </section>
@@ -959,7 +954,6 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Create or Import an existing workspace to locally save all files related to the network.</p>
-          <img class="row-img" src="images/workspace.png" alt="Create a Workspace" loading="lazy">
         </div>
       </div>
     </div>
@@ -974,8 +968,6 @@ body { padding-top: 57px; }
           <p class="row-text">Upload .docx, .pdf, .xlsx, or .csv to view all your artifacts in our native viewer.</p>
           <p class="row-text">Easily reference all preloaded NIST Publications related to 800-53 alongside your RMF package.</p>
           <p class="row-text">No more hassle with reorganizing a shared drive or standardizing.</p>
-          <img class="row-img" src="images/filemanager.png" alt="File Manager" loading="lazy">
-          <img class="row-img" src="images/artifacts.png" alt="Artifacts and Publications" loading="lazy">
         </div>
       </div>
     </div>
@@ -988,16 +980,13 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Intuitive Inventory database. You may select which devices need to be audited for compliance. Once selected, that item will be copied to Pulse.</p>
-          <img class="row-img" src="images/inventory1.png" alt="Inventory Master Table" loading="lazy">
           <div class="row-sub-section">
             <p class="row-sub-title">Hard Drive Tracking</p>
             <p class="row-text">Track Hard Drive statuses &mdash; are they in storage or in the asset?</p>
-            <img class="row-img" src="images/inventory2.png" alt="Hard Drive Tracking" loading="lazy">
           </div>
           <div class="row-sub-section">
             <p class="row-sub-title">Places</p>
             <p class="row-text">Drag and drop assets into a floorplan. Select the asset name in Inventory to transport to that asset's location.</p>
-            <img class="row-img" src="images/inventory3.png" alt="Places — Floor Plan" loading="lazy">
           </div>
         </div>
       </div>
@@ -1012,7 +1001,6 @@ body { padding-top: 57px; }
         <div class="row-body-inner">
           <p class="row-text">Integrate your SIEM, AV, Vulnerability Manager, and STIG results to see live connections between your inventory.</p>
           <p class="row-text">See last reported, AV definition dates, Vulnerability scan results, and verify logs.</p>
-          <img class="row-img" src="images/pulse.png" alt="Pulse Dashboard" loading="lazy">
         </div>
       </div>
     </div>
@@ -1025,7 +1013,6 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Drag-and-drop STIGs for an easy experience. Shows previous and new % after completing checklist.</p>
-          <img class="row-img" src="images/stig.png" alt="STIG Validation" loading="lazy">
         </div>
       </div>
     </div>
@@ -1038,7 +1025,6 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Generate a ports, protocols, and services artifact with a click of a button. Shows exactly what port is open, the service using it, the company associated to it, and the risk level of that service.</p>
-          <img class="row-img" src="images/admin.png" alt="Admin Tools — PPS" loading="lazy">
           <ul class="row-bullets">
             <li>Check the devices in your inventory for unencrypted drives</li>
             <li>Active Directory lookup for an accurate user count</li>
@@ -1058,7 +1044,6 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Consolidate all system information in your workspace for an intuitive and accurate sense of your environment.</p>
-          <img class="row-img" src="images/hygiene.png" alt="800-53 Cyber Hygiene Dashboard" loading="lazy">
         </div>
       </div>
     </div>
@@ -1071,7 +1056,6 @@ body { padding-top: 57px; }
       <div class="row-body">
         <div class="row-body-inner">
           <p class="row-text">Export your workspace for a user to import.</p>
-          <img class="row-img" src="images/export.png" alt="Export Workspace" loading="lazy">
         </div>
       </div>
     </div>
@@ -1205,26 +1189,6 @@ function handleReceiveUpdates(e) {
     .catch(function() { show('Something went wrong. Please try again.', 'err'); })
     .then(function() { btn.disabled = false; });
   return false;
-}
-
-/* ── Hero toggle ── */
-var heroToggleIndex = 0;
-var heroToggleTexts = [
-  'Connect Integrate to SIEM, AV, and Vuln APIs to compare your health against your inventory',
-  'Drag-and-drop your assets into floorplans',
-  'Upload your BoE to intuitive file structures',
-  'Add Inventory with relevant 800-53 data',
-  'Track hard drive status',
-  'Complete STIG checklists and organize results in a table'
-];
-function cycleHeroToggle() {
-  heroToggleIndex = (heroToggleIndex + 1) % heroToggleTexts.length;
-  var caption = document.getElementById('hero-caption');
-  caption.style.opacity = '0';
-  setTimeout(function() {
-    caption.textContent = heroToggleTexts[heroToggleIndex];
-    caption.style.opacity = '1';
-  }, 200);
 }
 
 /* ── Product tab switching ── */
