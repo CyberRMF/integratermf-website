@@ -240,6 +240,24 @@ body { padding-top: 57px; }
 .hero-email-btn:hover {
   background: #1d4ed8;
 }
+.hero-email-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.hero-email-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.hero-email-status {
+  margin-top: 10px;
+  font-size: 12px;
+}
+.hero-email-status:empty { display: none; }
+.hero-email-status.ok { color: var(--accent); }
+.hero-email-status.err { color: #ef4444; }
 .hero-airgap {
   margin-top: 14px;
   font-size: 12px;
@@ -247,7 +265,7 @@ body { padding-top: 57px; }
   letter-spacing: 0.01em;
   transition: color 0.3s ease;
 }
-.hero-email-form:focus-within + .hero-airgap {
+.hero-email-form:focus-within ~ .hero-airgap {
   color: var(--accent);
 }
 .hero-img {
@@ -636,6 +654,7 @@ body { padding-top: 57px; }
 [data-theme="light"] .hero-email-form { background: #fff; border-color: rgba(59,130,246,0.15); box-shadow: 0 0 6px rgba(59,130,246,0.06); }
 [data-theme="light"] .hero-email-input { color: var(--text); }
 [data-theme="light"] .hero-email-input::placeholder { color: #9ca3af; }
+[data-theme="light"] .hero-email-status.err { color: #b91c1c; }
 [data-theme="light"] .hero-img { border-color: var(--border); box-shadow: 0 0 8px rgba(59,130,246,0.08), 0 8px 40px rgba(0,0,0,0.12); }
 [data-theme="light"] .expand-row { background: transparent; border-color: var(--border); }
 [data-theme="light"] .row-header:hover { background: #f0f4ff; }
@@ -890,10 +909,12 @@ body { padding-top: 57px; }
             <p>Manage/generate artifacts, track inventory, integrate SIEM, AV, and Vuln Scanner, and much, much more.</p>
             <p>Export everything to your organization and SCAs.</p>
           </div>
-          <form class="hero-email-form" onsubmit="return handleTryBeta(event)">
-            <input class="hero-email-input" type="email" placeholder="Your work email">
-            <button class="hero-email-btn" type="submit">Get started</button>
+          <form class="hero-email-form" onsubmit="return handleReceiveUpdates(event)">
+            <input class="hero-email-input" type="email" name="email" placeholder="Your work email" aria-label="Your work email" autocomplete="email" maxlength="254" required>
+            <input class="hero-email-hp" type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button class="hero-email-btn" type="submit">Receive Updates</button>
           </form>
+          <p class="hero-email-status" id="hero-email-status" role="status" aria-live="polite"></p>
           <p class="hero-airgap">Full air-gapped support</p>
         </div>
         <div class="hero-right">
@@ -1157,13 +1178,32 @@ function toggleRow(header) {
   }
 }
 
-/* ── Try beta form ── */
-function handleTryBeta(e) {
+/* ── Receive Updates form ── */
+function handleReceiveUpdates(e) {
   e.preventDefault();
-  var email = document.querySelector('.hero-email-input').value;
-  var url = 'purchase.html';
-  if (email) url += '?email=' + encodeURIComponent(email);
-  window.location.href = url;
+  var form = e.target;
+  var input = form.querySelector('.hero-email-input');
+  var btn = form.querySelector('.hero-email-btn');
+  var status = document.getElementById('hero-email-status');
+  var email = input.value.trim();
+  if (!email) { input.focus(); return false; }
+  btn.disabled = true;
+  status.className = 'hero-email-status';
+  status.textContent = '';
+  function show(text, kind) { status.textContent = text; status.classList.add(kind); }
+  fetch('/api/receive-updates', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, hp: form.querySelector('.hero-email-hp').value })
+  })
+    .then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(data) {
+        if (r.ok) { show('Thanks! We\u2019ll send updates to ' + email + '.', 'ok'); input.value = ''; }
+        else show(data.error || 'Something went wrong. Please try again.', 'err');
+      });
+    })
+    .catch(function() { show('Something went wrong. Please try again.', 'err'); })
+    .then(function() { btn.disabled = false; });
   return false;
 }
 
