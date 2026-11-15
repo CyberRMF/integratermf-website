@@ -7,6 +7,10 @@ const RESEND_API_KEY     = process.env.RESEND_API_KEY;
 const DOWNLOAD_INTEGRATE = process.env.GITHUB_DOWNLOAD_INTEGRATE;
 const DOWNLOAD_ADMIN     = process.env.GITHUB_DOWNLOAD_ADMIN;
 
+// Closed until the paid checkout replaces this free signup (LIC-9). The
+// endpoint is public, so hiding the form doesn't stop direct calls.
+const SIGNUPS_OPEN = false;
+
 // CAN-SPAM / CASL / Gmail-bulk-sender compliance footer.
 // BUSINESS_ADDRESS should be a real, deliverable physical postal address
 // (street, suite / PO Box, city, state, ZIP). Set it as a Vercel env var.
@@ -131,6 +135,9 @@ function keyTerms(product, attributes, separator) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!SIGNUPS_OPEN) {
+    return res.status(503).json({ error: 'Signups are closed for now. Please contact info@cyberrmf.com.' });
   }
 
   const missing = [];
