@@ -1,6 +1,6 @@
 CYBERRMF — PURCHASE TERMS AND CONDITIONS
 
-Last Updated: November 10, 2026
+Last Updated: November 14, 2026
 
 
 By submitting your order, you ("Customer," "you," or "your") agree to be bound by the following terms and conditions. Please read them carefully before completing your purchase.
@@ -18,7 +18,7 @@ All purchases are final and non-refundable. CyberRMF LLC does not offer refunds,
 
 3. LICENSE TERMS
 
-Customer acknowledges that each license key entitles the holder to install and use CyberRMF Integrate and CyberRMF Admin Tools (collectively, the "Software"). Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
+Customer acknowledges that each purchase includes two license keys, one for CyberRMF Integrate and one for CyberRMF Admin Tools (collectively, the "Software"), and that each license key works only with the application it was issued for. Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
 
 
 4. PRIVACY AND CUSTOMER DATA

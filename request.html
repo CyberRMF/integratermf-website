@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Beta Access — CyberRMF Integrate</title>
+  <title>Request Access — CyberRMF Integrate</title>
   <style>
 :root {
   --bg:     #1a1d23;
@@ -188,7 +188,7 @@ a { color: inherit; text-decoration: none; }
   </nav>
 
   <div class="page-wrap">
-    <h1>Request Beta Access</h1>
+    <h1>Request Access</h1>
     <p class="subtitle">Fill out the form below and we will reach out with next steps.</p>
 
     <form id="betaForm">
@@ -206,7 +206,7 @@ a { color: inherit; text-decoration: none; }
       </div>
       <div class="form-group">
         <label style="text-transform:none;line-height:1.6;font-size:12px;color:var(--muted);">Pulse requires input from a SIEM, Anti Virus, and/or Vulnerability Management application.</label>
-        <label>Do you currently have the ability to integrate these functions to test on the beta? <span class="req">*</span></label>
+        <label>Do you currently have the ability to integrate these functions? <span class="req">*</span></label>
         <select id="pulseCapability" required>
           <option value="" disabled selected>Select</option>
           <option value="Yes">Yes</option>
@@ -227,7 +227,7 @@ a { color: inherit; text-decoration: none; }
       </div>
       <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
       <a href="index.html" class="back-link">&larr; Back</a>
-      <div class="success-msg" id="successMsg">Thank you! Check your email for your license key and download links.</div>
+      <div class="success-msg" id="successMsg">Thank you! Check your email for your two license keys, one for each app, and the download links.</div>
       <div class="error-msg" id="errorMsg" style="display:none;padding:16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#ef4444;font-size:13px;margin-top:16px;text-align:center;"></div>
     </form>
   </div>
@@ -282,13 +282,7 @@ a { color: inherit; text-decoration: none; }
         successMsg.classList.add('show');
         form.reset();
       } else {
-        var detail = data.error || 'Something went wrong.';
-        if (data.debug) detail += ' | Debug: ' + JSON.stringify(data.debug);
-        if (data.resendError) detail += ' | Resend: ' + JSON.stringify(data.resendError);
-        if (data.resendStatus) detail += ' | Status: ' + data.resendStatus;
-        if (data.keyPrefix) detail += ' | Key: ' + data.keyPrefix;
-        if (data.steps) detail += ' | Steps: ' + data.steps.join(', ');
-        errorMsg.textContent = detail;
+        errorMsg.textContent = data.error || 'Something went wrong.';
         errorMsg.style.display = 'block';
       }
     } catch (err) {

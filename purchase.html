@@ -648,12 +648,12 @@ body { padding-top: 57px; }
         </div>
 
         <p class="notice-at-collection" style="font-size:10px;color:var(--dim);margin-top:14px;line-height:1.55;">
-          We collect this information only to evaluate your beta request, provision your license, and send security &amp; product updates about the application you requested. We do not sell or share your personal information. See our <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">Privacy Statement</a>.
+          We collect this information only to evaluate your request, provision your licenses, and send security &amp; product updates about the application you requested. We do not sell or share your personal information. See our <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">Privacy Statement</a>.
         </p>
 
         <div id="form-error" class="form-error"></div>
 
-        <button type="submit" id="submit-btn" class="purchase-btn" disabled>Request Beta Access</button>
+        <button type="submit" id="submit-btn" class="purchase-btn" disabled>Request Access</button>
       </form>
     </div>
 
@@ -698,8 +698,8 @@ body { padding-top: 57px; }
     </div>
 
     <div id="purchase-success" class="form-success" style="display:none;">
-      <h2>&#10003; Beta Access Granted</h2>
-      <p>Your license key and download links have been sent to your email. Check your inbox (and spam folder) to get started.</p>
+      <h2>&#10003; Access Granted</h2>
+      <p>We emailed you two license keys, one for CyberRMF Integrate and one for CyberRMF Admin Tools, with download links for both apps. Check your inbox (and spam folder) to get started.</p>
       <p style="margin-top:16px;font-size:11px;color:var(--dim);">If you don&rsquo;t receive it within 5 minutes, contact <a href="mailto:info@cyberrmf.com" style="color:var(--accent);">info@cyberrmf.com</a></p>
     </div>
   </div>
@@ -731,7 +731,7 @@ body { padding-top: 57px; }
       </div>
       <div class="tc-modal-body" id="tc-body" style="white-space:pre-wrap;">CYBERRMF — PURCHASE TERMS AND CONDITIONS
 
-Last Updated: November 10, 2026
+Last Updated: November 14, 2026
 
 
 By submitting your order, you ("Customer," "you," or "your") agree to be bound by the following terms and conditions. Please read them carefully before completing your purchase.
@@ -749,7 +749,7 @@ All purchases are final and non-refundable. CyberRMF LLC does not offer refunds,
 
 3. LICENSE TERMS
 
-Customer acknowledges that each license key entitles the holder to install and use CyberRMF Integrate and CyberRMF Admin Tools (collectively, the "Software"). Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
+Customer acknowledges that each purchase includes two license keys, one for CyberRMF Integrate and one for CyberRMF Admin Tools (collectively, the "Software"), and that each license key works only with the application it was issued for. Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
 
 
 4. PRIVACY AND CUSTOMER DATA
@@ -841,7 +841,7 @@ form.addEventListener('submit', async function(e) {
     errorEl.textContent = err.message || 'Something went wrong. Please try again.';
     errorEl.style.display = 'block';
     submitBtn.disabled = !tcCheckbox.checked;
-    submitBtn.textContent = 'Request Beta Access';
+    submitBtn.textContent = 'Request Access';
   }
 });
 

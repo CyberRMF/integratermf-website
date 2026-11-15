@@ -7,44 +7,61 @@
  * one machine identified by the supplied fingerprint.
  *
  * Flow:
- *   1. Validate the license key against Keygen (find license id).
+ *   1. Validate the license key against Keygen (find license id) and
+ *      check it is under the policy of the app that called (`product`).
  *   2. Verify the caller's email matches the license's stored
  *      metadata.email (403 otherwise).
  *   3. List all machines attached to the license and locate the one
  *      whose attributes.fingerprint === the supplied fingerprint.
  *   4. Delete just that one machine record.
- *   5. Best-effort receipt email.
+ *   5. Best-effort release notice to the address on the license.
  *
- * Body: { key, email, fingerprint }
+ * Body: { product, key, email, fingerprint }
  *
  * Required env vars:
  *   KEYGEN_ACCOUNT_ID
  *   KEYGEN_ADMIN_TOKEN     (needs machine.read + machine.delete)
- *   RESEND_API_KEY         (optional)
+ *   KEYGEN_POLICY_ID_INTEGRATE, KEYGEN_POLICY_ID_ADMIN_TOOLS
+ *   RESEND_API_KEY         (sends the release notice; without it the release still happens)
+ *
+ * The request and response shapes are used by the desktop app
+ * (shared/ipc/keygen.ts, license-deactivate-online). Don't change them.
+ * The app shows `error`, and treats a `machinesRemoved` field as success.
  */
+
+import { clientIp, takeToken, tooManyRequests } from './_rate-limit.js';
+import { missingPolicyEnv, productName, productProblem, wrongProductProblem } from './_products.js';
+import { sendReleaseNotice } from './_release-notice.js';
 
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const RESEND_API_KEY     = process.env.RESEND_API_KEY;
 
 function normalizeLicenseKey(s) {
   return String(s || '').trim().toUpperCase().replace(/\s+/g, '');
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Generous: many PCs behind one office NAT share an IP.
+  const wait = takeToken('deactivate-this-machine', clientIp(req), 60, 10 * 60 * 1000);
+  if (wait) return tooManyRequests(res, wait);
+
   const missing = [];
   if (!KEYGEN_ACCOUNT_ID)  missing.push('KEYGEN_ACCOUNT_ID');
   if (!KEYGEN_ADMIN_TOKEN) missing.push('KEYGEN_ADMIN_TOKEN');
+  missing.push(...missingPolicyEnv());
   if (missing.length) {
-    console.error('Missing env vars:', missing);
-    return res.status(500).json({ error: 'Server configuration error', debug: `Missing: ${missing.join(', ')}` });
+    console.error('deactivate-this-machine: missing env vars:', missing);
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  const { key, email, fingerprint } = req.body || {};
+  const { product, key, email, fingerprint } = req.body || {};
+  const badProduct = productProblem(product, { inApp: true });
+  if (badProduct) return res.status(badProduct.status).json({ error: badProduct.error });
   if (!key || !email || !fingerprint) {
     return res.status(400).json({ error: 'License key, email, and fingerprint are required.' });
   }
@@ -68,9 +85,14 @@ export default async function handler(req, res) {
     const validateJson = await validateRes.json();
     const licenseId    = validateJson?.data?.id;
     const licenseEmail = validateJson?.data?.attributes?.metadata?.email;
+    const licensePolicy = validateJson?.data?.relationships?.policy?.data?.id;
 
     if (!licenseId) {
       return res.status(404).json({ error: 'License key not found. Double-check for typos.' });
+    }
+    const wrongProduct = wrongProductProblem(product, licensePolicy, { inApp: true });
+    if (wrongProduct) {
+      return res.status(wrongProduct.status).json({ error: wrongProduct.error });
     }
     // Fail CLOSED if the license has no email on file — otherwise the
     // check below is skipped and any caller could deactivate a machine
@@ -81,7 +103,7 @@ export default async function handler(req, res) {
         error: 'This license has no email on file, so single-machine deactivation cannot verify ownership. Please contact support at info@cyberrmf.com.',
       });
     }
-    if (String(licenseEmail).toLowerCase() !== String(email).toLowerCase()) {
+    if (String(licenseEmail).trim().toLowerCase() !== String(email).trim().toLowerCase()) {
       return res.status(403).json({ error: 'Email does not match the address the license was issued to.' });
     }
 
@@ -135,48 +157,15 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: detail });
     }
 
-    /* ── 5. Best-effort receipt ── */
-    if (RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'CyberRMF <no-reply@integratermf.com>',
-            // Always send the receipt to the license's REGISTERED email
-            // from Keygen, never the input `email`. Even though the two
-            // must match to reach this point (verified above), routing to
-            // the registered address defensively prevents any future code
-            // change from turning this into an information-leak vector.
-            to: [licenseEmail],
-            subject: 'CyberRMF Machine Deactivated',
-            html: `
-              <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
-                <h2 style="color:#60a5fa;margin:0 0 8px;">Machine Deactivated</h2>
-                <p style="color:#9ca3af;font-size:13px;margin:0 0 20px;">
-                  One machine slot has been released. Your other machines (if any) remain activated.
-                </p>
-                <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:16px;">
-                  <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">License Key</p>
-                  <p style="font-size:14px;font-weight:700;color:#60a5fa;margin:0;word-break:break-all;">${normalizedKey}</p>
-                </div>
-                <p style="font-size:12px;color:#9ca3af;margin:0;">
-                  Machine name: <strong>${match.attributes?.name || 'unknown'}</strong>
-                </p>
-                <p style="font-size:12px;color:#6b7280;margin:20px 0 0;text-align:center;">
-                  Questions? <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
-                </p>
-              </div>
-            `,
-          }),
-        });
-      } catch (mailErr) {
-        console.error('Deactivation receipt failed (non-fatal):', mailErr);
-      }
-    }
+    /* ── 5. Best-effort release notice ── */
+    await sendReleaseNotice({
+      to: licenseEmail,
+      product,
+      key: normalizedKey,
+      released: 1,
+      machineName: match.attributes?.name || match.id,
+      how: `Deactivate This Machine, in ${productName(product)}`,
+    });
 
     return res.status(200).json({
       success: true,
@@ -187,6 +176,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('deactivate-this-machine error:', err);
-    return res.status(500).json({ error: 'Internal server error', debug: err?.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

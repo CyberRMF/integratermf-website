@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import { clientIp, takeToken, tooManyRequests } from './_rate-limit.js';
+import { missingPolicyEnv, productProblem, wrongProductProblem } from './_products.js';
+import { sendReleaseNotice } from './_release-notice.js';
 
 /*
  * Air-gapped selective deactivation.
@@ -15,24 +18,29 @@ import crypto from 'crypto';
  *          fingerprint, and the code is the first 20 base32 characters of
  *          SHA-256("cyberrmf-dc-online-v3|" + fingerprint).
  *
- *   2. The user comes to integratermf.com/deactivate (Air-Gapped tab) with:
- *        { key, email, deactivationCode }
+ *   2. The user comes to integratermf.com/deactivate (Air-Gapped tab),
+ *      chooses the app, and enters:
+ *        { product, key, email, deactivationCode }
  *
  *   3. This endpoint:
- *        a. Validates the license & verifies the email matches.
+ *        a. Validates the license, checks it is under the chosen app's
+ *           policy & verifies the email matches (a license with no email
+ *           on file is refused).
  *        b. Lists every machine currently attached to the license.
  *        c. Checks the code against each machine's stored fingerprint, both
  *           ways above, using a timing-safe compare.
  *        d. Deletes only the matching machine (surgical release of a
  *           single slot). If the user has more than one active machine and
  *           wants to release them all, they should use the Online tab.
+ *        e. Best-effort release notice to the address on the license.
  *
- *   No secret is needed here or in the app.
+ *   No secret is needed here or in the app. No emailed confirmation code
+ *   either: the deactivation code already proves the request comes from
+ *   that machine.
  */
 
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const RESEND_API_KEY     = process.env.RESEND_API_KEY;
 
 const BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
@@ -91,19 +99,26 @@ function codesMatch(userStripped, expectedStripped) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const wait = takeToken('deactivate-airgap', clientIp(req), 10, 10 * 60 * 1000);
+  if (wait) return tooManyRequests(res, wait);
+
   const missing = [];
   if (!KEYGEN_ACCOUNT_ID)  missing.push('KEYGEN_ACCOUNT_ID');
   if (!KEYGEN_ADMIN_TOKEN) missing.push('KEYGEN_ADMIN_TOKEN');
+  missing.push(...missingPolicyEnv());
   if (missing.length) {
-    console.error('Missing env vars:', missing);
-    return res.status(500).json({ error: 'Server configuration error', debug: `Missing: ${missing.join(', ')}` });
+    console.error('deactivate-airgap: missing env vars:', missing);
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  const { key, email, deactivationCode } = req.body || {};
+  const { product, key, email, deactivationCode } = req.body || {};
+  const badProduct = productProblem(product);
+  if (badProduct) return res.status(badProduct.status).json({ error: badProduct.error });
   if (!key || !email || !deactivationCode) {
     return res.status(400).json({ error: 'License key, email, and deactivation code are all required.' });
   }
@@ -131,11 +146,19 @@ export default async function handler(req, res) {
     const validateJson = await validateRes.json();
     const licenseId    = validateJson?.data?.id;
     const licenseEmail = validateJson?.data?.attributes?.metadata?.email;
+    const licensePolicy = validateJson?.data?.relationships?.policy?.data?.id;
 
     if (!licenseId) {
       return res.status(404).json({ error: 'License key not found. Double-check for typos.' });
     }
-    if (licenseEmail && String(licenseEmail).toLowerCase() !== String(email).toLowerCase()) {
+    const wrongProduct = wrongProductProblem(product, licensePolicy);
+    if (wrongProduct) {
+      return res.status(wrongProduct.status).json({ error: wrongProduct.error });
+    }
+    if (!licenseEmail) {
+      return res.status(409).json({ error: 'This license has no email address on file, so we cannot check that it is yours. Please contact info@cyberrmf.com.' });
+    }
+    if (String(licenseEmail).trim().toLowerCase() !== String(email).trim().toLowerCase()) {
       return res.status(403).json({ error: 'Email does not match the address the license was issued to.' });
     }
 
@@ -199,44 +222,15 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: detail });
     }
 
-    /* ── 5. Best-effort receipt ── */
-    if (RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'CyberRMF <no-reply@integratermf.com>',
-            to: [email],
-            subject: 'CyberRMF Air-Gapped Deactivation Confirmation',
-            html: `
-              <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
-                <h2 style="color:#a78bfa;margin:0 0 8px;">Machine Released</h2>
-                <p style="color:#9ca3af;font-size:13px;margin:0 0 20px;">
-                  The air-gapped machine that generated the deactivation code below has been released from your license. You can now activate a new machine using the same license key.
-                </p>
-                <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:16px;">
-                  <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">License Key</p>
-                  <p style="font-size:14px;font-weight:700;color:#a78bfa;margin:0;word-break:break-all;">${normalizedKey}</p>
-                </div>
-                <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:16px;">
-                  <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Machine Name</p>
-                  <p style="font-size:13px;color:#e5e7eb;margin:0;word-break:break-all;">${match.attributes?.name || match.id}</p>
-                </div>
-                <p style="font-size:12px;color:#6b7280;margin:20px 0 0;text-align:center;">
-                  Questions? <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
-                </p>
-              </div>
-            `,
-          }),
-        });
-      } catch (mailErr) {
-        console.error('Airgap deactivation receipt failed (non-fatal):', mailErr);
-      }
-    }
+    /* ── 5. Best-effort release notice ── */
+    await sendReleaseNotice({
+      to: licenseEmail,
+      product,
+      key: normalizedKey,
+      released: 1,
+      machineName: match.attributes?.name || match.id,
+      how: 'Air-Gapped Deactivation, on integratermf.com',
+    });
 
     return res.status(200).json({
       success: true,
@@ -247,6 +241,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('deactivate-airgap error:', err);
-    return res.status(500).json({ error: 'Internal server error', debug: err?.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

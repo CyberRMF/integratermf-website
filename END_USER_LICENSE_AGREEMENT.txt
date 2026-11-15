@@ -1,6 +1,6 @@
 CYBERRMF END USER LICENSE AGREEMENT
 
-Effective Date: November 8, 2026
+Effective Date: November 14, 2026
 
 IMPORTANT — PLEASE READ CAREFULLY. This End User License Agreement (this "Agreement") is a legally binding agreement between you, either an individual or the organization on whose behalf you are acting ("Licensee," "you," or "your"), and CyberRMF LLC ("CyberRMF LLC," "we," "us," or "our"). It governs your purchase, installation, activation, and use of CyberRMF Integrate and CyberRMF Admin Tools. This Agreement is the "Software License Agreement" referred to in the CyberRMF Purchase Terms and Conditions.
 
@@ -40,7 +40,7 @@ The following terms have the meanings set out below wherever they appear in this
 
 2.1 Grant. Subject to your continuous compliance with this Agreement and your payment of all applicable fees, CyberRMF LLC grants you a limited, non-exclusive, non-transferable, non-sublicensable, revocable license, during the Subscription Term, to install, activate, and use the Software in accordance with the Documentation for your own internal business purposes.
 
-2.2 Devices and Activations. Unless your order states otherwise, each License Key permits you to activate CyberRMF Integrate on one (1) Device and CyberRMF Admin Tools on one (1) Device. The two applications may be activated on the same Device or on separate Devices within the same network environment. Activation binds the License Key to a machine identifier derived from the Device's hardware.
+2.2 Devices and Activations. Unless your order states otherwise, you receive two License Keys: one for CyberRMF Integrate and one for CyberRMF Admin Tools. Each License Key works only in the application it was issued for and permits you to activate that application on one (1) Device. The two applications may be activated on the same Device or on separate Devices within the same network environment. Activation binds the License Key to a machine identifier derived from the Device's hardware.
 
 2.3 Pre-Release Versions. If the Software, or any feature of it, is identified as beta, preview, evaluation, trial, or otherwise pre-release (a "Pre-Release Version"), it is provided for evaluation only, may contain errors and defects, may be modified or discontinued at any time without notice, and may stop functioning at the end of the evaluation period. CyberRMF LLC has no obligation to provide support for, or to release a commercial version of, any Pre-Release Version.
 
@@ -98,7 +98,7 @@ Except as expressly permitted by this Agreement or by applicable law that cannot
 
 6.1 Activation Required. The Software requires a valid License Key and may be activated either online or by the air-gapped method described in the Terms and Conditions.
 
-6.2 Information Transmitted. Online activation and periodic re-validation transmit your License Key and a machine identifier derived from the Device's hardware to CyberRMF LLC's license-management service provider, and the first online activation of a Device also transmits the Device's computer name. Online deactivation from within the Software transmits your License Key, the machine identifier, and the email address you enter to CyberRMF LLC. Air-gapped activation transmits no data from the Device. You consent to these transmissions, which are described further in the Terms and Conditions.
+6.2 Information Transmitted. Online activation and periodic re-validation transmit your License Key, a machine identifier derived from the Device's hardware, and which application is making the request to CyberRMF LLC's license-management service provider, and the first online activation of a Device also transmits the Device's computer name. Online deactivation from within the Software transmits your License Key, the machine identifier, the email address you enter, and which application is being deactivated to CyberRMF LLC. Air-gapped activation transmits no data from the Device. You consent to these transmissions, which are described further in the Terms and Conditions.
 
 6.3 Loss of Function. The Software may stop functioning, without liability to CyberRMF LLC, if your License Key expires, is suspended or revoked, is deactivated, or cannot be re-validated within the offline grace period described in the Terms and Conditions.
 

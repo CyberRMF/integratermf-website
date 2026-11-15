@@ -512,7 +512,7 @@ body { padding-top: 57px; }
         <h2>Getting Started</h2>
         <h3>Download and Install</h3>
         <p>CyberRMF ships as two desktop applications: <strong>Integrate</strong> (the ISSO compliance workstation) and <strong>Admin Tools</strong> (the administrator scanning engine). Both are Electron-based and run on Windows 10+ and Linux.</p>
-        <p>After purchasing a license, you will receive an email with your <strong>license key</strong> and a download link for the installer. Run the installer on the target machine and follow the on-screen prompts.</p>
+        <p>After purchasing, you will receive one email with <strong>two license keys</strong>, one for Integrate and one for Admin Tools, and download links for both installers. Run the installer on the target machine and follow the on-screen prompts.</p>
         <p><strong>System requirements:</strong></p>
         <ul>
           <li>Windows 10 or later (64-bit), or a modern Linux distribution</li>
@@ -526,12 +526,12 @@ body { padding-top: 57px; }
         <h3>License Activation</h3>
         <p>When you launch CyberRMF for the first time, you will be prompted to activate your license.</p>
         <ol>
-          <li>Copy the license key from your purchase confirmation email.</li>
+          <li>Copy the license key for that app from your purchase email.</li>
           <li>Paste it into the activation field in the application.</li>
           <li>The app sends your license key and hardware fingerprint to the licensing server.</li>
           <li>Upon validation, the license is bound to your machine and stored securely.</li>
         </ol>
-        <p>One license covers <strong>both Integrate and Admin Tools</strong>. If running on two separate machines (split deployment), the license supports up to two machine activations.</p>
+        <p>Integrate and Admin Tools have <strong>separate licenses</strong>. Each key works only in its own app: the Integrate key in Integrate and the Admin Tools key in Admin Tools. Your purchase email shows how many machines each key covers.</p>
       </section>
 
       <section id="airgap-activation">
@@ -539,10 +539,12 @@ body { padding-top: 57px; }
         <p>For systems without internet access, CyberRMF supports offline activation using cryptographic license verification.</p>
         <ol>
           <li>Open the app on the air-gapped machine and choose <strong>Air-Gapped Activation</strong>. It shows an <strong>activation code</strong>. Write it down.</li>
-          <li>On any device with internet access, go to <code>integratermf.com/activate</code> and enter your license key, your email and the activation code. You receive a <strong>response code</strong>.</li>
+          <li>On any device with internet access, go to <code>integratermf.com/activate</code>, choose the app at the top of the page, and enter that app's license key, your email and the activation code.</li>
+          <li>Click <strong>Email My Response Code</strong>. We email a <strong>response code</strong> to the address on your license. It is not shown on the page.</li>
           <li>On the air-gapped machine, type the response code into the app to complete activation.</li>
         </ol>
-        <p>Both codes are typed by hand, so the air-gapped machine never needs a network connection or a USB drive. The response code only works on that machine with that license key. It carries an ED25519 signature, which the app verifies locally without any network call.</p>
+        <p>The activation code and the response code are typed by hand, so the air-gapped machine never needs a network connection or a USB drive. The response code only works in that app, on that machine, with that license key. It carries an ED25519 signature, which the app verifies locally without any network call.</p>
+        <p>The response code goes only to the email address on the license, so someone who only knows your license key and email cannot get one. The email says which activation code it was made for.</p>
       </section>
 
       <section id="deactivation-transfer">
@@ -551,9 +553,11 @@ body { padding-top: 57px; }
         <ol>
           <li>Open the app on the current machine, open License Management and select <strong>Deactivate License</strong>.</li>
           <li><strong>Online:</strong> enter your email and click <strong>Deactivate This Machine</strong>. The machine is unregistered from your license straight away.</li>
-          <li><strong>Air-gapped:</strong> click <strong>Generate Deactivation Code</strong>, then enter that code at <code>integratermf.com/deactivate</code> (Air-Gapped Deactivation) from any device with internet access.</li>
+          <li><strong>Air-gapped:</strong> click <strong>Generate Deactivation Code</strong>, then go to <code>integratermf.com/deactivate</code> from any device with internet access, choose the app at the top of the page, and enter that code under Air-Gapped Deactivation.</li>
           <li>Install on the new machine and activate with the same license key.</li>
         </ol>
+        <p>If you can no longer open the app on the old machine, go to <code>integratermf.com/deactivate</code>, choose the app, and enter its license key and your email under Online Deactivation. We email a confirmation code to the address on the license. When you enter it, <strong>every</strong> machine on that license is released.</p>
+        <p>Whenever a machine is released, by any of these routes, we email a notice to the address on the license. If you didn't release it, contact <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>.</p>
         <p>Your license expiration date does <strong>not</strong> reset — the remaining time carries over to the new machine.</p>
       </section>
 
@@ -618,7 +622,7 @@ body { padding-top: 57px; }
         <ul>
           <li>Name, Location, Room, Type, Make, Model, Serial Number, Asset Tag</li>
           <li>DNS Name, Domain, IP Address, Operating System</li>
-          <li>Audit Asset? (Yes/No) — marks the asset for inclusion in Pulse and auditing</li>
+          <li>Audit Asset? (Yes/No) — select Yes if the device requires auditing or connects to SIEM, A/V, or vulnerability scanners; it then appears in Pulse</li>
           <li>Virtual (Yes/No), Connection type, Router assignment</li>
           <li>EOL Date, STIG Score, Memory type (Volatile/Non-Volatile)</li>
         </ul>
@@ -645,7 +649,7 @@ body { padding-top: 57px; }
 
       <section id="inventory-csv">
         <h3>Import / Export CSV</h3>
-        <p>Inventory data can be exported as CSV from the toolbar. For Pulse, you can import a CSV that maps reference column values (DNS, SIEM, AV, Vuln, Logs) and STIG scores by IP address. Column file uploads can also provide DNS-to-IP mappings for batch updates.</p>
+        <p>Inventory data can be exported as CSV from the toolbar. Column file uploads can also provide DNS-to-IP mappings for batch updates.</p>
       </section>
 
       <!-- ════════════════ PULSE ════════════════ -->
@@ -655,7 +659,7 @@ body { padding-top: 57px; }
         <p>Pulse is the real-time operational view of all devices marked as <code>Audit Asset? = Yes</code> in your inventory. Each device row shows:</p>
         <ul>
           <li><strong>Connectivity:</strong> Ping status (reachable/unreachable)</li>
-          <li><strong>Reference columns:</strong> DNS, SIEM, AV, Vuln, Logs — each shows Yes/No</li>
+          <li><strong>Status columns:</strong> Ping, DNS, SIEM, AV, Vuln, Logs — each shows a green, yellow, or red dot. <strong>Ping All</strong> and <strong>DNS Check</strong> sit above their columns.</li>
           <li><strong>STIG Score:</strong> From quarterly STIG validation uploads</li>
           <li><strong>Integration columns:</strong> SIEM last seen, AV status, vulnerability counts (appear when integrations are configured)</li>
         </ul>
@@ -664,13 +668,14 @@ body { padding-top: 57px; }
 
       <section id="pulse-toggling">
         <h3>Toggling Mechanism</h3>
-        <p>Each reference column (DNS, SIEM, AV, Vuln, Logs) can be toggled per device:</p>
+        <p>The <strong>Toggle</strong> button shows words and numbers in the status columns instead of dots. Each click shows more, up to level 4. The next click brings the dots back.</p>
         <ul>
-          <li>Click a cell to manually toggle between Yes and No.</li>
-          <li>Import a Pulse CSV to bulk-set these values — the CSV is matched by IP address.</li>
-          <li>Integration auto-population (if configured) fills SIEM, AV, and Vuln columns based on live queries.</li>
+          <li><strong>Level 1:</strong> Ping result, DNS match or mismatch, SIEM last reported, AV last communicated, critical vulnerabilities, number of logs, adjusted STIG score</li>
+          <li><strong>Level 2:</strong> DNS resolved name, SIEM source count, AV DAT status and version, high vulnerabilities, log names</li>
+          <li><strong>Level 3:</strong> DNS resolved IP, SIEM log source names, medium vulnerabilities</li>
+          <li><strong>Level 4:</strong> DNS reverse (PTR) name, SIEM forwarder version, low vulnerabilities</li>
         </ul>
-        <p>Changes persist to the workspace data immediately.</p>
+        <p>Configured integrations fill the SIEM, AV, and Vuln columns from live queries.</p>
       </section>
 
       <section id="integrations">
@@ -698,6 +703,7 @@ body { padding-top: 57px; }
           <li>Create, rename, recolor, and reorder rows and tiles</li>
           <li>Upload and manage files within each tile (the File Manager)</li>
           <li>View files in the built-in viewer (DOCX, PDF, spreadsheet support)</li>
+          <li>Keep other file types in the file structure too. Integrate opens only .docx, .pdf, .xlsx, and .csv, so it asks before adding anything else.</li>
           <li>Switch between tile view and tree view</li>
           <li>Export selected tiles as a ZIP package</li>
         </ul>
@@ -746,10 +752,12 @@ body { padding-top: 57px; }
         <h3>CM Tracker (Change Management)</h3>
         <p>Track hardware and software changes through the approval lifecycle:</p>
         <ul>
-          <li>HW/SW type, country of origin, make/company, model/version</li>
-          <li>EOL/EOSL dates, CCB needed (Yes/No), approval status (Requested, Approved, Rejected, Expired)</li>
-          <li>Attached documentation, in-use tracking</li>
+          <li>HW/SW type, date added, country of origin, make/company, model/version</li>
+          <li>EOL/EOSL dates, CCB needed (Yes/No), requested date, and need-by date</li>
+          <li>Status (Approved, Pending, Rejected, Expired) and status date, which fills in with today's date when the status changes</li>
+          <li>Attached documentation, installed (Yes/No)</li>
         </ul>
+        <p>When you add hardware or software, Integrate asks whether to copy it to the HW or SW List. The HW List's <strong>Inventory Count</strong> shows how many inventory assets have that make and model. When you add an inventory asset, Make and Model suggest the HW List's entries and fill in their EOL/EOSL.</p>
       </section>
 
       <section id="publications">

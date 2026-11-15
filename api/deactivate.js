@@ -1,17 +1,34 @@
+import { clientIp, takeToken, tooManyRequests } from './_rate-limit.js';
+import {
+  CONFIRM_NOT_SET_UP, NO_EMAIL_ON_FILE, RESEND_AFTER_SECONDS, CONFIRM_TTL_MS,
+  confirmSecretProblem, newConfirmation, confirmationProblem, sendConfirmationEmail, maskEmail,
+} from './_confirm.js';
+import { missingPolicyEnv, productName, productProblem, wrongProductProblem } from './_products.js';
+import { sendReleaseNotice } from './_release-notice.js';
+
 /*
  * Online license deactivation.
  *
  * Flow:
- *   1. User visits integratermf.com/deactivate (Online tab), enters
- *      { licenseKey, email }, hits Deactivate.
+ *   1. User visits integratermf.com/deactivate (Online tab), chooses the
+ *      app, enters { product, key, email }, hits Send Code to My Email.
  *   2. This endpoint:
- *        a. Validates the license against Keygen (finds the license id).
+ *        a. Validates the license against Keygen (finds the license id)
+ *           and checks it is under the chosen app's policy.
  *        b. Verifies that the license's stored `metadata.email` matches
- *           the caller's email (403 otherwise) — so a random person who
- *           only knows a leaked key can't release someone else's slots.
- *        c. Lists every machine currently attached to the license.
- *        d. Deletes each machine record via the Keygen admin token.
- *        e. Best-effort Resend receipt.
+ *           the caller's email (403 otherwise). A license with no email
+ *           on file is refused (409): there is nowhere to send a code.
+ *        c. Emails a one-time confirmation code to that address and
+ *           returns { confirmationRequired, confirmToken, sentTo }.
+ *           See _confirm.js. Nothing is released yet.
+ *   3. The page posts { product, key, email, confirmToken, confirmCode }.
+ *      This endpoint checks the token and code, repeats a and b, then:
+ *        d. Lists every machine currently attached to the license.
+ *        e. Deletes each machine record via the Keygen admin token.
+ *        f. Best-effort release notice to the address on the license.
+ *
+ *   Knowing a leaked key + email is no longer enough: the code goes to
+ *   the license owner's mailbox.
  *
  *   Result: the license slot count is now 0/N and the customer can
  *   reactivate on a fresh machine.
@@ -19,36 +36,61 @@
  * Required env vars:
  *   KEYGEN_ACCOUNT_ID
  *   KEYGEN_ADMIN_TOKEN     (needs machine.read + machine.delete permissions)
- *   RESEND_API_KEY         (optional; skipped silently if unset)
+ *   KEYGEN_POLICY_ID_INTEGRATE, KEYGEN_POLICY_ID_ADMIN_TOOLS
+ *   RESEND_API_KEY         (sends the confirmation code and the release notice)
+ *   CONFIRM_CODE_SECRET    (signs the confirmation token, >= 32 chars)
  */
 
 const KEYGEN_ACCOUNT_ID  = process.env.KEYGEN_ACCOUNT_ID;
 const KEYGEN_ADMIN_TOKEN = process.env.KEYGEN_ADMIN_TOKEN;
-const RESEND_API_KEY     = process.env.RESEND_API_KEY;
+
+const ACTION = 'deactivate-all';
+const TEN_MINUTES = 10 * 60 * 1000;
 
 function normalizeLicenseKey(s) {
   return String(s || '').trim().toUpperCase().replace(/\s+/g, '');
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const wait = takeToken('deactivate', clientIp(req), 10, TEN_MINUTES);
+  if (wait) return tooManyRequests(res, wait);
+
   const missing = [];
   if (!KEYGEN_ACCOUNT_ID)  missing.push('KEYGEN_ACCOUNT_ID');
   if (!KEYGEN_ADMIN_TOKEN) missing.push('KEYGEN_ADMIN_TOKEN');
+  missing.push(...missingPolicyEnv());
   if (missing.length) {
-    console.error('Missing env vars:', missing);
-    return res.status(500).json({ error: 'Server configuration error', debug: `Missing: ${missing.join(', ')}` });
+    console.error('deactivate: missing env vars:', missing);
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+  const secretProblem = confirmSecretProblem();
+  if (secretProblem) {
+    console.error('deactivate: confirmation codes disabled:', secretProblem);
+    return res.status(500).json({ error: CONFIRM_NOT_SET_UP });
   }
 
-  const { key, email } = req.body || {};
+  const { product, key, email, confirmToken, confirmCode } = req.body || {};
+  const badProduct = productProblem(product);
+  if (badProduct) return res.status(badProduct.status).json({ error: badProduct.error });
   if (!key || !email) {
     return res.status(400).json({ error: 'License key and email are required.' });
   }
 
   const normalizedKey = normalizeLicenseKey(key);
+  const confirming = Boolean(confirmToken || confirmCode);
+
+  if (confirming) {
+    if (!confirmToken || !confirmCode) {
+      return res.status(400).json({ error: 'Enter the code from the email.' });
+    }
+    const problem = confirmationProblem({ action: ACTION, key: normalizedKey, email, token: confirmToken, code: confirmCode });
+    if (problem) return res.status(problem.status).json({ error: problem.error });
+  }
 
   try {
     /* ── 1. Find the license id by validating the key ── */
@@ -66,12 +108,48 @@ export default async function handler(req, res) {
     const validateJson = await validateRes.json();
     const licenseId    = validateJson?.data?.id;
     const licenseEmail = validateJson?.data?.attributes?.metadata?.email;
+    const licensePolicy = validateJson?.data?.relationships?.policy?.data?.id;
 
     if (!licenseId) {
       return res.status(404).json({ error: 'License key not found. Double-check for typos.' });
     }
-    if (licenseEmail && String(licenseEmail).toLowerCase() !== String(email).toLowerCase()) {
+    const wrongProduct = wrongProductProblem(product, licensePolicy);
+    if (wrongProduct) {
+      return res.status(wrongProduct.status).json({ error: wrongProduct.error });
+    }
+    if (!licenseEmail) {
+      return res.status(409).json({ error: NO_EMAIL_ON_FILE });
+    }
+    if (String(licenseEmail).trim().toLowerCase() !== String(email).trim().toLowerCase()) {
       return res.status(403).json({ error: 'Email does not match the address the license was issued to.' });
+    }
+
+    /* ── 1b. First request: email a confirmation code and stop here ── */
+    if (!confirming) {
+      const sendWait = takeToken('confirm-email', normalizedKey, 5, TEN_MINUTES);
+      if (sendWait) return tooManyRequests(res, sendWait);
+
+      const { code, token } = newConfirmation({ action: ACTION, key: normalizedKey, email });
+      const sendProblem = await sendConfirmationEmail({
+        to: licenseEmail,
+        code,
+        what: 'release all machines',
+        intro: `Someone asked on integratermf.com to release every machine on your ${productName(product)} license. To do it, enter this code on that page.`,
+        accent: '#60a5fa',
+        rows: [['License Key', normalizedKey]],
+      });
+      if (sendProblem) {
+        return res.status(sendProblem.status).json({ error: sendProblem.error });
+      }
+      const sentTo = maskEmail(licenseEmail);
+      return res.status(200).json({
+        confirmationRequired: true,
+        confirmToken: token,
+        sentTo,
+        expiresInSeconds: CONFIRM_TTL_MS / 1000,
+        resendAfterSeconds: RESEND_AFTER_SECONDS,
+        message: `We emailed a code to ${sentTo}. Enter it on this page to release all machines.`,
+      });
     }
 
     /* ── 2. List every machine currently attached to this license ── */
@@ -122,43 +200,16 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: `Failed to release ${failed.length} machine(s). Please try again or contact support.` });
     }
 
-    /* ── 4. Best-effort receipt ── */
-    if (RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'CyberRMF <no-reply@integratermf.com>',
-            to: [email],
-            subject: 'CyberRMF License Deactivation Confirmation',
-            html: `
-              <div style="font-family:'Consolas','Courier New',monospace;background:#1a1d23;color:#e4e6eb;padding:32px;border-radius:8px;max-width:600px;margin:0 auto;">
-                <h2 style="color:#60a5fa;margin:0 0 8px;">License Deactivated</h2>
-                <p style="color:#9ca3af;font-size:13px;margin:0 0 20px;">
-                  Your license slot has been released. You can now activate CyberRMF on a new machine using the same license key.
-                </p>
-                <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:16px;margin-bottom:16px;">
-                  <p style="font-size:11px;color:#9ca3af;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">License Key</p>
-                  <p style="font-size:14px;font-weight:700;color:#60a5fa;margin:0;word-break:break-all;">${normalizedKey}</p>
-                </div>
-                <p style="font-size:12px;color:#9ca3af;margin:0;">
-                  <strong>${removed}</strong> machine slot${removed === 1 ? '' : 's'} released.
-                </p>
-                <p style="font-size:12px;color:#6b7280;margin:20px 0 0;text-align:center;">
-                  Questions? <a href="mailto:info@cyberrmf.com" style="color:#60a5fa;">info@cyberrmf.com</a>
-                </p>
-              </div>
-            `,
-          }),
-        });
-      } catch (mailErr) {
-        console.error('Deactivation receipt failed (non-fatal):', mailErr);
-      }
-    }
+    /* ── 4. Best-effort release notice ── */
+    const onlyOne = removed === 1 ? results.find(r => r.ok) : null;
+    await sendReleaseNotice({
+      to: licenseEmail,
+      product,
+      key: normalizedKey,
+      released: removed,
+      machineName: onlyOne?.name,
+      how: 'Release all machines, on integratermf.com',
+    });
 
     return res.status(200).json({
       success: true,
@@ -168,6 +219,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('deactivate error:', err);
-    return res.status(500).json({ error: 'Internal server error', debug: err?.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
