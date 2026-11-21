@@ -1,4 +1,4 @@
-CYBERRMF INTEGRATE AND ADMIN TOOLS — TERMS AND CONDITIONS
+CYBERRMF INTEGRATE AND ADMIN TOOLS - TERMS AND CONDITIONS
 
 Last Updated: November 14, 2026
 
@@ -47,26 +47,26 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 4. SOFTWARE DESCRIPTION
 
 4.1 CyberRMF Integrate provides the following core capabilities:
-(a) Artifact management — interactive Security Control Traceability Matrix (SCTM), Plan of Action and Milestones (POA&M), Continuous Monitoring (CONMON), policy and procedure documents, and related compliance artifacts.
-(b) Inventory tracking — asset inventory with NIST SP 800-53 control requirement mapping, native drag-and-drop floorplan layouts, and end-of-life tracking.
-(c) Third-party integration — optional outbound connections to SIEM, antivirus / endpoint detection and response (EDR), and vulnerability management platforms configured by the Licensee.
-(d) STIG validation — import and parsing of XCCDF benchmark files for Security Technical Implementation Guide compliance checks.
-(e) Auditing — network diagnostics (ping, traceroute, DNS lookup) and cyber hygiene health dashboards.
-(f) Workspace export and import — full workspace packaging as ZIP archives for transfer between users, organizations, or Security Control Assessors (SCAs).
+(a) Artifact management - interactive Security Control Traceability Matrix (SCTM), Plan of Action and Milestones (POA&M), Continuous Monitoring (CONMON), policy and procedure documents, and related compliance artifacts.
+(b) Inventory tracking - asset inventory with NIST SP 800-53 control requirement mapping, native drag-and-drop floorplan layouts, and end-of-life tracking.
+(c) Third-party integration - optional outbound connections to SIEM, antivirus / endpoint detection and response (EDR), and vulnerability management platforms configured by the Licensee.
+(d) STIG validation - import and parsing of XCCDF benchmark files for Security Technical Implementation Guide compliance checks.
+(e) Auditing - network diagnostics (ping, traceroute, DNS lookup) and cyber hygiene health dashboards.
+(f) Workspace export and import - full workspace packaging as ZIP archives for transfer between users, organizations, or Security Control Assessors (SCAs).
 
 4.2 CyberRMF Admin Tools provides the following capabilities:
-(a) Ports, Protocols, and Services (PPS) generation — enumerates running processes and active network connections on target hosts.
-(b) Installed software inventory — collects software lists from Windows (WMI/CIM) and Linux (package manager queries) systems.
-(c) Encryption verification — checks BitLocker status (Windows) and block device encryption (Linux) on target hosts.
-(d) Log collection — enumerates and exports Windows event logs and Linux system logs from remote systems.
-(e) Active Directory user enumeration — queries AD for user accounts using PowerShell or LDAP.
-(f) DNS spot check — performs local nslookup operations to verify hostname and IP consistency against inventory records.
-(g) Domain join verification — queries Active Directory for domain-joined computer objects.
+(a) Ports, Protocols, and Services (PPS) generation - enumerates running processes and active network connections on target hosts.
+(b) Installed software inventory - collects software lists from Windows (WMI/CIM) and Linux (package manager queries) systems.
+(c) Encryption verification - checks BitLocker status (Windows) and block device encryption (Linux) on target hosts.
+(d) Log collection - enumerates and exports Windows event logs and Linux system logs from remote systems.
+(e) Active Directory user enumeration - queries AD for user accounts using PowerShell or LDAP.
+(f) DNS spot check - performs local nslookup operations to verify hostname and IP consistency against inventory records.
+(g) Domain join verification - queries Active Directory for domain-joined computer objects.
 
 4.3 Shared Workspace. Admin Tools writes scan results to the shared Workspace directory. Integrate reads these results to populate dashboards, reports, and artifact views. The two applications communicate exclusively through the shared file system and do not use inter-process communication, network sockets, or any external relay.
 
 
-5. ADMIN TOOLS — CREDENTIALS AND ELEVATED PRIVILEGES
+5. ADMIN TOOLS - CREDENTIALS AND ELEVATED PRIVILEGES
 
 5.1 Administrative Access Required. Admin Tools requires Windows domain administrator credentials or equivalent privileges to perform remote operations on target systems via Windows Management Instrumentation (WMI), Windows Remote Management (WinRM), and Secure Shell (SSH). The Licensee is solely responsible for ensuring that the credentials used have appropriate authorization for the systems being scanned.
 
@@ -98,7 +98,7 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 7.1 File System Permissions. The Software requires permission to create, read, write, and delete files and directories within (a) the Licensee's designated Workspace directories and (b) the application's local data directory (Electron userData). The Licensee is responsible for ensuring that appropriate file system permissions are granted.
 
-7.2 Local Data Storage. All application data — including inventory records, scan results, artifacts, configuration settings, and workspace metadata — is stored in the Licensee's Workspace directories and on the Licensee's device in JSON format and standard file structures.
+7.2 Local Data Storage. All application data - including inventory records, scan results, artifacts, configuration settings, and workspace metadata - is stored in the Licensee's Workspace directories and on the Licensee's device in JSON format and standard file structures.
 
 7.3 Credential and License Encryption. API tokens, passwords, and keys for Third-Party Services are encrypted with the operating system's secure storage facility (Electron safeStorage, which uses DPAPI on Windows) and are stored for each user on each device, separately from the Workspace. They are not written to the shared Workspace, and each person who uses a shared Workspace enters their own tokens. If the operating system's secure storage is unavailable, tokens are not saved. The local license file is encrypted with the same facility when it is available. Scan results and general Workspace data are stored as plaintext JSON.
 
@@ -128,7 +128,7 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 9.2 Limited Communication. Apart from the licensing requests described in Section 3, the Software does not communicate with CyberRMF LLC servers, cloud services, or any external party unless the Licensee configures a Third-Party Service or initiates an operation that requires a network connection. User-Controlled Data is never sent to CyberRMF LLC by the Software.
 
-9.3 Local Data Only. All user data — including inventory information, scan results, credentials (in memory only), configuration, and artifacts — remains on the Licensee's devices and user-designated Workspace directories unless the Licensee explicitly initiates an export or configures a Third-Party Service connection.
+9.3 Local Data Only. All user data - including inventory information, scan results, credentials (in memory only), configuration, and artifacts - remains on the Licensee's devices and user-designated Workspace directories unless the Licensee explicitly initiates an export or configures a Third-Party Service connection.
 
 9.4 Purchase Information. Information that you provide when purchasing a license is governed by the CyberRMF Purchase Terms and Conditions.
 
@@ -137,7 +137,7 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 10.1 The Software Reports What It Is Given. The Software pulls, organizes, and reports only the data that users enter into it or direct it to retrieve from the systems, files, and Third-Party Services that they select. It does not independently verify that data.
 
-10.2 User Responsibility for Accuracy. It is the user's responsibility to ensure that User-Controlled Data — including inventory records, control statuses, POA&M entries, scan targets, imported files, and integration settings — is accurate, complete, and current, and that every report and artifact produced from it accurately reflects the systems being reported on. Reports and artifacts must be reviewed and verified before they are relied on or submitted to any assessor, authorizing official, or other party. See Section 5 of the EULA.
+10.2 User Responsibility for Accuracy. It is the user's responsibility to ensure that User-Controlled Data - including inventory records, control statuses, POA&M entries, scan targets, imported files, and integration settings - is accurate, complete, and current, and that every report and artifact produced from it accurately reflects the systems being reported on. Reports and artifacts must be reviewed and verified before they are relied on or submitted to any assessor, authorizing official, or other party. See Section 5 of the EULA.
 
 
 11. EXPORT AND CLASSIFICATION

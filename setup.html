@@ -560,7 +560,7 @@ body { padding-top: 57px; }
         </ol>
         <p>If you can no longer open the app on the old machine, go to <code>integratermf.com/deactivate</code>, choose the app, and enter its license key and your email under Online Deactivation. We email a confirmation code to the address on the license. When you enter it, <strong>every</strong> machine on that license is released.</p>
         <p>Whenever a machine is released, by any of these routes, we email a notice to the address on the license. If you didn't release it, contact <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>.</p>
-        <p>Your license expiration date does <strong>not</strong> reset — the remaining time carries over to the new machine.</p>
+        <p>Your license expiration date does <strong>not</strong> reset - the remaining time carries over to the new machine.</p>
       </section>
 
       <!-- ════════════════ INTEGRATE SETUP ════════════════ -->
@@ -583,11 +583,11 @@ body { padding-top: 57px; }
         <h3>Workspace Folder Structure</h3>
         <p>When a workspace is created, the following directory structure is established on disk:</p>
         <ul>
-          <li><code>{ParentFolder}/{WorkspaceName}/</code> — Workspace root</li>
-          <li><code>CyberRMF/data/.cyberrmf/</code> — JSON data files (inventory, SCTM, POA&amp;M, admin results, etc.)</li>
-          <li><code>CyberRMF/{ArtifactRow}/{ArtifactTile}/</code> — File Manager artifacts</li>
-          <li><code>CyberRMF/STIG Validator/</code> — STIG checklist files</li>
-          <li><code>CyberRMF/Artifacts/CM/</code> — Change management attachments</li>
+          <li><code>{ParentFolder}/{WorkspaceName}/</code> - Workspace root</li>
+          <li><code>CyberRMF/data/.cyberrmf/</code> - JSON data files (inventory, SCTM, POA&amp;M, admin results, etc.)</li>
+          <li><code>CyberRMF/{ArtifactRow}/{ArtifactTile}/</code> - File Manager artifacts</li>
+          <li><code>CyberRMF/STIG Validator/</code> - STIG checklist files</li>
+          <li><code>CyberRMF/Artifacts/CM/</code> - Change management attachments</li>
         </ul>
         <p>A <code>.workspace.lock</code> file in the <code>.cyberrmf</code> folder prevents simultaneous edits. If the lock is stale (30 seconds), it is automatically released.</p>
       </section>
@@ -624,7 +624,7 @@ body { padding-top: 57px; }
         <ul>
           <li>Name, Location, Room, Type, Make, Model, Serial Number, Asset Tag</li>
           <li>DNS Name, Domain, IP Address, Operating System</li>
-          <li>Audit Asset? (Yes/No) — select Yes if the device requires auditing or connects to SIEM, A/V, or vulnerability scanners; it then appears in Pulse</li>
+          <li>Audit Asset? (Yes/No) - select Yes if the device requires auditing or connects to SIEM, A/V, or vulnerability scanners; it then appears in Pulse</li>
           <li>Virtual (Yes/No), Connection type, Router assignment</li>
           <li>EOL Date, STIG Score, Memory type (Volatile/Non-Volatile)</li>
         </ul>
@@ -661,7 +661,7 @@ body { padding-top: 57px; }
         <p>Pulse is the real-time operational view of all devices marked as <code>Audit Asset? = Yes</code> in your inventory. Each device row shows:</p>
         <ul>
           <li><strong>Connectivity:</strong> Ping status (reachable/unreachable)</li>
-          <li><strong>Status columns:</strong> Ping, DNS, SIEM, AV, Vuln, Logs — each shows a green, yellow, or red dot. <strong>Ping All</strong> and <strong>DNS Check</strong> sit above their columns.</li>
+          <li><strong>Status columns:</strong> Ping, DNS, SIEM, AV, Vuln, Logs - each shows a green, yellow, or red dot. <strong>Ping All</strong> and <strong>DNS Check</strong> sit above their columns.</li>
           <li><strong>STIG Score:</strong> From quarterly STIG validation uploads</li>
           <li><strong>Integration columns:</strong> SIEM last seen, AV status, vulnerability counts (appear when integrations are configured)</li>
         </ul>
@@ -715,11 +715,11 @@ body { padding-top: 57px; }
         <h3>Document Editors</h3>
         <p>CyberRMF includes built-in editors for standard RMF artifacts:</p>
         <ul>
-          <li><strong>ATO (Authority to Operate)</strong> — Authorization document editor</li>
-          <li><strong>SAR (Security Assessment Report)</strong> — Assessment findings editor</li>
-          <li><strong>SSP (System Security Plan)</strong> — Plan documentation editor</li>
-          <li><strong>RAR (Risk Assessment Report)</strong> — Risk analysis editor</li>
-          <li><strong>PPS (Ports, Protocols, and Services)</strong> — PPS documentation tied to Admin Tools scan data</li>
+          <li><strong>ATO (Authority to Operate)</strong> - Authorization document editor</li>
+          <li><strong>SAR (Security Assessment Report)</strong> - Assessment findings editor</li>
+          <li><strong>SSP (System Security Plan)</strong> - Plan documentation editor</li>
+          <li><strong>RAR (Risk Assessment Report)</strong> - Risk analysis editor</li>
+          <li><strong>PPS (Ports, Protocols, and Services)</strong> - PPS documentation tied to Admin Tools scan data</li>
         </ul>
         <p>Changes are saved to the workspace and can be exported as DOCX.</p>
       </section>
@@ -808,7 +808,7 @@ body { padding-top: 57px; }
 
       <section id="cyber-hygiene-export">
         <h3>HTML Export</h3>
-        <p>Export the Cyber Hygiene Dashboard as a standalone HTML file. This creates a self-contained report that can be opened in any browser — useful for sharing with leadership or including in authorization packages.</p>
+        <p>Export the Cyber Hygiene Dashboard as a standalone HTML file. This creates a self-contained report that can be opened in any browser - useful for sharing with leadership or including in authorization packages.</p>
       </section>
 
       <!-- ════════════════ FLOOR PLANS ════════════════ -->
@@ -834,7 +834,7 @@ body { padding-top: 57px; }
         <h2>Admin Results</h2>
         <h3>Overview</h3>
         <p>Admin Results is a read-only section within <strong>Integrate</strong> that displays data generated by <strong>Admin Tools</strong>. When Admin Tools runs scans on the shared workspace, the results are written to the <code>.cyberrmf</code> data directory. Integrate reads these results and presents them under the Admin Results tab.</p>
-        <p>This gives the ISSO full visibility into scan outcomes — PPS data, encryption status, installed software, AD users, and more — without needing access to the Admin Tools application itself.</p>
+        <p>This gives the ISSO full visibility into scan outcomes - PPS data, encryption status, installed software, AD users, and more - without needing access to the Admin Tools application itself.</p>
       </section>
 
       <section id="admin-results-logs">
@@ -857,7 +857,7 @@ body { padding-top: 57px; }
         <h2>Admin Tools Setup</h2>
         <h3>Overview</h3>
         <p>Admin Tools is the scanning and data collection engine. It runs on an administrator's workstation and writes scan results to the shared workspace. Integrate reads these results for display in Admin Results, Pulse, and Cyber Hygiene.</p>
-        <p>This separation enforces <strong>separation of duties</strong> — the administrator performing scans operates on a different machine than the ISSO reviewing compliance data, aligned with NIST 800-53 AC-5.</p>
+        <p>This separation enforces <strong>separation of duties</strong> - the administrator performing scans operates on a different machine than the ISSO reviewing compliance data, aligned with NIST 800-53 AC-5.</p>
       </section>
 
       <section id="admin-link-workspace">
@@ -888,7 +888,7 @@ body { padding-top: 57px; }
         <h3>Domain-Joined Requirements</h3>
         <p>Admin Tools detects whether the host machine is domain-joined and whether the current user has administrator privileges:</p>
         <ul>
-          <li><strong>Domain-joined + admin:</strong> "Using domain token" — no password is required. Windows remoting uses the current Kerberos ticket for authentication.</li>
+          <li><strong>Domain-joined + admin:</strong> "Using domain token" - no password is required. Windows remoting uses the current Kerberos ticket for authentication.</li>
           <li><strong>Not domain-joined or not admin:</strong> The app prompts for explicit Windows credentials (domain\username + password). For Linux targets, SSH credentials are requested separately.</li>
         </ul>
         <p>AD Users and Domain Join scans require that the Admin Tools host can reach Active Directory domain controllers. The RSAT tools or <code>Get-ADComputer</code> cmdlet should be available for full domain join verification.</p>
@@ -911,7 +911,7 @@ body { padding-top: 57px; }
         <ul>
           <li>Never written to disk</li>
           <li>Cleared after each scan batch completes</li>
-          <li>Subject to a <strong>10-minute idle timeout</strong> — if no scan runs within 10 minutes, credentials are automatically wiped</li>
+          <li>Subject to a <strong>10-minute idle timeout</strong> - if no scan runs within 10 minutes, credentials are automatically wiped</li>
           <li>Passed to scan processes via environment variables, which are cleared immediately after use</li>
         </ul>
         <p>This design ensures credentials have minimal exposure, even in memory.</p>
@@ -1017,7 +1017,7 @@ body { padding-top: 57px; }
     <div class="footer-inner">
       <div class="footer-left">
         <span class="footer-brand">CyberRMF Integrate</span>
-        <span class="footer-tagline">&mdash; All-in-one Cyber compliance workflow.</span>
+        <span class="footer-tagline">- All-in-one Cyber compliance workflow.</span>
       </div>
       <div class="footer-center">
         <a href="privacy.html">Privacy</a>

@@ -1,4 +1,4 @@
-CYBERRMF — PURCHASE TERMS AND CONDITIONS
+CYBERRMF - PURCHASE TERMS AND CONDITIONS
 
 Last Updated: November 14, 2026
 
@@ -27,7 +27,7 @@ Customer acknowledges that each purchase includes two license keys, one for Cybe
 
 4.2 Disclosure Required by Law. CyberRMF LLC will not sell, rent, or otherwise disclose Customer personal information to third parties, except as required to comply with applicable federal, state, or local laws, regulations, or legal process, including but not limited to subpoenas, court orders, or requests from governmental or regulatory authorities with competent jurisdiction. Where permitted by law, CyberRMF LLC will make reasonable efforts to notify the Customer prior to such disclosure.
 
-4.3 Internal Business Use. Customer acknowledges and agrees that CyberRMF LLC may use non-personally identifiable and aggregated information that Customer provides when ordering — including but not limited to organization name and industry sector — for CyberRMF LLC's own internal business purposes, such as marketing materials, case studies, promotional content, and service improvement initiatives. CyberRMF LLC will not use individually identifiable Customer information in any public-facing marketing material without prior written consent from the Customer.
+4.3 Internal Business Use. Customer acknowledges and agrees that CyberRMF LLC may use non-personally identifiable and aggregated information that Customer provides when ordering - including but not limited to organization name and industry sector - for CyberRMF LLC's own internal business purposes, such as marketing materials, case studies, promotional content, and service improvement initiatives. CyberRMF LLC will not use individually identifiable Customer information in any public-facing marketing material without prior written consent from the Customer.
 
 4.4 No Usage Data. The Software does not send telemetry, usage analytics, crash reports or any other information about how it is used to CyberRMF LLC or anyone else. The only information the Software sends to CyberRMF LLC or its license service is what is needed to activate, validate and deactivate a license, as described in the CyberRMF Terms and Conditions. Its integrations connect only to the services you set up.
 

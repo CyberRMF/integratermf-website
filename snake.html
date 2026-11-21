@@ -247,7 +247,7 @@
     </div>
     <div class="hud">
       <span class="score">Score: <strong id="snake-score">0</strong></span>
-      <span class="score"><span id="hud-label">Control</span>: <strong id="snake-ctrl">—</strong></span>
+      <span class="score"><span id="hud-label">Control</span>: <strong id="snake-ctrl">-</strong></span>
       <button class="btn" id="snake-start">Start</button>
     </div>
 
@@ -439,7 +439,7 @@ window.addEventListener('DOMContentLoaded', function () {
     dirX = 1; dirY = 0; ndX = 1; ndY = 0;
     score = 0; animT = 0; justAte = false;
     if (scoreEl) scoreEl.textContent = '0';
-    if (ctrlEl) ctrlEl.textContent = '\u2014';
+    if (ctrlEl) ctrlEl.textContent = '-';
     if (hudLabelEl) hudLabelEl.textContent = gameMode === 'controls' ? 'Control' : 'Port';
     if (flashIdEl) flashIdEl.classList.remove('show');
     if (flashNameEl) flashNameEl.classList.remove('show');

@@ -11,6 +11,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "snake.integratermf.com" }], "destination": "/snake.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ],
   "redirects": [
