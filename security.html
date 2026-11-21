@@ -200,7 +200,7 @@ body { padding-top: 57px; }
         <a href="index.html">Integrate</a>
         <a href="about.html">About</a>
         <a href="setup.html">Setup</a>
-        <a href="deactivate.html">License Management</a>
+        <a href="license">License Management</a>
         <a href="updates.html">Updates</a>
       </div>
       <div class="nav-right">
@@ -221,7 +221,7 @@ body { padding-top: 57px; }
       <a href="index.html">Integrate</a>
       <a href="about.html">About</a>
       <a href="setup.html">Setup</a>
-      <a href="deactivate.html">License Management</a>
+      <a href="license">License Management</a>
       <a href="updates.html">Updates</a>
       <a href="https://snake.integratermf.com">Cyber Snake</a>
       <a href="purchase.html">Get Integrate</a>
@@ -268,23 +268,23 @@ body { padding-top: 57px; }
           <p>Admin Tools performs only enumeration and read operations against inventory-listed hosts. It does not perform subnet sweeps or discovery beyond the assets you explicitly list.</p>
         </div>
       </div>
-      <p>The full behavioral specification - including handling of TLS certificate verification, SSH host keys, and WinRM configuration changes - is documented in our <a href="TERMS_AND_CONDITIONS.txt">Terms and Conditions</a>, Sections 5&ndash;8.</p>
+      <p>The full behavioral specification - including handling of TLS certificate verification, SSH host keys, and WinRM configuration changes - is documented in our <a href="terms.html">Terms and Conditions</a>, Sections 5&ndash;8.</p>
 
       <h2>2. Website and licensing infrastructure</h2>
       <table>
         <thead>
-          <tr><th>Layer</th><th>Provider / Approach</th><th>Region</th></tr>
+          <tr><th>Layer</th><th>Approach</th><th>Region</th></tr>
         </thead>
         <tbody>
-          <tr><td>Website hosting</td><td>Vercel (edge network + serverless functions)</td><td>United States</td></tr>
-          <tr><td>TLS</td><td>Automatic HTTPS with modern cipher suites (managed by Vercel)</td><td>-</td></tr>
-          <tr><td>License issuance and lifecycle</td><td>Keygen</td><td>United States</td></tr>
-          <tr><td>Transactional email</td><td>Resend</td><td>United States</td></tr>
-          <tr><td>Application installer distribution</td><td>GitHub Releases</td><td>United States (Microsoft global CDN)</td></tr>
-          <tr><td>Source control</td><td>GitHub (private organization repositories)</td><td>United States</td></tr>
+          <tr><td>Website hosting</td><td>Managed edge network and serverless functions</td><td>United States</td></tr>
+          <tr><td>TLS</td><td>Automatic HTTPS with modern cipher suites, managed by the hosting provider</td><td>-</td></tr>
+          <tr><td>License issuance and lifecycle</td><td>Dedicated license-management service</td><td>United States</td></tr>
+          <tr><td>Transactional email</td><td>Dedicated email delivery service</td><td>United States</td></tr>
+          <tr><td>Application installer distribution</td><td>Managed release hosting on a global content delivery network</td><td>United States</td></tr>
+          <tr><td>Source control</td><td>Private repositories, with access limited to authorized personnel</td><td>United States</td></tr>
         </tbody>
       </table>
-      <p>All production secrets (API tokens for Keygen, Resend, and download links) are managed as environment variables in the hosting provider and are never committed to source control. Access to production is limited to authorized personnel protected by multi-factor authentication.</p>
+      <p>All production secrets (API tokens for the license and email services, and download links) are managed as environment variables in the hosting provider and are never committed to source control. Access to production is limited to authorized personnel protected by multi-factor authentication.</p>
 
       <h2>3. Compliance posture</h2>
       <h3>What CyberRMF is</h3>
@@ -345,5 +345,7 @@ body { padding-top: 57px; }
   </footer>
 
   <script src="shared-themes.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>

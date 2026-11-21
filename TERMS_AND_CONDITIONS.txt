@@ -1,6 +1,6 @@
 CYBERRMF INTEGRATE AND ADMIN TOOLS - TERMS AND CONDITIONS
 
-Last Updated: November 20, 2026
+Last Updated: November 21, 2026
 
 These Terms and Conditions describe how CyberRMF Integrate and CyberRMF Admin Tools operate, the data they handle, and the responsibilities that come with using them. They form part of, and are incorporated into, the CyberRMF End User License Agreement (the "EULA"). Capitalized terms that are not defined here have the meanings given in the EULA. If these Terms and Conditions conflict with the EULA, the EULA controls.
 
@@ -33,11 +33,11 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 
 3.2 Device Binding. Each License Key is issued for one application, Integrate or Admin Tools, and activates only that application. Each application is bound to a machine identifier derived from the hardware of the device on which it is activated. Integrate and Admin Tools may be activated on the same device or on separate devices within the same network environment. You may not activate a License Key on more devices than your license permits.
 
-3.3 Online Activation and Re-Validation. When you activate online, the Software sends your License Key, the device's machine identifier, and which application is being activated to CyberRMF LLC's license-management service provider (currently Keygen). The machine identifier is a one-way SHA-256 hash of hardware identifiers, not the identifiers themselves. The first time a device is registered, its computer name is also sent so that the device can be recognized in your license records. While an online license is active, the Software checks it when the application starts, when the device wakes from sleep, and every five (5) minutes while the application is running. Each check re-validates the License Key and machine identifier with the license service if more than thirty (30) minutes have passed since the last successful validation, so a running application contacts the license service about every thirty (30) minutes. If the license service cannot be reached, the Software continues to work for up to fourteen (14) days after the last successful validation.
+3.3 Online Activation and Re-Validation. When you activate online, the Software sends your License Key, the device's machine identifier, and which application is being activated to CyberRMF LLC's license-management service provider. The machine identifier is a one-way SHA-256 hash of hardware identifiers, not the identifiers themselves. The first time a device is registered, its computer name is also sent so that the device can be recognized in your license records. While an online license is active, the Software checks it when the application starts, when the device wakes from sleep, and every five (5) minutes while the application is running. Each check re-validates the License Key and machine identifier with the license service if more than thirty (30) minutes have passed since the last successful validation, so a running application contacts the license service about every thirty (30) minutes. If the license service cannot be reached, the Software continues to work for up to fourteen (14) days after the last successful validation.
 
-3.4 Air-Gapped Activation. On a device without internet access, the Software generates an activation code. You redeem that code, together with the application's License Key and the email address the license was issued to, at integratermf.com/activate from any internet-connected device. The device is registered to the license at that time, and the response code is sent only to the email address on file for the license; you then enter it into the Software. A response code works only for the application, License Key, and device it was issued for. No data is transmitted from the air-gapped device itself. An air-gapped license expires on the date encoded in its response code.
+3.4 Air-Gapped Activation. On a device without internet access, the Software generates an activation code. You redeem that code, together with the application's License Key and the email address the license was issued to, at integratermf.com/license from any internet-connected device. The device is registered to the license at that time, and the response code is sent only to the email address on file for the license; you then enter it into the Software. A response code works only for the application, License Key, and device it was issued for. No data is transmitted from the air-gapped device itself. An air-gapped license expires on the date encoded in its response code.
 
-3.5 Deactivation and Transfer. To move a license to a different device, deactivate it from within the Software (License Management, Deactivate License) or at integratermf.com/deactivate. Online deactivation from within the Software sends your License Key, the machine identifier, the email address you enter, and which application is being deactivated to integratermf.com. When a device is released from a license, a notice is sent to the email address on file for the license. CyberRMF LLC reserves the right to limit the number of transfers within a Subscription Term.
+3.5 Deactivation and Transfer. To move a license to a different device, deactivate it from within the Software (License Management, Deactivate License) or at integratermf.com/license. Online deactivation from within the Software sends your License Key, the machine identifier, the email address you enter, and which application is being deactivated to integratermf.com. When a device is released from a license, a notice is sent to the email address on file for the license. CyberRMF LLC reserves the right to limit the number of transfers within a Subscription Term.
 
 3.6 License Restrictions. The license grant, the restrictions on use, and the lawful-use requirements are set out in Sections 2 through 4 of the EULA.
 
@@ -171,7 +171,25 @@ By purchasing, installing, activating, or otherwise using CyberRMF Integrate and
 13.2 Changes to These Terms. CyberRMF LLC may modify these Terms and Conditions or the EULA from time to time. When a change is material, the Software will present the revised documents and ask you to accept them before you continue to use it. Revised terms may also be made available at integratermf.com.
 
 
-14. CONTACT INFORMATION
+14. PROPRIETARY RIGHTS, REVERSE ENGINEERING, AND COMPETING PRODUCTS
+
+14.1 Proprietary Software. The Software, including its source and object code, architecture, data structures, algorithms, workflows, screens, and documentation, is the confidential and proprietary property of CyberRMF LLC and is protected by copyright, trade secret, and other intellectual property laws. The Licensee receives only the limited license described in the EULA.
+
+14.2 No Reverse Engineering or Reuse of Code. Unless CyberRMF LLC has approved it in advance and in writing, the Licensee shall not, and shall not permit or help anyone else to:
+(a) reverse engineer, decompile, disassemble, decrypt, unpack, or otherwise attempt to derive the source code, algorithms, or internal structure of the Software, including by extracting or examining the files inside its installation package or application archive;
+(b) copy, reuse, adapt, translate, or incorporate any part of the Software's code, or any work derived from it, into any other software, product, or service, in any capacity, whether commercial or non-commercial, internal or public; or
+(c) publish, disclose, or distribute any part of the Software's code, or any information obtained through an activity described in (a).
+
+14.3 No Reproduction of Pulse or Other Core Functionality. The Licensee shall not use the Software, or any information obtained from using, testing, observing, or examining it, to design, develop, or train, or to help anyone else design, develop, or train, any software, product, or service that reproduces or substantially replicates the core functionality of the Software. This includes Pulse, the Software's live view that brings together each inventory device's reachability, DNS, antivirus, SIEM, vulnerability, log backup, and STIG information, as well as the Software's other features, workflows, and screens. This section does not prevent the Licensee from using or acquiring products that others develop independently, without use of the Software or information obtained from it.
+
+14.4 Limits. Sections 14.2 and 14.3 apply to the fullest extent permitted by applicable law. They do not restrict an activity that applicable law expressly permits despite a contractual restriction, in which case the activity must be limited to what that law permits, and they do not limit any right granted by the license of an open-source or other third-party component included in the Software, as described in Section 7.2 of the EULA.
+
+14.5 Breach. A breach of this Section 14 is a material breach of the Agreement. In addition to its other rights and remedies, CyberRMF LLC may terminate the Licensee's licenses under the EULA and may seek injunctive or other equitable relief to stop or prevent the breach.
+
+14.6 Survival. This Section 14 continues to apply after the Agreement ends.
+
+
+15. CONTACT INFORMATION
 
 For questions regarding the Agreement, licensing, or the Software, contact CyberRMF LLC at info@cyberrmf.com or through integratermf.com.
 

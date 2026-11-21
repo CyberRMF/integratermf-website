@@ -14,7 +14,7 @@ const TEN_MINUTES = 10 * 60 * 1000;
  * Air-gapped activation flow:
  *   1. User launches Integrate / Admin Tools on an offline machine.
  *   2. App displays an activation code derived from its hardware fingerprint.
- *   3. User visits integratermf.com/deactivate on any online device, chooses
+ *   3. User visits integratermf.com/license on any online device, chooses
  *      the app and enters { product, key, email, activationCode } in the
  *      "Air-Gapped Activation" tab.
  *   4. This endpoint:
@@ -151,7 +151,7 @@ async function sendResponseCodeEmail({ to, product, responseCode, activationCode
     ['Last day of the license', lastDay],
   ];
   const howTo = `On the air-gapped machine, open ${app} and choose Air-Gapped Activation (or License Management, Activate License, Air-Gapped). Enter your license key and this response code, then click Complete Activation. O and 0 count as the same character, as do I, L and 1.`;
-  const notYou = `Didn't ask for this? Check the activation code above. If it isn't from one of your machines, someone who knows your license key and email has used one of its machine slots, although only you received this code. Contact info@cyberrmf.com and we'll release that machine, or release every machine yourself at integratermf.com/deactivate (Online Deactivation).`;
+  const notYou = `Didn't ask for this? Check the activation code above. If it isn't from one of your machines, someone who knows your license key and email has used one of its machine slots, although only you received this code. Contact info@cyberrmf.com and we'll release that machine, or release every machine yourself at integratermf.com/license (Online Deactivation).`;
   const rowsHtml = rows.map(([label, value]) => `
                 <div style="background:#23272e;border:1px solid #3a3f4b;border-radius:6px;padding:12px 16px;margin-bottom:12px;">
                   <p style="font-size:11px;color:#9ca3af;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(label)}</p>

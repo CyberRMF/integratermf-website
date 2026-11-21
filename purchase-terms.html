@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<!-- Generated from PURCHASE_TERMS.txt. Edit that file, not this one. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Terms and Conditions - CyberRMF Integrate</title>
+  <meta name="description" content="Payment, refund and license terms for buying CyberRMF licenses.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav (shared pattern) ── */
+.nav {
+  padding: 0; border-bottom: 1px solid var(--border);
+  background: var(--nav-bg); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+.nav-hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: 57px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 8px 0; z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block; padding: 12px 32px; font-size: 13px; color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+
+/* ── Doc layout ── */
+.doc-wrap {
+  max-width: 820px; margin: 0 auto; padding: 48px 32px 64px;
+  flex: 1; width: 100%;
+}
+.doc-eyebrow {
+  font-size: 11px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.doc-title {
+  font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+}
+.doc-meta {
+  font-size: 12px; color: var(--muted); margin-bottom: 8px;
+}
+.doc-meta strong { color: var(--text); font-weight: 600; }
+.doc-lead {
+  font-size: 14px; color: var(--text); margin-top: 20px; margin-bottom: 32px;
+  padding: 16px 20px; background: var(--bg2); border-left: 3px solid var(--accent);
+  border-radius: 4px;
+}
+.doc-body h2 {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin-top: 40px; margin-bottom: 12px; letter-spacing: 0.01em;
+}
+.doc-body h3 {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-top: 24px; margin-bottom: 8px; letter-spacing: 0.01em;
+}
+.doc-body p { margin-bottom: 12px; color: var(--text); }
+.doc-body ul, .doc-body ol { margin: 8px 0 16px 24px; }
+.doc-body li { margin-bottom: 6px; color: var(--text); }
+.doc-body a { color: var(--accent); text-decoration: underline; }
+.doc-body a:hover { color: #93c5fd; }
+.doc-body code {
+  font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+.doc-body table {
+  width: 100%; margin: 16px 0; border-collapse: collapse;
+  font-size: 12px; border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.doc-body th, .doc-body td {
+  padding: 10px 12px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.doc-body th {
+  background: var(--bg2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+}
+.doc-body tr:last-child td { border-bottom: none; }
+.callout {
+  margin: 24px 0; padding: 14px 18px; font-size: 12px;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 6px; color: var(--text);
+}
+.callout strong { color: var(--accent); }
+.placeholder {
+  color: #f59e0b; font-weight: 700; font-family: var(--mono);
+  background: rgba(245,158,11,0.1); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 28px 32px; background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-center { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.footer-center a {
+  font-size: 11px; color: var(--muted); transition: color .2s;
+}
+.footer-center a:hover { color: var(--text); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .doc-lead { background: #e0e0e0; }
+[data-theme="light"] .doc-body th { background: #e0e0e0; color: #1a1a1a; }
+[data-theme="light"] .doc-body code { background: #e8e8e8; border-color: var(--border); }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+
+@media (max-width: 768px) {
+  .doc-wrap { padding: 32px 20px 48px; }
+  .doc-title { font-size: 24px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .doc-wrap { padding: 24px 16px 40px; }
+  .doc-title { font-size: 20px; }
+  .footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+/* ── Agreement pages ── */
+.doc-lead p + p { margin-top: 10px; }
+.doc-meta a { color: var(--accent); text-decoration: underline; }
+.doc-meta a:hover { color: #93c5fd; }
+.doc-body ul.legal-list { list-style: none; margin: 4px 0 16px 4px; }
+.doc-body ul.legal-list li { padding-left: 2.4em; text-indent: -2.4em; }
+.doc-body hr { border: none; border-top: 1px solid var(--border); margin: 32px 0 20px; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span>CyberRMF <span class="gradient-text">Integrate</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="license">License Management</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">2 themes</div>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="license">License Management</a>
+      <a href="updates.html">Updates</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="doc-wrap">
+    <div class="doc-eyebrow">Legal</div>
+    <h1 class="doc-title">Purchase Terms and Conditions</h1>
+    <p class="doc-meta"><strong>Last updated:</strong> November 21, 2026</p>
+    <p class="doc-meta"><a href="PURCHASE_TERMS.txt">Plain-text version</a></p>
+
+    <div class="doc-lead">
+      <p>By submitting your order, you ("Customer," "you," or "your") agree to be bound by the following terms and conditions. Please read them carefully before completing your purchase.</p>
+    </div>
+
+    <div class="doc-body">
+
+      <h2 id="section-1">1. Payment Authorization and Legitimacy</h2>
+
+      <p>By submitting payment through this checkout, you represent and warrant that: (a) you are the authorized holder of the payment method used, or have obtained explicit authorization from the account holder to complete this transaction; (b) all billing information provided is accurate and complete; and (c) this transaction constitutes a legitimate, voluntary purchase of the CyberRMF LLC software license described herein. Any fraudulent, unauthorized, or disputed payment may result in immediate license revocation and referral to applicable law enforcement authorities.</p>
+
+      <h2 id="section-2">2. Refund Policy</h2>
+
+      <p>All purchases are final and non-refundable. CyberRMF LLC does not offer refunds, credits, or exchanges for any reason, including but not limited to dissatisfaction with the Software, failure to use the Software, or changes in organizational requirements. For billing disputes, errors, or extenuating circumstances, please contact <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>. CyberRMF LLC will review each inquiry on a case-by-case basis at its sole discretion.</p>
+
+      <h2 id="section-3">3. License Terms</h2>
+
+      <p>Customer acknowledges that each purchase includes two license keys, one for CyberRMF Integrate and one for CyberRMF Admin Tools (collectively, the "Software"), and that each license key works only with the application it was issued for. Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.</p>
+
+      <p>Customer agrees, for itself and for everyone who uses the Software under its licenses, that without CyberRMF LLC's prior written approval it will not reverse engineer, decompile, disassemble, or otherwise attempt to derive the source code of the Software, and will not copy, reuse, or incorporate any part of the Software's code into any other software, product, or service in any capacity. Customer also agrees not to use the Software, or any information obtained from it, to develop, or to help anyone else develop, a product or service that reproduces or substantially replicates the Software's core functionality, including Pulse. These commitments are set out in full in Section 14 of the CyberRMF Terms and Conditions. They apply to the fullest extent permitted by law and do not limit rights granted by the licenses of open-source components included in the Software. A breach of them is grounds for immediate license revocation, without refund.</p>
+
+      <h2 id="section-4">4. Privacy and Customer Data</h2>
+
+      <p><strong>4.1 Limited Collection.</strong> CyberRMF LLC collects only the information necessary to process your order and fulfill your license, including your name, email address, organization name, and billing details.</p>
+
+      <p><strong>4.2 Disclosure Required by Law.</strong> CyberRMF LLC will not sell, rent, or otherwise disclose Customer personal information to third parties, except as required to comply with applicable federal, state, or local laws, regulations, or legal process, including but not limited to subpoenas, court orders, or requests from governmental or regulatory authorities with competent jurisdiction. Where permitted by law, CyberRMF LLC will make reasonable efforts to notify the Customer prior to such disclosure.</p>
+
+      <p><strong>4.3 Internal Business Use.</strong> Customer acknowledges and agrees that CyberRMF LLC may use non-personally identifiable and aggregated information that Customer provides when ordering - including but not limited to organization name and industry sector - for CyberRMF LLC's own internal business purposes, such as marketing materials, case studies, promotional content, and service improvement initiatives. CyberRMF LLC will not use individually identifiable Customer information in any public-facing marketing material without prior written consent from the Customer.</p>
+
+      <p><strong>4.4 No Usage Data.</strong> The Software does not send telemetry, usage analytics, crash reports or any other information about how it is used to CyberRMF LLC or anyone else. The only information the Software sends to CyberRMF LLC or its license service is what is needed to activate, validate and deactivate a license, as described in the CyberRMF Terms and Conditions. Its integrations connect only to the services you set up.</p>
+
+      <h2 id="section-5">5. General</h2>
+
+      <p><strong>5.1</strong> These Purchase Terms supplement and do not replace the CyberRMF Software License Agreement. In the event of a conflict between these Purchase Terms and the Software License Agreement, the Software License Agreement shall control with respect to software usage, and these Purchase Terms shall control with respect to payment and purchase matters.</p>
+
+      <p><strong>5.2</strong> CyberRMF LLC reserves the right to modify these Purchase Terms at any time. Updated terms will be posted at <a href="https://integratermf.com">integratermf.com</a>. Your completion of a purchase constitutes acceptance of the terms in effect at the time of purchase.</p>
+
+      <p><strong>5.3</strong> For questions regarding your purchase, licensing, or these terms, contact <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>.</p>
+
+      <hr>
+
+      <p>By clicking "I have read and accept the Terms and Conditions" and submitting your order, you acknowledge that you have read, understood, and agree to be bound by these Purchase Terms and Conditions.</p>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">- All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-center">
+        <a href="privacy.html">Privacy</a>
+        <a href="legal.html">Legal</a>
+        <a href="security.html">Security</a>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF LLC</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

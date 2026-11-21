@@ -12,13 +12,16 @@
   ],
   "rewrites": [
     { "source": "/", "has": [{ "type": "host", "value": "snake.integratermf.com" }], "destination": "/snake.html" },
+    { "source": "/license", "destination": "/license.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ],
   "redirects": [
-    { "source": "/activate",   "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false },
-    { "source": "/activate/",  "destination": "/deactivate.html?action=activate&mode=airgap",   "permanent": false },
-    { "source": "/deactivate",  "destination": "/deactivate.html", "permanent": false },
-    { "source": "/deactivate/", "destination": "/deactivate.html", "permanent": false },
+    { "source": "/activate",   "destination": "/license?action=activate&mode=airgap",   "permanent": false },
+    { "source": "/activate/",  "destination": "/license?action=activate&mode=airgap",   "permanent": false },
+    { "source": "/license/",    "destination": "/license", "permanent": false },
+    { "source": "/deactivate",  "destination": "/license", "permanent": false },
+    { "source": "/deactivate/", "destination": "/license", "permanent": false },
+    { "source": "/deactivate.html", "destination": "/license", "permanent": true },
     { "source": "/updates",    "destination": "/updates.html", "permanent": false },
     { "source": "/updates/",   "destination": "/updates.html", "permanent": false },
     { "source": "/purchase.html", "destination": "/coming-soon.html", "permanent": false },
@@ -40,7 +43,13 @@
       ]
     },
     {
-      "source": "/deactivate.html",
+      "source": "/license",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'sha256-IYZFd5s+mDAqpgtAP3kEa0z3t2kSiS6AI507IkqUs8Q='; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types 'none'" }
+      ]
+    },
+    {
+      "source": "/license.html",
       "headers": [
         { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'sha256-IYZFd5s+mDAqpgtAP3kEa0z3t2kSiS6AI507IkqUs8Q='; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types 'none'" }
       ]

@@ -42,7 +42,7 @@ export function productProblem(product, { inApp = false } = {}) {
   return {
     status: 400,
     error: inApp
-      ? 'Update CyberRMF to the latest version and try again, or release this machine at integratermf.com/deactivate.'
+      ? 'Update CyberRMF to the latest version and try again, or release this machine at integratermf.com/license.'
       : 'Choose CyberRMF Integrate or CyberRMF Admin Tools at the top of the page.',
   };
 }
@@ -65,7 +65,7 @@ export function wrongProductProblem(product, licensePolicyId, { inApp = false } 
   return {
     status: 409,
     error: inApp
-      ? `This license key is for ${right}, not ${productName(product)}. Release it at integratermf.com/deactivate and choose ${right} there.`
+      ? `This license key is for ${right}, not ${productName(product)}. Release it at integratermf.com/license and choose ${right} there.`
       : `This license key is for ${right}. Choose ${right} at the top of the page.`,
   };
 }

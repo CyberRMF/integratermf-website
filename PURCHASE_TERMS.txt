@@ -1,6 +1,6 @@
 CYBERRMF - PURCHASE TERMS AND CONDITIONS
 
-Last Updated: November 14, 2026
+Last Updated: November 21, 2026
 
 
 By submitting your order, you ("Customer," "you," or "your") agree to be bound by the following terms and conditions. Please read them carefully before completing your purchase.
@@ -19,6 +19,8 @@ All purchases are final and non-refundable. CyberRMF LLC does not offer refunds,
 3. LICENSE TERMS
 
 Customer acknowledges that each purchase includes two license keys, one for CyberRMF Integrate and one for CyberRMF Admin Tools (collectively, the "Software"), and that each license key works only with the application it was issued for. Integrate and Admin Tools may be installed on separate devices within the same network environment. Each application is individually bound to the device on which it is activated. The license is subject to the terms, conditions, and restrictions set forth in the CyberRMF Software License Agreement included with the application. By completing this purchase, Customer agrees to comply with both these Purchase Terms and the Software License Agreement in their entirety.
+
+Customer agrees, for itself and for everyone who uses the Software under its licenses, that without CyberRMF LLC's prior written approval it will not reverse engineer, decompile, disassemble, or otherwise attempt to derive the source code of the Software, and will not copy, reuse, or incorporate any part of the Software's code into any other software, product, or service in any capacity. Customer also agrees not to use the Software, or any information obtained from it, to develop, or to help anyone else develop, a product or service that reproduces or substantially replicates the Software's core functionality, including Pulse. These commitments are set out in full in Section 14 of the CyberRMF Terms and Conditions. They apply to the fullest extent permitted by law and do not limit rights granted by the licenses of open-source components included in the Software. A breach of them is grounds for immediate license revocation, without refund.
 
 
 4. PRIVACY AND CUSTOMER DATA

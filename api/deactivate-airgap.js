@@ -18,7 +18,7 @@ import { sendReleaseNotice } from './_release-notice.js';
  *          fingerprint, and the code is the first 20 base32 characters of
  *          SHA-256("cyberrmf-dc-online-v3|" + fingerprint).
  *
- *   2. The user comes to integratermf.com/deactivate (Air-Gapped tab),
+ *   2. The user comes to integratermf.com/license (Air-Gapped tab),
  *      chooses the app, and enters:
  *        { product, key, email, deactivationCode }
  *

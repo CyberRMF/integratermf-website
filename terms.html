@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<!-- Generated from TERMS_AND_CONDITIONS.txt. Edit that file, not this one. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms and Conditions - CyberRMF Integrate</title>
+  <meta name="description" content="How CyberRMF Integrate and CyberRMF Admin Tools work with your systems and data.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="shared-themes.css">
+  <script>try{var t=localStorage.getItem('site-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scrollbar-gutter: stable; overflow-y: scroll; }
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 13px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav (shared pattern) ── */
+.nav {
+  padding: 0; border-bottom: 1px solid var(--border);
+  background: var(--nav-bg); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 57px; min-height: 57px; max-height: 57px;
+  box-sizing: border-box; overflow: visible;
+}
+body { padding-top: 57px; }
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; height: 56px; gap: 40px;
+}
+.nav-brand {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.01em;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-logo svg { display: block; }
+.gradient-text { color: var(--accent); }
+.nav-links { display: flex; gap: 0; align-items: center; flex: 1; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); padding: 18px 16px;
+  transition: color .2s, background .2s; position: relative; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-links a.active { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.btn-nav-cta {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--blue); border: none; padding: 7px 18px; border-radius: 5px;
+  cursor: pointer; transition: background .2s, box-shadow .2s;
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.btn-nav-cta:hover { background: #1d4ed8; box-shadow: 0 0 12px rgba(37,99,235,0.3); }
+.snake-pill {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3); padding: 5px 14px; border-radius: 16px;
+  transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+}
+.snake-pill:hover { color: #fff; border-color: var(--accent); background: rgba(59,130,246,.1); }
+.nav-hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: 57px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 8px 0; z-index: 99;
+}
+.nav-mobile-menu.open { display: block; }
+.nav-mobile-menu a {
+  display: block; padding: 12px 32px; font-size: 13px; color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.nav-mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-mobile-menu a.active { color: var(--accent); }
+
+/* ── Doc layout ── */
+.doc-wrap {
+  max-width: 820px; margin: 0 auto; padding: 48px 32px 64px;
+  flex: 1; width: 100%;
+}
+.doc-eyebrow {
+  font-size: 11px; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.doc-title {
+  font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+}
+.doc-meta {
+  font-size: 12px; color: var(--muted); margin-bottom: 8px;
+}
+.doc-meta strong { color: var(--text); font-weight: 600; }
+.doc-lead {
+  font-size: 14px; color: var(--text); margin-top: 20px; margin-bottom: 32px;
+  padding: 16px 20px; background: var(--bg2); border-left: 3px solid var(--accent);
+  border-radius: 4px;
+}
+.doc-body h2 {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin-top: 40px; margin-bottom: 12px; letter-spacing: 0.01em;
+}
+.doc-body h3 {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-top: 24px; margin-bottom: 8px; letter-spacing: 0.01em;
+}
+.doc-body p { margin-bottom: 12px; color: var(--text); }
+.doc-body ul, .doc-body ol { margin: 8px 0 16px 24px; }
+.doc-body li { margin-bottom: 6px; color: var(--text); }
+.doc-body a { color: var(--accent); text-decoration: underline; }
+.doc-body a:hover { color: #93c5fd; }
+.doc-body code {
+  font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+.doc-body table {
+  width: 100%; margin: 16px 0; border-collapse: collapse;
+  font-size: 12px; border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.doc-body th, .doc-body td {
+  padding: 10px 12px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.doc-body th {
+  background: var(--bg2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+}
+.doc-body tr:last-child td { border-bottom: none; }
+.callout {
+  margin: 24px 0; padding: 14px 18px; font-size: 12px;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 6px; color: var(--text);
+}
+.callout strong { color: var(--accent); }
+.placeholder {
+  color: #f59e0b; font-weight: 700; font-family: var(--mono);
+  background: rgba(245,158,11,0.1); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: auto; border-top: 1px solid var(--border);
+  padding: 28px 32px; background: var(--footer-bg);
+}
+.footer-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-left { display: flex; gap: 8px; align-items: baseline; }
+.footer-brand { font-size: 12px; font-weight: 600; }
+.footer-tagline { font-size: 11px; color: var(--dim); }
+.footer-center { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.footer-center a {
+  font-size: 11px; color: var(--muted); transition: color .2s;
+}
+.footer-center a:hover { color: var(--text); }
+.footer-right { display: flex; gap: 16px; align-items: center; }
+.footer-email { font-size: 11px; color: var(--accent); transition: color .2s; }
+.footer-email:hover { color: #93c5fd; }
+.footer-copy { font-size: 10px; color: var(--dim); }
+[data-theme="light"] .footer { border-top-color: var(--border); background: #eaeaea; }
+[data-theme="light"] .doc-lead { background: #e0e0e0; }
+[data-theme="light"] .doc-body th { background: #e0e0e0; color: #1a1a1a; }
+[data-theme="light"] .doc-body code { background: #e8e8e8; border-color: var(--border); }
+[data-theme="light"] .nav { background: rgba(255,255,255,0.97); border-bottom-color: var(--border); }
+
+@media (max-width: 768px) {
+  .doc-wrap { padding: 32px 20px 48px; }
+  .doc-title { font-size: 24px; }
+  .footer { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: block; }
+  .snake-pill { display: none; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-right { gap: 8px; }
+  .btn-nav-cta { padding: 6px 12px; font-size: 10px; }
+  .doc-wrap { padding: 24px 16px 40px; }
+  .doc-title { font-size: 20px; }
+  .footer { padding: 20px 16px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+/* ── Agreement pages ── */
+.doc-lead p + p { margin-top: 10px; }
+.doc-meta a { color: var(--accent); text-decoration: underline; }
+.doc-meta a:hover { color: #93c5fd; }
+.doc-body ul.legal-list { list-style: none; margin: 4px 0 16px 4px; }
+.doc-body ul.legal-list li { padding-left: 2.4em; text-indent: -2.4em; }
+.doc-body hr { border: none; border-top: 1px solid var(--border); margin: 32px 0 20px; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <span class="nav-logo">
+          <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="logo-glow"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <g filter="url(#logo-glow)" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" fill="none">
+              <polyline points="58,80 58,58 80,58"/><polyline points="120,58 142,58 142,80"/>
+              <polyline points="142,120 142,142 120,142"/><polyline points="80,142 58,142 58,120"/>
+            </g>
+            <circle cx="100" cy="100" r="20" fill="#3b82f6" filter="url(#logo-glow)"/>
+          </svg>
+        </span>
+        <span>CyberRMF <span class="gradient-text">Integrate</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Integrate</a>
+        <a href="about.html">About</a>
+        <a href="setup.html">Setup</a>
+        <a href="license">License Management</a>
+        <a href="updates.html">Updates</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://snake.integratermf.com" class="snake-pill">Cyber Snake</a>
+        <a href="purchase.html" class="btn-nav-cta">Get Integrate</a>
+        <div class="theme-picker-wrap" id="theme-picker-wrap">
+          <button class="theme-picker-btn" id="theme-picker-btn" onclick="toggleThemePicker()" title="Theme"></button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-dropdown-label">2 themes</div>
+            <button class="theme-swatch" onclick="setTheme('dark')" title="Dark" style="background:linear-gradient(to right,#242426 50%,#3b82f6 50%)"></button>
+            <button class="theme-swatch" onclick="setTheme('light')" title="Light" style="background:linear-gradient(to right,#fff 50%,#3b82f6 50%)"></button>
+          </div>
+        </div>
+        <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="nav-mobile-menu">
+      <a href="index.html">Integrate</a>
+      <a href="about.html">About</a>
+      <a href="setup.html">Setup</a>
+      <a href="license">License Management</a>
+      <a href="updates.html">Updates</a>
+      <a href="https://snake.integratermf.com">Cyber Snake</a>
+      <a href="purchase.html">Get Integrate</a>
+    </div>
+  </nav>
+
+  <div class="doc-wrap">
+    <div class="doc-eyebrow">Legal</div>
+    <h1 class="doc-title">Terms and Conditions</h1>
+    <p class="doc-meta"><strong>Last updated:</strong> November 21, 2026</p>
+    <p class="doc-meta"><a href="TERMS_AND_CONDITIONS.txt">Plain-text version</a></p>
+
+    <div class="doc-lead">
+      <p>These Terms and Conditions describe how CyberRMF Integrate and CyberRMF Admin Tools operate, the data they handle, and the responsibilities that come with using them. They form part of, and are incorporated into, the CyberRMF End User License Agreement (the "EULA"). Capitalized terms that are not defined here have the meanings given in the EULA. If these Terms and Conditions conflict with the EULA, the EULA controls.</p>
+    </div>
+
+    <div class="doc-body">
+
+      <h2 id="section-1">1. Acceptance of Terms</h2>
+
+      <p>By purchasing, installing, activating, or otherwise using CyberRMF Integrate and its companion application CyberRMF Admin Tools (collectively, the "Software"), you ("Licensee," "you," or "your") agree to be bound by these Terms and Conditions and the EULA (together, the "Agreement"). If you do not agree to all of the terms of the Agreement, do not activate or use the Software. If you are accepting the Agreement on behalf of an organization, you represent and warrant that you have the authority to bind that organization to these terms.</p>
+
+      <h2 id="section-2">2. Definitions</h2>
+
+      <p><strong>"Software"</strong> means CyberRMF Integrate and CyberRMF Admin Tools, including all associated files, documentation, and reference materials distributed with the installation package.</p>
+
+      <p><strong>"CyberRMF Integrate"</strong> (or "Integrate") means the primary desktop application used for artifact management, inventory tracking, compliance workflows, and related functions.</p>
+
+      <p><strong>"CyberRMF Admin Tools"</strong> (or "Admin Tools") means the companion desktop application used for performing administrative scans, generating system reports, and collecting data from networked devices.</p>
+
+      <p><strong>"Workspace"</strong> means a user-designated directory on a local or network file system where the Software stores and retrieves project data, artifacts, configuration, and scan results.</p>
+
+      <p><strong>"Information System Owner"</strong> ("ISO") means the individual or organization responsible for the information system(s) on which the Software is installed or against which the Software operates.</p>
+
+      <p><strong>"Third-Party Service"</strong> means any external software, platform, or API endpoint (such as Splunk, ELK/OpenSearch, Trellix, CrowdStrike, Microsoft Defender for Endpoint, Tenable.sc, Nessus, or similar products) to which the Software may connect at the Licensee's direction.</p>
+
+      <p><strong>"User-Controlled Data"</strong> means all data that users enter into the Software, import into it, or direct it to retrieve, as described in Section 10.</p>
+
+      <h2 id="section-3">3. Licensing and Activation</h2>
+
+      <p><strong>3.1 Subscription Term.</strong> Each license is valid for the Subscription Term stated in your order, which is one (1) year from the date the License Key is issued unless your order states otherwise. Evaluation License Keys may carry a shorter term. The Software's functionality ceases when the Subscription Term ends unless the license is renewed.</p>
+
+      <p><strong>3.2 Device Binding.</strong> Each License Key is issued for one application, Integrate or Admin Tools, and activates only that application. Each application is bound to a machine identifier derived from the hardware of the device on which it is activated. Integrate and Admin Tools may be activated on the same device or on separate devices within the same network environment. You may not activate a License Key on more devices than your license permits.</p>
+
+      <p><strong>3.3 Online Activation and Re-Validation.</strong> When you activate online, the Software sends your License Key, the device's machine identifier, and which application is being activated to CyberRMF LLC's license-management service provider. The machine identifier is a one-way SHA-256 hash of hardware identifiers, not the identifiers themselves. The first time a device is registered, its computer name is also sent so that the device can be recognized in your license records. While an online license is active, the Software checks it when the application starts, when the device wakes from sleep, and every five (5) minutes while the application is running. Each check re-validates the License Key and machine identifier with the license service if more than thirty (30) minutes have passed since the last successful validation, so a running application contacts the license service about every thirty (30) minutes. If the license service cannot be reached, the Software continues to work for up to fourteen (14) days after the last successful validation.</p>
+
+      <p><strong>3.4 Air-Gapped Activation.</strong> On a device without internet access, the Software generates an activation code. You redeem that code, together with the application's License Key and the email address the license was issued to, at <a href="https://integratermf.com/license">integratermf.com/license</a> from any internet-connected device. The device is registered to the license at that time, and the response code is sent only to the email address on file for the license; you then enter it into the Software. A response code works only for the application, License Key, and device it was issued for. No data is transmitted from the air-gapped device itself. An air-gapped license expires on the date encoded in its response code.</p>
+
+      <p><strong>3.5 Deactivation and Transfer.</strong> To move a license to a different device, deactivate it from within the Software (License Management, Deactivate License) or at <a href="https://integratermf.com/license">integratermf.com/license</a>. Online deactivation from within the Software sends your License Key, the machine identifier, the email address you enter, and which application is being deactivated to <a href="https://integratermf.com">integratermf.com</a>. When a device is released from a license, a notice is sent to the email address on file for the license. CyberRMF LLC reserves the right to limit the number of transfers within a Subscription Term.</p>
+
+      <p><strong>3.6 License Restrictions.</strong> The license grant, the restrictions on use, and the lawful-use requirements are set out in Sections 2 through 4 of the EULA.</p>
+
+      <p><strong>3.7 Acceptance Record.</strong> When you accept the Agreement in the Software, the Software records on the device the version of the Agreement accepted, the date and time of acceptance, the application name and version, and the operating-system user name and computer name. This record is stored locally and is not transmitted to CyberRMF LLC.</p>
+
+      <h2 id="section-4">4. Software Description</h2>
+
+      <p><strong>4.1</strong> CyberRMF Integrate provides the following core capabilities:</p>
+      <ul class="legal-list">
+        <li>(a) Artifact management - interactive Security Control Traceability Matrix (SCTM), Plan of Action and Milestones (POA&amp;M), Continuous Monitoring (CONMON), policy and procedure documents, and related compliance artifacts.</li>
+        <li>(b) Inventory tracking - asset inventory with NIST SP 800-53 control requirement mapping, native drag-and-drop floorplan layouts, and end-of-life tracking.</li>
+        <li>(c) Third-party integration - optional outbound connections to SIEM, antivirus / endpoint detection and response (EDR), and vulnerability management platforms configured by the Licensee.</li>
+        <li>(d) STIG validation - import and parsing of XCCDF benchmark files for Security Technical Implementation Guide compliance checks.</li>
+        <li>(e) Auditing - network diagnostics (ping, traceroute, DNS lookup) and cyber hygiene health dashboards.</li>
+        <li>(f) Workspace export and import - full workspace packaging as ZIP archives for transfer between users, organizations, or Security Control Assessors (SCAs).</li>
+      </ul>
+
+      <p><strong>4.2</strong> CyberRMF Admin Tools provides the following capabilities:</p>
+      <ul class="legal-list">
+        <li>(a) Ports, Protocols, and Services (PPS) generation - enumerates running processes and active network connections on target hosts.</li>
+        <li>(b) Installed software inventory - collects software lists from Windows (WMI/CIM) and Linux (package manager queries) systems.</li>
+        <li>(c) Encryption verification - checks BitLocker status (Windows) and block device encryption (Linux) on target hosts.</li>
+        <li>(d) Log collection - enumerates and exports Windows event logs and Linux system logs from remote systems.</li>
+        <li>(e) Active Directory user enumeration - queries AD for user accounts using PowerShell or LDAP.</li>
+        <li>(f) DNS spot check - performs forward and reverse DNS lookups to verify hostname and IP consistency against inventory records.</li>
+        <li>(g) Domain join verification - queries Active Directory for domain-joined computer objects.</li>
+      </ul>
+
+      <p><strong>4.3 Shared Workspace.</strong> Admin Tools writes scan results to the shared Workspace directory. Integrate reads these results to populate dashboards, reports, and artifact views. The two applications communicate exclusively through the shared file system and do not use inter-process communication, network sockets, or any external relay.</p>
+
+      <h2 id="section-5">5. Admin Tools - Credentials and Elevated Privileges</h2>
+
+      <p><strong>5.1 Administrative Access Required.</strong> Admin Tools requires Windows domain administrator credentials or equivalent privileges to perform remote operations on target systems via Windows Management Instrumentation (WMI), Windows Remote Management (WinRM), and Secure Shell (SSH). The Licensee is solely responsible for ensuring that the credentials used have appropriate authorization for the systems being scanned.</p>
+
+      <p><strong>5.2 Credential Handling.</strong> Credentials entered into Admin Tools are stored exclusively in application memory (the main process of the Electron runtime). Credentials are never written to disk, never transmitted to CyberRMF LLC or any third party, and are automatically cleared after ten (10) minutes of application inactivity or upon explicit user action. During active scan operations, credentials may be passed to child processes (PowerShell, SSH) via environment variables for the duration of the operation.</p>
+
+      <p><strong>5.3 No Credential Retention.</strong> By accepting the Agreement, the Licensee acknowledges and agrees that:</p>
+      <ul class="legal-list">
+        <li>(a) CyberRMF Admin Tools does not retain, persist, or transmit user credentials beyond the active application session as described in Section 5.2;</li>
+        <li>(b) any mishandling, unauthorized disclosure, or misuse of credentials entered into Admin Tools is solely the responsibility of the Information System Owner, the organization, or the end user;</li>
+        <li>(c) CyberRMF LLC shall not be held liable for any security incident, unauthorized access, data breach, or system compromise arising from the use of Admin Tools on systems the Licensee is not authorized to administer; and</li>
+        <li>(d) the Licensee is responsible for complying with all applicable organizational policies, regulations, and laws governing the use of privileged credentials and remote system administration.</li>
+      </ul>
+
+      <p><strong>5.4 Local System Modifications.</strong> Admin Tools includes an optional WinRM configuration helper that, with explicit User Account Control (UAC) approval, may modify the local machine's WinRM service settings, firewall rules, and TrustedHosts list. Admin Tools records the previous settings and offers an "Undo WinRM changes" action to restore them. The Licensee acknowledges that these changes affect the local system's security posture and accepts full responsibility for authorizing them and for restoring the previous configuration.</p>
+
+      <h2 id="section-6">6. Third-Party Integrations</h2>
+
+      <p><strong>6.1 Outbound Connections.</strong> Integrate and Admin Tools can establish outbound network connections to Third-Party Services configured by the Licensee. These connections are initiated solely at the Licensee's direction using URLs and credentials provided by the Licensee. The Software does not expose an API, does not function as a network service, and does not accept inbound connections, with one exception: if the person running Admin Tools chooses Configure WinRM and approves the administrator prompt, Admin Tools turns on Windows Remote Management (WinRM) and PowerShell Remoting on that person's own device, which creates a WinRM listener and the Windows firewall rules for it, and adds the scan target to that device's WinRM trusted hosts. Admin Tools records the device's previous settings, and Undo WinRM changes restores them.</p>
+
+      <p><strong>6.2 Supported Integrations.</strong> As of this version, Integrate and Admin Tools support connections to Splunk and ELK/OpenSearch for SIEM; Trellix ePO, CrowdStrike Falcon, Microsoft Defender for Endpoint, Symantec Endpoint Protection Manager (SEPM), VMware Carbon Black, and other endpoint protection platforms with a REST API for antivirus and endpoint protection; and Tenable.sc and Nessus for vulnerability management.</p>
+
+      <p><strong>6.3 TLS Certificate Verification.</strong> Integrate and Admin Tools verify the TLS certificate of every Third-Party Service they connect to over HTTPS before it sends any data or credentials. A certificate that passes standard verification is accepted. If a certificate cannot be verified (for example, because it is self-signed, was issued by a certificate authority that the Software does not recognize, was issued for a different server name, or has expired), the Software closes the connection without sending anything and shows the certificate's details, including its SHA-256 fingerprint. The Licensee may then choose to trust that exact certificate for that server. After that, the Software accepts the trusted certificate for that server, and if the server presents a different certificate that cannot be verified, the Software refuses the connection until the Licensee reviews and trusts it. Trusted certificates are stored for each user on each device. The Licensee is responsible for confirming that a certificate belongs to the intended server before trusting it. Connections to a Third-Party Service configured with an http:// address are not encrypted.</p>
+
+      <p><strong>6.4 SSH Host Key Verification.</strong> Admin Tools verifies the host key of every remote system it connects to over SSH, in the manner of OpenSSH's known-hosts file. Before a scan, Admin Tools reads the host key of each target that has no approved key on the device, without attempting to log in, and asks the person running the scan to approve the new hosts and their key fingerprints. Connections that send credentials accept only the approved key: a host that has not been approved, or whose key has changed, is refused before any credentials are sent. Approved host keys are stored for each user on each device and can be reviewed and removed in Admin Tools. The Licensee is responsible for confirming that a host key belongs to the intended system before approving it.</p>
+
+      <p><strong>6.5 Third-Party Liability.</strong> CyberRMF LLC is not responsible for the availability, accuracy, security, or performance of any Third-Party Service. The Licensee's use of Third-Party Services is governed by the respective third party's own terms of service and policies.</p>
+
+      <h2 id="section-7">7. File System Access and Data Storage</h2>
+
+      <p><strong>7.1 File System Permissions.</strong> The Software requires permission to create, read, write, and delete files and directories within (a) the Licensee's designated Workspace directories and (b) the application's local data directory (Electron userData). The Licensee is responsible for ensuring that appropriate file system permissions are granted.</p>
+
+      <p><strong>7.2 Local Data Storage.</strong> All application data - including inventory records, scan results, artifacts, configuration settings, and workspace metadata - is stored in the Licensee's Workspace directories and on the Licensee's device in JSON format and standard file structures.</p>
+
+      <p><strong>7.3 Credential and License Encryption.</strong> API tokens, passwords, and keys for Third-Party Services are encrypted with the operating system's secure storage facility (Electron safeStorage, which uses DPAPI on Windows) and are stored for each user on each device, separately from the Workspace. They are not written to the shared Workspace, and each person who uses a shared Workspace enters their own tokens. If the operating system's secure storage is unavailable, tokens are not saved. The local license file is encrypted with the same facility when it is available. Scan results and general Workspace data are stored as plaintext JSON.</p>
+
+      <p><strong>7.4 No Remote Storage.</strong> Apart from the licensing requests described in Section 3, and connections to Third-Party Services that the Licensee configures, no data is transmitted from the Software to CyberRMF LLC servers, cloud services, or any external party.</p>
+
+      <p><strong>7.5 Workspace Locking.</strong> The Software uses cooperative file-based locking to prevent concurrent conflicting edits to the same Workspace. Lock files are stored in the Workspace's .cyberrmf directory and identify the active user by operating system username and hostname.</p>
+
+      <p><strong>7.6 Activity Log.</strong> Each application keeps an Activity Log of actions taken in a Workspace, such as data saved or deleted, files added or removed, scans run, integrations used, and errors. Each entry records the time, the application and its version, and the operating system user name, domain, and computer name of the person who took the action. Entries are written to the Workspace's .cyberrmf directory, where other users of the Workspace can view them, and are chained so that later edits can be detected. Technical details of errors, such as stack traces, are kept only on the device where they occurred. Each application also records, once per launch, basic system details (the Windows version, application and runtime versions, memory and free disk space) and, if an application or one of its processes crashes, a crash dump file, which can contain memory contents from the time of the crash, unless an administrator has turned crash dumps off for the device. When crash dumps are turned off, the application records the crash without a dump and deletes any crash dumps it saved before. These are also kept only on the device; technical details of errors and crash dumps are deleted once they are fourteen (14) days old, the next time the application runs. The Activity Log is not transmitted to CyberRMF LLC.</p>
+
+      <p><strong>7.7 Support Bundles.</strong> A user may choose to create a support bundle: a ZIP file, saved where the user chooses, containing system details, license status and the device's recent crash reports, including any crash dumps on the device unless an administrator has turned crash dumps off. Support bundles never contain Activity Log entries, Workspace file contents, saved credentials or the license key. The Software does not send support bundles anywhere; the user decides whether and how to share one. If a user sends a support bundle to CyberRMF LLC, CyberRMF LLC uses it only to investigate the reported problem.</p>
+
+      <h2 id="section-8">8. Network Operations</h2>
+
+      <p><strong>8.1 Integrate Network Activity.</strong> Integrate performs local network diagnostic operations, including ICMP ping, traceroute, and forward and reverse DNS lookups, which the Software makes itself using the DNS servers configured on the device, for auditing and cyber hygiene assessment purposes.</p>
+
+      <p><strong>8.2 Admin Tools Network Activity.</strong> Admin Tools performs targeted remote operations against hosts listed in the Licensee's inventory. These operations include WMI queries (TCP port 135 and dynamic RPC ports), WinRM sessions (TCP port 5985), and SSH connections (TCP port 22). Admin Tools does not perform subnet sweeps, port scanning of arbitrary hosts, or network discovery beyond the hosts explicitly listed in the inventory.</p>
+
+      <p><strong>8.3 Log Collection.</strong> Admin Tools can copy Windows event log files (.evtx) and Linux system logs from remote hosts to a local directory selected by the Licensee. To collect Windows event logs, Admin Tools exports them on the remote host into a temporary folder it creates under that host's Windows Temp folder, copies them from there, and then deletes that folder; over WMI it starts the Windows event log utility (wevtutil.exe) on the remote host to do so. The Licensee is responsible for securing collected log data in accordance with organizational policies.</p>
+
+      <p><strong>8.4 Licensing Traffic.</strong> The only connections the Software makes to CyberRMF LLC or its service providers are the license activation, re-validation, and deactivation requests described in Section 3.</p>
+
+      <h2 id="section-9">9. Data Privacy</h2>
+
+      <p><strong>9.1 No Telemetry.</strong> The Software does not send telemetry, usage analytics, crash reports or any other information about how it is used to CyberRMF LLC or anyone else. Errors and crashes are recorded only on the device and in the Workspace, as described in Sections 7.6 and 7.7.</p>
+
+      <p><strong>9.2 Limited Communication.</strong> Apart from the licensing requests described in Section 3, the Software does not communicate with CyberRMF LLC servers, cloud services, or any external party unless the Licensee configures a Third-Party Service or initiates an operation that requires a network connection. User-Controlled Data is never sent to CyberRMF LLC by the Software.</p>
+
+      <p><strong>9.3 Local Data Only.</strong> All user data - including inventory information, scan results, credentials (in memory only), configuration, and artifacts - remains on the Licensee's devices and user-designated Workspace directories unless the Licensee explicitly initiates an export or configures a Third-Party Service connection.</p>
+
+      <p><strong>9.4 Purchase Information.</strong> Information that you provide when purchasing a license is governed by the CyberRMF Purchase Terms and Conditions.</p>
+
+      <h2 id="section-10">10. User-Controlled Data and Reporting</h2>
+
+      <p><strong>10.1 The Software Reports What It Is Given.</strong> The Software pulls, organizes, and reports only the data that users enter into it or direct it to retrieve from the systems, files, and Third-Party Services that they select. It does not independently verify that data.</p>
+
+      <p><strong>10.2 User Responsibility for Accuracy.</strong> It is the user's responsibility to ensure that User-Controlled Data - including inventory records, control statuses, POA&amp;M entries, scan targets, imported files, and integration settings - is accurate, complete, and current, and that every report and artifact produced from it accurately reflects the systems being reported on. Reports and artifacts must be reviewed and verified before they are relied on or submitted to any assessor, authorizing official, or other party. See Section 5 of the EULA.</p>
+
+      <h2 id="section-11">11. Export and Classification</h2>
+
+      <p><strong>11.1 Workspace Export.</strong> The Software allows the Licensee to export Workspace data as ZIP archives containing configuration, artifacts, scan results, and metadata.</p>
+
+      <p><strong>11.2 Licensee Responsibility.</strong> The Licensee is solely responsible for handling, transmitting, and storing exported data in accordance with their organization's security policies, classification requirements, and all applicable laws and regulations.</p>
+
+      <p><strong>11.3 Classification.</strong> The Software supports optional classification banners on Workspaces. The Licensee is responsible for correctly applying and enforcing classification markings.</p>
+
+      <h2 id="section-12">12. Warranties, Liability, and Other Legal Terms</h2>
+
+      <p><strong>12.1 Governing Terms.</strong> Ownership, warranty disclaimers, limitation of liability, indemnification, termination, export control, governing law, and the other legal terms that apply to the Software are set out in the EULA.</p>
+
+      <p><strong>12.2 Compliance Disclaimer.</strong> The Software is a tool designed to assist with compliance workflows. It does not guarantee compliance with any standard, regulation, or framework, including NIST SP 800-53, DISA STIGs, or any organizational security policy. The Licensee is solely responsible for validating the accuracy and completeness of all compliance assessments, artifacts, and reports generated with the Software.</p>
+
+      <p><strong>12.3 Specific Acknowledgements.</strong> Without limiting Sections 9 and 10 of the EULA, CyberRMF LLC expressly disclaims liability for:</p>
+      <ul class="legal-list">
+        <li>(a) any changes Admin Tools makes to the local machine's WinRM configuration, TrustedHosts settings, firewall rules, or related system services;</li>
+        <li>(b) any data exposure resulting from a TLS certificate or SSH host key that the Licensee chose to trust, or from a Third-Party Service connection configured with an http:// address, as described in Section 6;</li>
+        <li>(c) any loss or corruption of data within Workspace directories;</li>
+        <li>(d) any actions taken on remote systems as a result of Admin Tools operations authorized by the Licensee;</li>
+        <li>(e) any failures, inaccuracies, or security incidents involving Third-Party Services connected through the Software; and</li>
+        <li>(f) any inaccurate, incomplete, or outdated report or artifact resulting from User-Controlled Data.</li>
+      </ul>
+
+      <h2 id="section-13">13. Updates and Changes</h2>
+
+      <p><strong>13.1 Software Updates.</strong> CyberRMF LLC may release updates, patches, or new versions of the Software from time to time. Such updates may modify features, capabilities, or system requirements.</p>
+
+      <p><strong>13.2 Changes to These Terms.</strong> CyberRMF LLC may modify these Terms and Conditions or the EULA from time to time. When a change is material, the Software will present the revised documents and ask you to accept them before you continue to use it. Revised terms may also be made available at <a href="https://integratermf.com">integratermf.com</a>.</p>
+
+      <h2 id="section-14">14. Proprietary Rights, Reverse Engineering, and Competing Products</h2>
+
+      <p><strong>14.1 Proprietary Software.</strong> The Software, including its source and object code, architecture, data structures, algorithms, workflows, screens, and documentation, is the confidential and proprietary property of CyberRMF LLC and is protected by copyright, trade secret, and other intellectual property laws. The Licensee receives only the limited license described in the EULA.</p>
+
+      <p><strong>14.2 No Reverse Engineering or Reuse of Code.</strong> Unless CyberRMF LLC has approved it in advance and in writing, the Licensee shall not, and shall not permit or help anyone else to:</p>
+      <ul class="legal-list">
+        <li>(a) reverse engineer, decompile, disassemble, decrypt, unpack, or otherwise attempt to derive the source code, algorithms, or internal structure of the Software, including by extracting or examining the files inside its installation package or application archive;</li>
+        <li>(b) copy, reuse, adapt, translate, or incorporate any part of the Software's code, or any work derived from it, into any other software, product, or service, in any capacity, whether commercial or non-commercial, internal or public; or</li>
+        <li>(c) publish, disclose, or distribute any part of the Software's code, or any information obtained through an activity described in (a).</li>
+      </ul>
+
+      <p><strong>14.3 No Reproduction of Pulse or Other Core Functionality.</strong> The Licensee shall not use the Software, or any information obtained from using, testing, observing, or examining it, to design, develop, or train, or to help anyone else design, develop, or train, any software, product, or service that reproduces or substantially replicates the core functionality of the Software. This includes Pulse, the Software's live view that brings together each inventory device's reachability, DNS, antivirus, SIEM, vulnerability, log backup, and STIG information, as well as the Software's other features, workflows, and screens. This section does not prevent the Licensee from using or acquiring products that others develop independently, without use of the Software or information obtained from it.</p>
+
+      <p><strong>14.4 Limits.</strong> Sections 14.2 and 14.3 apply to the fullest extent permitted by applicable law. They do not restrict an activity that applicable law expressly permits despite a contractual restriction, in which case the activity must be limited to what that law permits, and they do not limit any right granted by the license of an open-source or other third-party component included in the Software, as described in Section 7.2 of the EULA.</p>
+
+      <p><strong>14.5 Breach.</strong> A breach of this Section 14 is a material breach of the Agreement. In addition to its other rights and remedies, CyberRMF LLC may terminate the Licensee's licenses under the EULA and may seek injunctive or other equitable relief to stop or prevent the breach.</p>
+
+      <p><strong>14.6 Survival.</strong> This Section 14 continues to apply after the Agreement ends.</p>
+
+      <h2 id="section-15">15. Contact Information</h2>
+
+      <p>For questions regarding the Agreement, licensing, or the Software, contact CyberRMF LLC at <a href="mailto:info@cyberrmf.com">info@cyberrmf.com</a> or through <a href="https://integratermf.com">integratermf.com</a>.</p>
+
+      <p>By selecting "Accept and Continue," you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions and the EULA.</p>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">CyberRMF Integrate</span>
+        <span class="footer-tagline">- All-in-one Cyber compliance workflow.</span>
+      </div>
+      <div class="footer-center">
+        <a href="privacy.html">Privacy</a>
+        <a href="legal.html">Legal</a>
+        <a href="security.html">Security</a>
+      </div>
+      <div class="footer-right">
+        <a class="footer-email" href="mailto:info@cyberrmf.com">info@cyberrmf.com</a>
+        <span class="footer-copy">&copy; 2026 CyberRMF LLC</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared-themes.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

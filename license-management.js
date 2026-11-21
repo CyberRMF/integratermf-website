@@ -1,4 +1,4 @@
-/* ═══ License Management page (deactivate.html) ═══
+/* ═══ License Management page (license.html, served at /license) ═══
  * Kept out of the page, with no inline onclick handlers, so the page's
  * Content-Security-Policy (vercel.json) can allow scripts from this site only.
  */
@@ -93,10 +93,10 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
  * Deep-link support so the welcome email (and the app's activation
  * screen) can drop the user directly on the right form.
  *
- *   /deactivate.html?action=activate                — Activate License card
- *   /deactivate.html?action=activate&mode=airgap    — Activate → Air-Gapped tab
- *   /deactivate.html?action=deactivate&mode=airgap  — Deactivate → Air-Gapped tab
- *   /deactivate.html?action=activate&mode=online    — Activate → Online tab
+ *   /license?action=activate                — Activate License card
+ *   /license?action=activate&mode=airgap    — Activate → Air-Gapped tab
+ *   /license?action=deactivate&mode=airgap  — Deactivate → Air-Gapped tab
+ *   /license?action=activate&mode=online    — Activate → Online tab
  *   &app=integrate or &app=admin-tools              — also picks the application
  */
 (function applyUrlIntent() {

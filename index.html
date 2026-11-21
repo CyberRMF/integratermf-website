@@ -147,6 +147,16 @@ body { padding-top: 57px; }
   position: relative;
   overflow: hidden;
 }
+.hero-circuit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > .container { position: relative; z-index: 1; }
+[data-theme="light"] .hero-circuit { display: none; }
 .hero-inner {
   display: flex;
   align-items: center;
@@ -602,6 +612,14 @@ body { padding-top: 57px; }
 .idx-feat-group {
   break-inside: avoid;
 }
+#idx-panel-integrate.active, .idx-feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  justify-content: center;
+  align-items: start;
+  column-gap: 48px;
+  row-gap: 4px;
+}
 .idx-sod-overlay {
   text-align: center;
   padding: 48px 32px;
@@ -819,6 +837,7 @@ body { padding-top: 57px; }
   .container { padding: 0 20px; }
   .idx-feat-panel { padding: 20px 0; }
   .idx-feat-panel.active { flex-direction: column; align-items: center; }
+  #idx-panel-integrate.active, .idx-feat-grid { grid-template-columns: max-content; }
   #nist-text { white-space: normal; }
   .rows-section { padding: 28px 0 40px; }
 }
@@ -871,7 +890,7 @@ body { padding-top: 57px; }
         <a href="index.html" class="active">Integrate</a>
         <a href="about.html">About</a>
         <a href="setup.html">Setup</a>
-        <a href="deactivate.html">License Management</a>
+        <a href="license">License Management</a>
         <a href="updates.html">Updates</a>
       </div>
       <div class="nav-right">
@@ -892,7 +911,7 @@ body { padding-top: 57px; }
       <a href="index.html" class="active">Integrate</a>
       <a href="about.html">About</a>
       <a href="setup.html">Setup</a>
-      <a href="deactivate.html">License Management</a>
+      <a href="license">License Management</a>
       <a href="updates.html">Updates</a>
       <a href="https://snake.integratermf.com">Cyber Snake</a>
       <a href="purchase.html">Get Integrate</a>
@@ -1107,7 +1126,7 @@ body { padding-top: 57px; }
             <div class="idx-sod-line" id="idx-sod-l2">Admin Tools feeds scan data into Integrate for ISSO awareness.</div>
             <div class="idx-sod-line" id="idx-sod-l3">Relevant data is populated into Pulse and Cyber Hygiene.</div>
           </div>
-          <div id="idx-admin-features" style="display:none;">
+          <div id="idx-admin-features" class="idx-feat-grid" style="display:none;">
             <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> AD Lookup</div>
             <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pull reports of all users on a domain</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on account type</div></div></div>
 
@@ -1149,6 +1168,7 @@ body { padding-top: 57px; }
   </footer>
 
   <script src="shared-themes.js"></script>
+  <script src="circuit-bg.js"></script>
   <script>
 /* ── Expand/collapse rows ── */
 function toggleRow(header) {
@@ -1326,7 +1346,7 @@ function runIdxSodTransition(expandAfter) {
       });
       setTimeout(function() {
         overlay.style.display = 'none';
-        adminFeat.style.display = 'block';
+        adminFeat.style.display = '';
         if (expandAfter) {
           var admP = document.getElementById('idx-panel-admin');
           expandPanelInstant(admP);
@@ -1402,5 +1422,7 @@ function runIdxSodTransition(expandAfter) {
 })();
 
   </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>
