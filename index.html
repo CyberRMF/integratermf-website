@@ -612,13 +612,66 @@ body { padding-top: 57px; }
 .idx-feat-group {
   break-inside: avoid;
 }
-#idx-panel-integrate.active, .idx-feat-grid {
+.idx-feat-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, max-content));
   justify-content: center;
   align-items: start;
   column-gap: 48px;
   row-gap: 4px;
+}
+.idx-feat-grid[hidden], .idx-feat-carousel[hidden] { display: none; }
+/* ── "Show all features": one feature at a time ── */
+.idx-feat-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+}
+.idx-car-stage { display: grid; min-width: 0; }
+.idx-car-slide {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(24px);
+  transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.idx-car-slide.before { transform: translateX(-24px); }
+.idx-car-slide.current {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity .35s ease .2s, transform .35s ease .2s, visibility 0s linear .2s;
+}
+.idx-car-slide .idx-feat-item { font-size: 13px; }
+.idx-car-slide .idx-feat-sub-item { font-size: 12px; }
+.idx-car-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.idx-car-btn:hover, .idx-car-btn:focus-visible {
+  background: rgba(59,130,246,.1);
+  border-color: var(--accent);
+  color: #fff;
+}
+.idx-car-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.idx-car-btn.is-hidden { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .idx-car-slide, .idx-car-slide.current { transform: none; transition: none; }
 }
 .idx-sod-overlay {
   text-align: center;
@@ -684,6 +737,8 @@ body { padding-top: 57px; }
 [data-theme="light"] .idx-sep-duties { background: transparent; }
 [data-theme="light"] .show-all-btn { background: #fff; border-color: var(--border); color: var(--accent); }
 [data-theme="light"] .show-all-btn:hover { background: #eff6ff; color: var(--accent); }
+[data-theme="light"] .idx-car-btn { background: #fff; border-color: var(--border); color: var(--accent); }
+[data-theme="light"] .idx-car-btn:hover, [data-theme="light"] .idx-car-btn:focus-visible { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
 [data-theme="light"] .product-tab { background: #fff; border-color: var(--border); color: #1a1a1a; }
 [data-theme="light"] .product-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 [data-theme="light"] .product-tab:not(.active):hover { background: rgba(0,0,0,.04); }
@@ -837,7 +892,8 @@ body { padding-top: 57px; }
   .container { padding: 0 20px; }
   .idx-feat-panel { padding: 20px 0; }
   .idx-feat-panel.active { flex-direction: column; align-items: center; }
-  #idx-panel-integrate.active, .idx-feat-grid { grid-template-columns: max-content; }
+  .idx-feat-grid { grid-template-columns: max-content; }
+  .idx-feat-carousel { gap: 14px; }
   #nist-text { white-space: normal; }
   .rows-section { padding: 28px 0 40px; }
 }
@@ -863,6 +919,10 @@ body { padding-top: 57px; }
   .idx-feat-panel { padding: 16px 0; }
   .idx-feat-item { font-size: 11px; }
   .idx-feat-sub-item { font-size: 10px; padding-left: 16px; }
+  .idx-car-slide .idx-feat-item { font-size: 12px; }
+  .idx-car-slide .idx-feat-sub-item { font-size: 11px; }
+  .idx-feat-carousel { gap: 10px; }
+  .idx-car-btn { width: 30px; height: 30px; }
   .product-tab { padding: 8px 16px; font-size: 11px; }
   .row-header h3 { font-size: 13px; }
   .idx-sod-overlay { padding: 32px 16px; }
@@ -1092,11 +1152,9 @@ body { padding-top: 57px; }
           <button class="show-all-btn" id="show-all-features-btn" onclick="toggleAllFeatures()">Show all features</button>
         </div>
         <div id="idx-panel-integrate" class="idx-feat-panel active">
+          <div id="idx-integrate-features" class="idx-feat-grid">
             <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Pulse</div>
             <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Import Inventory database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Ping all assets at once</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Check DNS accuracy for assets</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> API integration for SIEM, AV, and Vulnerability Management</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Last reported</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> DAT version</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Vulnerability stats</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show # of logs backed up for each asset</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Show STIG score for each asset</div></div></div>
-
-            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> 800-53 Cyber Hygiene Dashboard</div>
-            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Full statistics on entire workspace</div></div></div>
 
             <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Artifact Manager</div>
             <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Upload all RMF BoE</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native PDF, XLSX, and CSV viewer</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> SCTM builder</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> POA&amp;M database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Change Management Tracker</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> HW/SW list Database</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Native NIST Special Publications.</div></div></div>
@@ -1118,6 +1176,10 @@ body { padding-top: 57px; }
 
             <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> CSRMC support</div>
             <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Configuration drift detection (IP and DNS mismatches)</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Real-Time telemetry through Pulse</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Reduces duplication &amp; compliance burdens</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Incident Response and root-cause</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pro-active monitoring</div></div></div>
+
+            <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> Cyber Hygiene Dashboard</div>
+            <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Full statistics on entire workspace</div></div></div>
+          </div>
         </div>
         <div id="idx-panel-admin" class="idx-feat-panel">
           <div id="idx-sod-overlay" class="idx-sod-overlay">
@@ -1126,7 +1188,7 @@ body { padding-top: 57px; }
             <div class="idx-sod-line" id="idx-sod-l2">Admin Tools feeds scan data into Integrate for ISSO awareness.</div>
             <div class="idx-sod-line" id="idx-sod-l3">Relevant data is populated into Pulse and Cyber Hygiene.</div>
           </div>
-          <div id="idx-admin-features" class="idx-feat-grid" style="display:none;">
+          <div id="idx-admin-features" class="idx-feat-grid" hidden>
             <div class="idx-feat-group"><div class="idx-feat-item"><span class="ck">&#10003;</span> AD Lookup</div>
             <div class="idx-feat-sub"><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Pull reports of all users on a domain</div><div class="idx-feat-sub-item"><span class="ck">&#10003;</span> Stats on account type</div></div></div>
 
@@ -1228,107 +1290,148 @@ function switchProductTab(id) {
   }
 }
 
+/*
+ * Features: a grid of titles, or with "Show all features" one feature at a time. Each feature moves on to the next
+ * by itself after a few seconds (longer for longer lists, paused while the pointer is over it), or with the arrows.
+ */
+var FEAT_REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var _featuresExpanded = false;
+var _featTab = 'integrate';
+var _sodPlaying = false;
+var _sodRun = 0;
+var _featViews = {};
+
+function featView(tab) {
+  if (_featViews[tab]) return _featViews[tab];
+  var panel = document.getElementById('idx-panel-' + tab);
+  var grid = document.getElementById('idx-' + tab + '-features');
+  var wrap = document.createElement('div');
+  wrap.className = 'idx-feat-carousel';
+  wrap.hidden = true;
+  wrap.innerHTML = '<button type="button" class="idx-car-btn idx-car-back is-hidden" aria-label="Previous feature"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>'
+    + '<div class="idx-car-stage" aria-live="off"></div>'
+    + '<button type="button" class="idx-car-btn idx-car-next" aria-label="Next feature"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>';
+  panel.appendChild(wrap);
+  var stage = wrap.querySelector('.idx-car-stage');
+  var slides = Array.prototype.map.call(grid.querySelectorAll('.idx-feat-group'), function(group) {
+    var slide = group.cloneNode(true);
+    slide.classList.add('idx-car-slide');
+    slide.setAttribute('aria-hidden', 'true');
+    slide.querySelector('.idx-feat-item').classList.add('glow-blue');
+    slide.querySelector('.idx-feat-sub').classList.add('show');
+    stage.appendChild(slide);
+    return slide;
+  });
+  var v = { grid: grid, wrap: wrap, stage: stage, slides: slides, back: wrap.querySelector('.idx-car-back'), index: 0, moved: false, hover: false, timer: 0 };
+  v.back.addEventListener('click', function() { featGo(v, -1, true); });
+  wrap.querySelector('.idx-car-next').addEventListener('click', function() { featGo(v, 1, true); });
+  wrap.addEventListener('mouseenter', function() { v.hover = true; clearTimeout(v.timer); });
+  wrap.addEventListener('mouseleave', function() { v.hover = false; featSchedule(v); });
+  _featViews[tab] = v;
+  return v;
+}
+
+function featShow(v, i, dir) {
+  var old = v.slides[v.index];
+  var slide = v.slides[i];
+  if (old !== slide) {
+    old.classList.remove('current');
+    old.classList.toggle('before', dir > 0);
+    old.setAttribute('aria-hidden', 'true');
+  }
+  slide.style.transition = 'none';
+  slide.classList.toggle('before', dir < 0);
+  void slide.offsetWidth;
+  slide.style.transition = '';
+  slide.classList.remove('before');
+  slide.classList.add('current');
+  slide.removeAttribute('aria-hidden');
+  v.index = i;
+  if (FEAT_REDUCED_MOTION) return;
+  var rows = slide.querySelectorAll('.idx-feat-sub-item');
+  rows.forEach(function(row) { row.classList.remove('feat-cascade-visible'); row.classList.add('feat-cascade-hidden'); });
+  requestAnimationFrame(function() {
+    rows.forEach(function(row, k) {
+      setTimeout(function() { row.classList.add('feat-cascade-visible'); }, 300 + k * 45);
+    });
+  });
+}
+
+function featSchedule(v) {
+  clearTimeout(v.timer);
+  if (v.wrap.hidden || v.hover) return;
+  var rows = v.slides[v.index].querySelectorAll('.idx-feat-sub-item').length;
+  v.timer = setTimeout(function() { featGo(v, 1); }, Math.max(5000, 2500 + rows * 600));
+}
+
+function featGo(v, dir, byUser) {
+  var n = v.slides.length;
+  v.stage.setAttribute('aria-live', byUser ? 'polite' : 'off');
+  featShow(v, (v.index + dir + n) % n, dir);
+  if (!v.moved) {
+    v.moved = true;
+    v.back.classList.remove('is-hidden');
+  }
+  featSchedule(v);
+}
+
+function featStop(tab) {
+  var v = featView(tab);
+  clearTimeout(v.timer);
+  v.wrap.hidden = true;
+}
+
+function showIdxFeatures(tab) {
+  var v = featView(tab);
+  if (!_featuresExpanded) {
+    featStop(tab);
+    v.grid.hidden = false;
+    return;
+  }
+  v.grid.hidden = true;
+  v.slides.forEach(function(s) { s.classList.remove('current', 'before'); s.setAttribute('aria-hidden', 'true'); });
+  v.index = 0;
+  v.moved = false;
+  v.hover = false;
+  v.stage.setAttribute('aria-live', 'off');
+  v.back.classList.add('is-hidden');
+  v.wrap.hidden = false;
+  featShow(v, 0, 1);
+  featSchedule(v);
+}
+
 function toggleAllFeatures() {
   _featuresExpanded = !_featuresExpanded;
-  var activePanel = document.querySelector('.idx-feat-panel.active');
-  if (!activePanel) return;
-  var subs = activePanel.querySelectorAll('.idx-feat-sub');
-  var btn = document.getElementById('show-all-features-btn');
-  btn.textContent = _featuresExpanded ? 'Hide all features' : 'Show all features';
-
-  if (_featuresExpanded) {
-    var allItems = activePanel.querySelectorAll('.idx-feat-item');
-    var allSubItems = activePanel.querySelectorAll('.idx-feat-sub-item');
-
-    allItems.forEach(function(el) {
-      el.classList.add('feat-cascade-hidden');
-      el.classList.remove('feat-cascade-visible', 'glow-blue');
-    });
-    allSubItems.forEach(function(el) {
-      el.classList.add('feat-cascade-hidden');
-      el.classList.remove('feat-cascade-visible');
-    });
-
-    subs.forEach(function(s) { s.classList.add('show'); });
-
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        var allRows = activePanel.querySelectorAll('.idx-feat-item, .idx-feat-sub-item');
-        allRows.forEach(function(el, i) {
-          setTimeout(function() {
-            el.classList.add('feat-cascade-visible');
-            if (el.classList.contains('idx-feat-item')) {
-              el.classList.add('glow-blue');
-            }
-          }, i * 35);
-        });
-      });
-    });
-  } else {
-    subs.forEach(function(s) { s.classList.remove('show'); });
-    activePanel.querySelectorAll('.idx-feat-item').forEach(function(el) {
-      el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible', 'glow-blue');
-    });
-    activePanel.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
-      el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible');
-    });
-  }
+  document.getElementById('show-all-features-btn').textContent = _featuresExpanded ? 'Hide all features' : 'Show all features';
+  if (_featTab === 'admin' && _sodPlaying) return;
+  showIdxFeatures(_featTab);
 }
 
 function switchIdxFeatTab(tab) {
   var tabs = document.querySelectorAll('.idx-feat-tab');
-  var intP = document.getElementById('idx-panel-integrate');
-  var admP = document.getElementById('idx-panel-admin');
   tabs[0].classList.toggle('active', tab === 'integrate');
   tabs[1].classList.toggle('active', tab === 'admin');
-  intP.classList.toggle('active', tab === 'integrate');
-  admP.classList.toggle('active', tab === 'admin');
-
-  var wasExpanded = _featuresExpanded;
-  if (!wasExpanded) {
-    _featuresExpanded = false;
-    document.getElementById('show-all-features-btn').textContent = 'Show all features';
-  }
-
-  document.querySelectorAll('.idx-feat-sub').forEach(function(s) { s.classList.remove('show'); });
-  document.querySelectorAll('.idx-feat-item').forEach(function(el) {
-    el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible', 'glow-blue');
-  });
-  document.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
-    el.classList.remove('feat-cascade-hidden', 'feat-cascade-visible');
-  });
-
-  if (tab === 'admin') {
-    runIdxSodTransition(wasExpanded);
-  } else if (wasExpanded) {
-    expandPanelInstant(intP);
-  }
+  document.getElementById('idx-panel-integrate').classList.toggle('active', tab === 'integrate');
+  document.getElementById('idx-panel-admin').classList.toggle('active', tab === 'admin');
+  _featTab = tab;
+  featStop('integrate');
+  featStop('admin');
+  _sodRun++;
+  _sodPlaying = false;
+  if (tab === 'admin') runIdxSodTransition();
+  else showIdxFeatures('integrate');
 }
 
-function expandPanelInstant(panel) {
-  if (!panel) return;
-  _featuresExpanded = true;
-  document.getElementById('show-all-features-btn').textContent = 'Hide all features';
-  panel.querySelectorAll('.idx-feat-sub').forEach(function(s) { s.classList.add('show'); });
-  panel.querySelectorAll('.idx-feat-item').forEach(function(el) {
-    el.classList.remove('feat-cascade-hidden');
-    el.classList.add('feat-cascade-visible', 'glow-blue');
-  });
-  panel.querySelectorAll('.idx-feat-sub-item').forEach(function(el) {
-    el.classList.remove('feat-cascade-hidden');
-    el.classList.add('feat-cascade-visible');
-  });
-}
-
-function runIdxSodTransition(expandAfter) {
+/* The Admin Tools intro; then its features, as a grid or one at a time. */
+function runIdxSodTransition() {
+  var run = ++_sodRun;
   var overlay = document.getElementById('idx-sod-overlay');
-  var adminFeat = document.getElementById('idx-admin-features');
   var titleEl = document.getElementById('idx-sod-title');
   var lines = [document.getElementById('idx-sod-l1'), document.getElementById('idx-sod-l2'), document.getElementById('idx-sod-l3')];
 
+  _sodPlaying = true;
   overlay.style.display = '';
-  adminFeat.style.display = 'none';
+  featView('admin').grid.hidden = true;
   titleEl.textContent = '';
   lines.forEach(function(l) { l.classList.remove('show'); });
 
@@ -1336,21 +1439,21 @@ function runIdxSodTransition(expandAfter) {
   var idx = 0;
 
   var typeInterval = setInterval(function() {
-    if (idx < phrase.length) {
+    if (run !== _sodRun) {
+      clearInterval(typeInterval);
+    } else if (idx < phrase.length) {
       titleEl.textContent += phrase[idx];
       idx++;
     } else {
       clearInterval(typeInterval);
       lines.forEach(function(line, i) {
-        setTimeout(function() { line.classList.add('show'); }, 400 + i * 600);
+        setTimeout(function() { if (run === _sodRun) line.classList.add('show'); }, 400 + i * 600);
       });
       setTimeout(function() {
+        if (run !== _sodRun) return;
+        _sodPlaying = false;
         overlay.style.display = 'none';
-        adminFeat.style.display = '';
-        if (expandAfter) {
-          var admP = document.getElementById('idx-panel-admin');
-          expandPanelInstant(admP);
-        }
+        showIdxFeatures('admin');
       }, 400 + 3 * 600 + 2300);
     }
   }, 55);
