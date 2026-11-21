@@ -875,7 +875,7 @@ body { padding-top: 57px; }
           </thead>
           <tbody>
             <tr><td>WMI / CIM (DCOM)</td><td>TCP 135 + RPC dynamic range</td><td>WMI service and DCOM permissions on target. For local accounts remotely, set <code>LocalAccountTokenFilterPolicy = 1</code>.</td></tr>
-            <tr><td>WinRM</td><td>TCP 5985 (HTTP) / 5986 (HTTPS)</td><td><code>Enable-PSRemoting</code> on target. TrustedHosts or Kerberos for non-domain scenarios. The app can auto-configure WinRM.</td></tr>
+            <tr><td>WinRM</td><td>TCP 5985 (HTTP)</td><td><code>Enable-PSRemoting</code> on target. TrustedHosts or Kerberos for non-domain scenarios. The app can auto-configure WinRM.</td></tr>
             <tr><td>SMB (log export)</td><td>TCP 445</td><td>Admin share (<code>\\target\c$</code>) access for WMI-path log collection.</td></tr>
             <tr><td>SSH</td><td>TCP 22</td><td>Password authentication must be enabled on the target <code>sshd</code>. Used for all Linux scans.</td></tr>
             <tr><td>DNS</td><td>UDP/TCP 53</td><td>DNS spot check resolves names from the Admin Tools host.</td></tr>
@@ -974,7 +974,7 @@ body { padding-top: 57px; }
 
       <section id="scan-dns">
         <h3>DNS Spot Check</h3>
-        <p>Validates DNS consistency for all cyber inventory items. For each device, the app runs <code>nslookup</code> from the Admin Tools host and compares the resolved IP and hostname against inventory records. Results are classified as:</p>
+        <p>Validates DNS consistency for all cyber inventory items. For each device, Admin Tools looks up the name and IP address itself (forward and reverse DNS), using the DNS servers configured on the Admin Tools host, and compares the resolved IP and hostname against inventory records. Results are classified as:</p>
         <ul>
           <li><strong>Match:</strong> DNS resolution matches inventory</li>
           <li><strong>No match:</strong> the resolved IP address or name differs from inventory (shown as IP mismatch, Name mismatch, or No DNS name in Inventory when the device has no DNS name)</li>
