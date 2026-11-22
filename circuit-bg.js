@@ -29,7 +29,6 @@
   var stepMs = 1;
   var drawn = 0;
   var animated = false;
-  var grain = null;
 
   function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
 
@@ -50,26 +49,30 @@
     return { body: shade(0), light: shade(9), shadow: shade(-10) };
   }
 
-  /* A sparse grain tile, inked in the hero's own light/shadow shades, tiled and stroked along the ridges so the
-   * neurons read as grainy rather than smooth. Mostly transparent so it stipples instead of flooding. */
-  function makeGrain(c) {
-    var size = 128;
-    var oc = document.createElement('canvas');
-    oc.width = size; oc.height = size;
-    var octx = oc.getContext('2d');
-    if (!octx) return null;
-    var img = octx.createImageData(size, size);
-    var rand = rng(1699);
-    var lm = c.light.match(/\d+(\.\d+)?/g) || [255, 255, 255];
-    var sm = c.shadow.match(/\d+(\.\d+)?/g) || [0, 0, 0];
-    for (var i = 0; i < img.data.length; i += 4) {
-      if (rand() < 0.74) { img.data[i + 3] = 0; continue; } /* mostly bare -> sparse speckle */
-      var src = rand() < 0.5 ? sm : lm;
-      img.data[i] = +src[0]; img.data[i + 1] = +src[1]; img.data[i + 2] = +src[2];
-      img.data[i + 3] = Math.floor(70 + rand() * 120);
+  /* A faint crinkled-paper crease field across the whole hero: many short straight creases, each drawn as a
+   * top-left light edge and a bottom-right shadow edge that match the neurons' emboss, so the hero reads as if
+   * it were embossed on crumpled paper. Dark theme only; very low alpha so it stays a texture, not a pattern. */
+  function paintCrinkle() {
+    var w = width, h = hero.clientHeight;
+    if (!w || !h) return;
+    var rand = rng(90125);
+    var diag = Math.sqrt(w * w + h * h);
+    var count = Math.round(diag * 1.1);
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 0.7;
+    for (var i = 0; i < count; i++) {
+      var x = rand() * w, y = rand() * h;
+      var a = rand() * Math.PI;
+      var len = diag * (0.03 + rand() * 0.14);
+      var ex = x + Math.cos(a) * len, ey = y + Math.sin(a) * len;
+      ctx.globalAlpha = 0.03 + rand() * 0.045;
+      ctx.strokeStyle = colors.light;
+      ctx.beginPath(); ctx.moveTo(x - 0.45, y - 0.6); ctx.lineTo(ex - 0.45, ey - 0.6); ctx.stroke();
+      ctx.strokeStyle = colors.shadow;
+      ctx.beginPath(); ctx.moveTo(x + 0.55, y + 0.75); ctx.lineTo(ex + 0.55, ey + 0.75); ctx.stroke();
     }
-    octx.putImageData(img, 0, 0);
-    return ctx.createPattern(oc, 'repeat');
+    ctx.restore();
   }
 
   /*
@@ -270,12 +273,6 @@
     layer(colors.shadow, 0.55, 0.75, 0.7, a, b, false);
     layer(colors.light, -0.45, -0.6, 0.3, a, b, false);
     layer(colors.body, 0, 0, 0, a, b, true);
-    if (grain) {
-      ctx.save();
-      ctx.globalAlpha = 0.9;
-      layer(grain, 0, 0, 0.5, a, b, true);
-      ctx.restore();
-    }
   }
 
   function setup() {
@@ -288,7 +285,6 @@
     ctx.lineJoin = 'round';
     width = w;
     colors = heroColors();
-    grain = makeGrain(colors);
     net = build(w, h);
     stepMs = GROW_MS / net.mainSteps;
     drawn = 0;
@@ -296,6 +292,7 @@
 
   function drawAll() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    paintCrinkle();
     strokeRange(0, net.n);
     drawn = net.n;
   }
@@ -313,6 +310,7 @@
     animated = true;
     setup();
     if (reduceMotion) { drawAll(); return; }
+    paintCrinkle();
     startedAt = performance.now();
     frame = requestAnimationFrame(tick);
   }
