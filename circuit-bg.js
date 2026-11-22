@@ -13,7 +13,7 @@
 
   var GROW_MS = 5500;       /* how long the materialize takes */
   var COVER = 1.0;          /* image is "contained" in the hero, then scaled by this */
-  var MAX_ALPHA = 0.3;      /* peak brightness of the emerged image — kept low so it reads as dark, like the hero bg */
+  var MAX_ALPHA = 0.18;     /* peak brightness of the emerged image — kept low so it reads as dark, like the hero bg */
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var img = new Image();
@@ -97,7 +97,7 @@
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var iw = img.naturalWidth, ih = img.naturalHeight;
-    var s = Math.min(width / iw, height / ih) * COVER;
+    var s = Math.max(width / iw, height / ih) * COVER;   /* cover: fill the full hero width (crop overflow) */
     var dw = iw * s, dh = ih * s;
     rect = { x: (width - dw) / 2, y: (height - dh) / 2, w: dw, h: dh };
     spriteW = makeSprite(true);
@@ -138,7 +138,7 @@
     /* top-left highlight ridge — additive */
     ctx.globalCompositeOperation = 'lighter';
     if (useFilter) ctx.filter = 'blur(' + (blur * 0.5).toFixed(2) + 'px)';
-    ctx.globalAlpha = 0.14 * e;
+    ctx.globalAlpha = 0.09 * e;
     ctx.drawImage(spriteW, -w / 2 - off, -h / 2 - off, w, h);
     if (useFilter) ctx.filter = 'none';
 
