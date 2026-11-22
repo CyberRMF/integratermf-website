@@ -13,13 +13,13 @@
 
   var GROW_MS = 5500;       /* how long the materialize takes */
   var COVER = 1.0;          /* image is "contained" in the hero, then scaled by this */
-  var MAX_ALPHA = 0.65;     /* peak brightness of the emerged image */
+  var MAX_ALPHA = 0.3;      /* peak brightness of the emerged image — kept low so it reads as dark, like the hero bg */
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var img = new Image();
   var imgReady = false;
   img.onload = function () { imgReady = true; start(); };
-  img.src = 'hero-eye.jpg';
+  img.src = 'hero-drape.png';
 
   var spriteW = null;       /* white-tinted, luminance-as-alpha (black background keyed out) */
   var spriteB = null;       /* black-tinted version, for carving the relief shadow */
@@ -138,7 +138,7 @@
     /* top-left highlight ridge — additive */
     ctx.globalCompositeOperation = 'lighter';
     if (useFilter) ctx.filter = 'blur(' + (blur * 0.5).toFixed(2) + 'px)';
-    ctx.globalAlpha = 0.3 * e;
+    ctx.globalAlpha = 0.14 * e;
     ctx.drawImage(spriteW, -w / 2 - off, -h / 2 - off, w, h);
     if (useFilter) ctx.filter = 'none';
 
