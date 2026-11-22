@@ -29,6 +29,7 @@
   var stepMs = 1;
   var drawn = 0;
   var animated = false;
+  var grain = null;
 
   function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
 
@@ -47,6 +48,28 @@
     var rgb = m && m.length >= 3 ? [+m[0], +m[1], +m[2]] : [26, 26, 28];
     var shade = function (d) { return 'rgb(' + rgb.map(function (c) { return Math.max(0, Math.min(255, Math.round(c + d))); }).join(',') + ')'; };
     return { body: shade(0), light: shade(9), shadow: shade(-10) };
+  }
+
+  /* A sparse grain tile, inked in the hero's own light/shadow shades, tiled and stroked along the ridges so the
+   * neurons read as grainy rather than smooth. Mostly transparent so it stipples instead of flooding. */
+  function makeGrain(c) {
+    var size = 128;
+    var oc = document.createElement('canvas');
+    oc.width = size; oc.height = size;
+    var octx = oc.getContext('2d');
+    if (!octx) return null;
+    var img = octx.createImageData(size, size);
+    var rand = rng(1699);
+    var lm = c.light.match(/\d+(\.\d+)?/g) || [255, 255, 255];
+    var sm = c.shadow.match(/\d+(\.\d+)?/g) || [0, 0, 0];
+    for (var i = 0; i < img.data.length; i += 4) {
+      if (rand() < 0.74) { img.data[i + 3] = 0; continue; } /* mostly bare -> sparse speckle */
+      var src = rand() < 0.5 ? sm : lm;
+      img.data[i] = +src[0]; img.data[i + 1] = +src[1]; img.data[i + 2] = +src[2];
+      img.data[i + 3] = Math.floor(70 + rand() * 120);
+    }
+    octx.putImageData(img, 0, 0);
+    return ctx.createPattern(oc, 'repeat');
   }
 
   /*
@@ -247,6 +270,12 @@
     layer(colors.shadow, 0.55, 0.75, 0.7, a, b, false);
     layer(colors.light, -0.45, -0.6, 0.3, a, b, false);
     layer(colors.body, 0, 0, 0, a, b, true);
+    if (grain) {
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      layer(grain, 0, 0, 0.5, a, b, true);
+      ctx.restore();
+    }
   }
 
   function setup() {
@@ -259,6 +288,7 @@
     ctx.lineJoin = 'round';
     width = w;
     colors = heroColors();
+    grain = makeGrain(colors);
     net = build(w, h);
     stepMs = GROW_MS / net.mainSteps;
     drawn = 0;
