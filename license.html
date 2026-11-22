@@ -333,6 +333,7 @@ body { padding-top: 57px; }
 
 /* Which app the license is for */
 .app-picker { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 28px; }
+.method-tabs + .app-picker { margin-top: 24px; margin-bottom: 0; }
 .app-picker-label {
   font-size: 11px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.04em;
@@ -556,14 +557,6 @@ body { padding-top: 57px; }
     <h1>License Management</h1>
     <p class="page-sub">Activate a new license or deactivate an existing one</p>
 
-    <div class="app-picker">
-      <span class="app-picker-label" id="app-picker-label">Application</span>
-      <div class="app-picker-options" role="group" aria-labelledby="app-picker-label">
-        <button type="button" class="app-choice" data-app="integrate" aria-pressed="false">CyberRMF Integrate</button>
-        <button type="button" class="app-choice" data-app="admin-tools" aria-pressed="false">CyberRMF Admin Tools</button>
-      </div>
-    </div>
-
     <!-- ── Top-level action selection ── -->
     <div class="action-cards">
       <div class="action-card" id="card-activate" data-action="activate">
@@ -587,6 +580,14 @@ body { padding-top: 57px; }
       <div class="method-tabs">
         <div class="method-tab active" data-panel="activate" data-method="online">Online Activation</div>
         <div class="method-tab" data-panel="activate" data-method="airgap">Air-Gapped Activation</div>
+      </div>
+
+      <div class="app-picker">
+        <span class="app-picker-label" id="app-picker-label-activate">Application</span>
+        <div class="app-picker-options" role="group" aria-labelledby="app-picker-label-activate">
+          <button type="button" class="app-choice" data-app="integrate" aria-pressed="false">CyberRMF Integrate</button>
+          <button type="button" class="app-choice" data-app="admin-tools" aria-pressed="false">CyberRMF Admin Tools</button>
+        </div>
       </div>
 
       <!-- Online Activation -->
@@ -656,6 +657,14 @@ body { padding-top: 57px; }
       <div class="method-tabs">
         <div class="method-tab active" data-panel="deactivate" data-method="online">Online Deactivation</div>
         <div class="method-tab" data-panel="deactivate" data-method="airgap">Air-Gapped Deactivation</div>
+      </div>
+
+      <div class="app-picker">
+        <span class="app-picker-label" id="app-picker-label-deactivate">Application</span>
+        <div class="app-picker-options" role="group" aria-labelledby="app-picker-label-deactivate">
+          <button type="button" class="app-choice" data-app="integrate" aria-pressed="false">CyberRMF Integrate</button>
+          <button type="button" class="app-choice" data-app="admin-tools" aria-pressed="false">CyberRMF Admin Tools</button>
+        </div>
       </div>
 
       <!-- Online Deactivation -->

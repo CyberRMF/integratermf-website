@@ -68,8 +68,8 @@ document.querySelectorAll('.app-choice').forEach(function(b) {
 
 function requireApp(showResult) {
   if (selectedApp) return true;
-  showResult('err', 'Choose CyberRMF Integrate or CyberRMF Admin Tools at the top of the page.');
-  document.querySelector('.app-choice').focus();
+  showResult('err', 'Choose CyberRMF Integrate or CyberRMF Admin Tools above.');
+  (document.querySelector('.license-panel.active .app-choice') || document.querySelector('.app-choice')).focus();
   return false;
 }
 

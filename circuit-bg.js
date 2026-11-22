@@ -12,6 +12,7 @@
   if (!ctx) return;
 
   var GROW_MS = 5500;       /* how long the materialize takes */
+  var START_AT = 0.25;      /* how much of the final state is already showing on the first frame */
   var COVER = 1.0;          /* image is "contained" in the hero, then scaled by this */
   var MAX_ALPHA = 0.2125;   /* scales the keyed luminance; the source is already very dark, so this stays subtle */
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -106,7 +107,7 @@
   }
 
   function render(p) {
-    var e = ease(p);
+    var e = START_AT + (1 - START_AT) * ease(p);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -164,6 +165,7 @@
     animated = true;
     setup();
     if (reduceMotion) { render(1); return; }
+    render(0);
     startedAt = performance.now();
     frame = requestAnimationFrame(tick);
   }
