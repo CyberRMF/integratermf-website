@@ -13,7 +13,7 @@
 
   var GROW_MS = 5500;       /* how long the materialize takes */
   var COVER = 1.0;          /* image is "contained" in the hero, then scaled by this */
-  var MAX_ALPHA = 0.425;    /* scales the keyed luminance; the source is already very dark, so this stays subtle */
+  var MAX_ALPHA = 0.2125;   /* scales the keyed luminance; the source is already very dark, so this stays subtle */
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var img = new Image();
@@ -138,7 +138,7 @@
     /* top-left highlight ridge — additive */
     ctx.globalCompositeOperation = 'lighter';
     if (useFilter) ctx.filter = 'blur(' + (blur * 0.5).toFixed(2) + 'px)';
-    ctx.globalAlpha = 0.15 * e;
+    ctx.globalAlpha = 0.075 * e;
     ctx.drawImage(spriteW, -w / 2 - off, -h / 2 - off, w, h);
     if (useFilter) ctx.filter = 'none';
 
