@@ -754,15 +754,20 @@ window.addEventListener('DOMContentLoaded', function () {
     return out;
   }
 
-  function fillWorldPoly(world, style) {
+  function worldPolyPath(world) {
     var pts = clipNear(world.map(function (p) { return toCam(p[0], p[1], p[2]); }));
-    if (pts.length < 3) return;
-    ctx.beginPath();
+    if (pts.length < 3) return false;
     for (var i = 0; i < pts.length; i++) {
       var p = proj(pts[i]);
       if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y);
     }
     ctx.closePath();
+    return true;
+  }
+
+  function fillWorldPoly(world, style) {
+    ctx.beginPath();
+    if (!worldPolyPath(world)) return;
     ctx.fillStyle = style;
     ctx.fill();
   }
@@ -951,13 +956,15 @@ window.addEventListener('DOMContentLoaded', function () {
   // Cybernetic theme, outside the walls: a slow particle show after the CyberRMF apps' screensaver. Particles drift
   // in from all around to an orb beyond the north wall, nine small orbs form and circle it, then merge back in, the
   // orb collapses, INTEGRATE lights up where it was, and the sign bursts back out into particles to start again.
-  // The camera looks down, so little sky shows: the orb sits at the camera's height, far enough off that it always
-  // fits under the top of the view.
-  var FX_N = 900, FX_R = 3.3, FX_CELL = 0.36, FX_DENSE = 0.45;
-  var FX_O = { x: COLS / 2, y: 3.3, z: -22 };
+  // The camera looks down, so little sky shows: the orb is centred at floor level, so from the north wall its top
+  // just fits under the top of the view, and from further back its lower part sinks behind the arena.
+  var FX_N = 2700, FX_R = 6.6, FX_CELL = 0.36, FX_DENSE = 0.45;
+  var FX_O = { x: COLS / 2, y: 0, z: -22 };
+  // INTEGRATE stands a little higher, so from the far end of the arena the north wall stays below the letters.
+  var FX_SIGN_Y = 1.2;
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
   var FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000, FX_BURST = 7000;
-  var FX_SUB_FORM = 3500, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
+  var FX_SUB_FORM = 3500, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = -0.5;
   var FX_SPAWN_AT = [0, 1200, 3500, 5500, 7500, 9500, 11500, 13500, 15500];
   var FX_SPAWN_ORDER = [0, 5, 2, 7, 4, 1, 6, 3, 8];
   var FX_ORBIT = 14000, FX_MERGE = 4000, FX_COLLAPSE = 5000, FX_DISSOLVE = 3000;
@@ -1048,15 +1055,28 @@ window.addEventListener('DOMContentLoaded', function () {
     var oc = toCam(FX_O.x, FX_O.y, FX_O.z);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    ctx.save();
+    clipOutFloor();
     fxHalo(ph, pt, scale, oc);
     subs.forEach(function (sb) { if (sb.c.z >= oc.z) fxSubOrb(sb); });
+    ctx.restore();
     fxParticles(ph, pt, scale, s);
+    clipOutFloor();
     subs.forEach(function (sb) { if (sb.c.z < oc.z) fxSubOrb(sb); });
     ctx.restore();
   }
 
-  // The small orbs circle on a ring tilted towards the arena, so from the snake they pass in front of the
-  // orb and behind it.
+  // The orb, its small orbs and the sign stand beyond the north wall, so wherever the floor is in front of
+  // them they're under it and hidden. Particles also fly over the floor, so they're checked one by one.
+  function clipOutFloor() {
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    worldPolyPath(BOARD);
+    ctx.clip('evenodd');
+  }
+
+  // The small orbs circle on a tilted ring, raised on the arena's side, so from the snake they pass across the
+  // front of the orb and then behind it, low enough to sink behind the arena from further back.
   function fxSubOrbs(ph, pt) {
     var out = [], mT = ph === 'merge' ? easeInOut(pt / FX_MERGE) : 0;
     var fadeOut = ph === 'merge' ? 1 - smooth(pt / FX_MERGE) : 1;
@@ -1117,7 +1137,7 @@ window.addEventListener('DOMContentLoaded', function () {
       if (ph === 'burst') {
         e = 1 - Math.pow(1 - clamp01((pt - p.bd) / (FX_BURST - 1500)), 3);
         x = lerp(FX_O.x + p.bx, p.hx, e);
-        y = lerp(FX_O.y + p.by, p.hy, e) + Math.sin(e * Math.PI) * p.arc * 0.5;
+        y = lerp(FX_SIGN_Y + p.by, p.hy, e) + Math.sin(e * Math.PI) * p.arc * 0.5;
         z = lerp(FX_O.z, p.hz, e);
         a = lerp(0.85, 0.32, e);
       } else {
@@ -1135,6 +1155,10 @@ window.addEventListener('DOMContentLoaded', function () {
         }
       }
       var dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
+      if (y < 0) {
+        var ft = cam.y / (cam.y - y), ix = cam.x + dx * ft, iz = cam.z + dz * ft;
+        if (ix > 0 && ix < COLS && iz > 0 && iz < ROWS) continue;
+      }
       var cz = dx * cam.fx + dy * cam.fy + dz * cam.fz;
       if (cz < 1) continue;
       var sx = cam.cx + (dx * cam.rx + dz * cam.rz) * f / cz;
@@ -1167,7 +1191,7 @@ window.addEventListener('DOMContentLoaded', function () {
     var fade = ph === 'burst' ? 1 - smooth(pt / 3000) : 1;
     if (fade <= 0) return;
     var C = FX_CELL, f = cam.f, W = canvas.width, H = canvas.height;
-    var o = toCam(FX_O.x - (fx.pw - 1) / 2 * C, FX_O.y + (fx.ph - 1) / 2 * C, FX_O.z);
+    var o = toCam(FX_O.x - (fx.pw - 1) / 2 * C, FX_SIGN_Y + (fx.ph - 1) / 2 * C, FX_O.z);
     var exX = C * cam.rx, exY = C * cam.ux, exZ = C * cam.fx, eyY = -C * cam.uy, eyZ = -C * cam.fy;
     var side = 0.75 * C * f, squash = Math.max(Math.abs(cam.rx), 0.15);
     var dissolve = ph === 'dissolve' ? smooth(pt / FX_DISSOLVE) : ph === 'burst' ? 1 : 0;
@@ -1180,11 +1204,9 @@ window.addEventListener('DOMContentLoaded', function () {
       ctx.globalAlpha = a * fade;
       ctx.fillRect(sx - q * squash / 2, sy - q / 2, q * squash, q);
     }
-    var i, cell, hw = fx.pw / 2 * C, hh = fx.ph / 2 * C;
+    var i, cell;
     ctx.save();
-    ctx.globalAlpha = fade * (ph === 'flicker' ? smooth(pt / 800) : 1);
-    fillWorldPoly([[FX_O.x - hw, FX_O.y + hh, FX_O.z], [FX_O.x + hw, FX_O.y + hh, FX_O.z],
-                   [FX_O.x + hw, FX_O.y - hh, FX_O.z], [FX_O.x - hw, FX_O.y - hh, FX_O.z]], 'rgba(1,3,8,0.85)');
+    clipOutFloor();
     if (ph === 'fill' || ph === 'dissolve' || ph === 'burst') {
       ctx.fillStyle = 'rgb(' + FX_PRIMARY.join(',') + ')';
       for (i = 0; i < fx.fill.length; i++) {
