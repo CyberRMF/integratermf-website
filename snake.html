@@ -956,9 +956,9 @@ window.addEventListener('DOMContentLoaded', function () {
   // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A field of star-like particles
   // around the arena falls together into an orb beyond the north wall; it shrinks into a dense core, nine small
   // orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign beyond the west wall. Then
-  // the sky keeps going: shooting stars now and then, swarms of particles that gravity pulls into the orb, the odd
-  // comet, and, two minutes after the first Start and every two minutes after that, a new object gathering out of
-  // particles further off: a quasar, a magnetar or a nebula. Nothing comes apart again.
+  // the sky keeps going, one of each at a time: a shooting star now and then, a swarm of particles that gravity
+  // pulls into the orb, the odd comet, and, two minutes after the first Start and two minutes apart, a quasar, a
+  // magnetar and a nebula gathering out of particles further off. Nothing comes apart again.
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
   var FX_R = 6.6, FX_DENSE = 0.45, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
   var FX_REST = 2000, FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000;
@@ -991,10 +991,10 @@ window.addEventListener('DOMContentLoaded', function () {
     a: ['00000','00000','01110','00001','01111','10001','01111','00000']
   };
 
-  // A new object every SKY_EVERY after the first Start, taking turns by type; SKY_MAX keeps a long visit from
-  // piling up more than the game can draw. Each gathers the same way: its particles fade in around the arena over
-  // SKY_APPEAR, fly in nearest first over SKY_RECRUIT, and it lights up at SKY_IGNITE.
-  var SKY_EVERY = 120000, SKY_MAX = 9, SKY_TYPES = ['quasar', 'magnetar', 'nebula'];
+  // One of each, in this order: the first SKY_EVERY after the first Start, the others SKY_EVERY apart. Each gathers
+  // the same way: its particles fade in around the arena over SKY_APPEAR, fly in nearest first over SKY_RECRUIT,
+  // and it lights up at SKY_IGNITE.
+  var SKY_EVERY = 120000, SKY_TYPES = ['quasar', 'magnetar', 'nebula'];
   var SKY_APPEAR = 3000, SKY_RECRUIT = 16000, SKY_IGNITE = 21000;
   // A quasar: a white-hot core with spikes of light, a disk of particles swirling round it (two spiral arms that
   // turn together, the rest faster the closer in they are), and a jet streaming out of each face of the disk.
@@ -1098,7 +1098,7 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function fxEvents() {
-    if (fx.t >= fx.nextStar) {
+    if (fx.t >= fx.nextStar && !fx.stars.length) {
       fx.stars.push(makeShootingStar());
       fx.nextStar = fx.t + randIn(STAR_GAP);
     }
@@ -1117,13 +1117,15 @@ window.addEventListener('DOMContentLoaded', function () {
     return ph === 'wait' || ph === 'recruit' ? 1 : FX_DENSE;
   }
 
-  function skyCount(now) { return skyStart ? Math.min(SKY_MAX, Math.floor((now - skyStart) / SKY_EVERY)) : 0; }
+  function skyCount(now) { return skyStart ? Math.min(SKY_TYPES.length, Math.floor((now - skyStart) / SKY_EVERY)) : 0; }
 
   function skyAge(o, now) { return now - skyStart - (o.k + 1) * SKY_EVERY; }
 
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+
   function makeSky(k) {
-    var type = SKY_TYPES[k % SKY_TYPES.length], turn = Math.floor(k / SKY_TYPES.length);
-    var o = type === 'quasar' ? makeQuasar(turn) : type === 'magnetar' ? makeMagnetar() : makeNebula(turn);
+    var type = SKY_TYPES[k];
+    var o = type === 'quasar' ? makeQuasar(pick(Q_PALETTES)) : type === 'magnetar' ? makeMagnetar() : makeNebula(pick(N_PALETTES));
     o.type = type; o.k = k;
     return o;
   }
@@ -1148,8 +1150,8 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Its disk tilted 35 to 65 degrees from flat.
-  function makeQuasar(turn) {
-    var q = { pal: Q_PALETTES[turn % Q_PALETTES.length] }, i;
+  function makeQuasar(pal) {
+    var q = { pal: pal }, i;
     placeSky(q, 55, 110);
     var dist = q.dist;
     q.R = 6 + Math.random() * 3; q.L = q.R * 3.2;
@@ -1218,8 +1220,8 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Clouds along a curving filament, facing the arena, with dust spread through them and a few stars inside.
-  function makeNebula(turn) {
-    var nb = { pal: N_PALETTES[turn % N_PALETTES.length] }, i;
+  function makeNebula(pal) {
+    var nb = { pal: pal }, i;
     placeSky(nb, 80, 120);
     nb.S = 18 + Math.random() * 8;
     // Wide and flat, low enough that the clouds' bright middles fit under the top of the view.
