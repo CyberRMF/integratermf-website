@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Cyber Snake - A NIST SP 800-53 Game from CyberRMF</title>
-  <meta name="description" content="Eat the controls: a quick NIST SP 800-53 snake game from CyberRMF. Turn with the left and right arrow keys, A and D, or the D-pad.">
+  <meta name="description" content="Eat the controls: a quick NIST SP 800-53 snake game from CyberRMF. Arrow keys, WASD or the D-pad: left and right turn, up jumps, down digs.">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -231,8 +231,6 @@
     .dpad-down  { bottom: 0; left: 50%; transform: translateX(-50%); }
     .dpad-left  { left: 0;  top: 50%;  transform: translateY(-50%); }
     .dpad-right { right: 0; top: 50%;  transform: translateY(-50%); }
-    .dpad-up, .dpad-down { opacity: .3; pointer-events: none; }
-
     @media (max-width: 600px), (pointer: coarse) {
       .dpad { display: block; }
       .game-sub { font-size: 10px; }
@@ -248,7 +246,7 @@
   <div class="game-wrap">
     <div style="text-align:center">
       <div class="game-title">NIST SP 800-53 Snake</div>
-      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn the snake: arrow keys, A/D, or D-pad.</div>
+      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn, up jumps, hold down to dig: arrow keys, WASD, or D-pad.</div>
     </div>
     <div class="tab-row">
       <div class="game-tabs">
@@ -469,6 +467,7 @@ window.addEventListener('DOMContentLoaded', function () {
     prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
     dirX = 1; dirY = 0;
     score = 0; animT = 0; justAte = false; over = false;
+    jumps = []; digHeld = false; digAmt = 0; digDepth = 0;
     answer = ''; turnBuf = []; lastStep = null; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
     if (scoreEl) scoreEl.textContent = '0';
     if (ctrlEl) ctrlEl.textContent = '-';
@@ -548,19 +547,37 @@ window.addEventListener('DOMContentLoaded', function () {
     return Math.min((score - 30) / 40, 1);
   }
 
-  var GRADIENT_STOPS = [
-    { pos: 0,    r: 220, g: 50,  b: 38  },
-    { pos: 0.25, r: 234, g: 130, b: 8   },
-    { pos: 0.5,  r: 234, g: 200, b: 30  },
-    { pos: 0.75, r: 34,  g: 197, b: 94  },
-    { pos: 1,    r: 22,  g: 120, b: 50  }
-  ];
+  // near: the body just behind the head; far: the tail. After score 30 the body blends towards stops.
+  var SNAKE_COLORS = {
+    classic: {
+      head: '#60a5fa', headGlow: 'rgba(96,165,250,0.5)', near: [234, 179, 8], far: [220, 50, 38],
+      eat: '#22c55e', eatRgb: '34,197,94',
+      stops: [
+        { pos: 0,    r: 220, g: 50,  b: 38  },
+        { pos: 0.25, r: 234, g: 130, b: 8   },
+        { pos: 0.5,  r: 234, g: 200, b: 30  },
+        { pos: 0.75, r: 34,  g: 197, b: 94  },
+        { pos: 1,    r: 22,  g: 120, b: 50  }
+      ]
+    },
+    cyber: {
+      head: '#14c8ff', headGlow: 'rgba(20,200,255,0.65)', near: [255, 150, 0], far: [255, 30, 90],
+      eat: '#39ff14', eatRgb: '57,255,20',
+      stops: [
+        { pos: 0,    r: 255, g: 30,  b: 90  },
+        { pos: 0.25, r: 255, g: 110, b: 0   },
+        { pos: 0.5,  r: 255, g: 230, b: 0   },
+        { pos: 0.75, r: 57,  g: 255, b: 20  },
+        { pos: 1,    r: 0,   g: 210, b: 120 }
+      ]
+    }
+  };
 
-  function sampleGradient(t) {
-    if (t <= 0) return GRADIENT_STOPS[0];
-    if (t >= 1) return GRADIENT_STOPS[GRADIENT_STOPS.length - 1];
-    for (var i = 0; i < GRADIENT_STOPS.length - 1; i++) {
-      var a = GRADIENT_STOPS[i], b = GRADIENT_STOPS[i + 1];
+  function sampleGradient(stops, t) {
+    if (t <= 0) return stops[0];
+    if (t >= 1) return stops[stops.length - 1];
+    for (var i = 0; i < stops.length - 1; i++) {
+      var a = stops[i], b = stops[i + 1];
       if (t >= a.pos && t <= b.pos) {
         var local = (t - a.pos) / (b.pos - a.pos);
         return {
@@ -570,39 +587,30 @@ window.addEventListener('DOMContentLoaded', function () {
         };
       }
     }
-    return GRADIENT_STOPS[0];
+    return stops[0];
+  }
+
+  function segmentRgb(i, len) {
+    var pal = SNAKE_COLORS[theme];
+    var t = i / Math.max(len - 1, 1);
+    var gb = greenBlend();
+    var rgb = [0, 1, 2].map(function (k) { return Math.round(lerp(pal.near[k], pal.far[k], t)); });
+    if (gb > 0) {
+      var c = sampleGradient(pal.stops, t);
+      rgb = [Math.round(lerp(rgb[0], c.r, gb)), Math.round(lerp(rgb[1], c.g, gb)), Math.round(lerp(rgb[2], c.b, gb))];
+    }
+    return rgb;
   }
 
   function colorForSegment(i, len) {
-    if (i === 0) return '#60a5fa';
-    var t = i / Math.max(len - 1, 1);
-    var gb = greenBlend();
-    var baseR = Math.round(lerp(234, 220, t));
-    var baseG = Math.round(lerp(179, 50, t));
-    var baseB = Math.round(lerp(8, 38, t));
-    if (gb > 0) {
-      var c = sampleGradient(t);
-      baseR = Math.round(lerp(baseR, c.r, gb));
-      baseG = Math.round(lerp(baseG, c.g, gb));
-      baseB = Math.round(lerp(baseB, c.b, gb));
-    }
-    return '#' + ((1 << 24) + (baseR << 16) + (baseG << 8) + baseB).toString(16).slice(1);
+    if (i === 0) return SNAKE_COLORS[theme].head;
+    var c = segmentRgb(i, len);
+    return '#' + ((1 << 24) + (c[0] << 16) + (c[1] << 8) + c[2]).toString(16).slice(1);
   }
 
   function glowForSegment(i, len) {
-    if (i === 0) return 'rgba(96,165,250,0.5)';
-    var t = i / Math.max(len - 1, 1);
-    var gb = greenBlend();
-    var baseR = Math.round(lerp(234, 220, t));
-    var baseG = Math.round(lerp(179, 50, t));
-    var baseB = Math.round(lerp(8, 38, t));
-    if (gb > 0) {
-      var c = sampleGradient(t);
-      baseR = Math.round(lerp(baseR, c.r, gb));
-      baseG = Math.round(lerp(baseG, c.g, gb));
-      baseB = Math.round(lerp(baseB, c.b, gb));
-    }
-    return 'rgba(' + baseR + ',' + baseG + ',' + baseB + ',0.5)';
+    if (i === 0) return SNAKE_COLORS[theme].headGlow;
+    return 'rgba(' + segmentRgb(i, len).join(',') + ',0.5)';
   }
 
   function blendHex(hexA, hexB, t) {
@@ -628,8 +636,8 @@ window.addEventListener('DOMContentLoaded', function () {
         ? segElapsed / half
         : 1 - (segElapsed - half) / half;
       greenT = greenT * greenT * (3 - 2 * greenT);
-      col = blendHex(col, '#22c55e', greenT * 0.85);
-      glow = 'rgba(34,197,94,' + (0.5 * greenT).toFixed(2) + ')';
+      col = blendHex(col, SNAKE_COLORS[theme].eat, greenT * 0.85);
+      glow = 'rgba(' + SNAKE_COLORS[theme].eatRgb + ',' + (0.5 * greenT).toFixed(2) + ')';
       glowStr = Math.max(glowStr, 0.7 * greenT);
       grow = 1.5 * greenT;
     }
@@ -701,7 +709,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
   // World units are grid cells, the board lies on y = 0 from (0, 0) to (COLS, ROWS),
   // and the camera rides behind and above the head, turning with it.
-  var CAM_BACK = 4, CAM_UP = 3.625, LOOK_AHEAD = 5, LOOK_UP = 0.375, NEAR = 0.15, WALL_H = 0.7;
+  // Far enough back that the head and the next two balls are in view.
+  var CAM_BACK = 5, CAM_UP = 2.9, LOOK_AHEAD = 2.2, LOOK_UP = 0.3, NEAR = 0.15, WALL_H = 0.7;
   var cam = null;
 
   function setCamera(hx, hz) {
@@ -810,13 +819,70 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.stroke();
   }
 
+  // Holding down digs a shallow well under the head that the floor's lines bend down into. It deepens while
+  // held, up to DIG_MAX, and springs back when let go.
+  var DIG_MAX = 0.6, DIG_SIGMA = 1.5, DIG_R = 4.5, DIG_IN = 700, DIG_OUT = 350, DIG_TAP = 0.2;
+  var digHeld = false, digAmt = 0, digDepth = 0, well = { x: 0, z: 0 };
+
+  // Up makes the snake hop: the head rises and falls over JUMP_MS, and each ball behind it makes the same hop
+  // where the head did. It's only for show: the snake still eats the food it hops at, and still hits things.
+  var JUMP_MS = 520, JUMP_H = 1.0, jumps = [];
+
+  function jump() {
+    if (!alive) return;
+    var now = performance.now();
+    if (jumps.length && now - jumps[jumps.length - 1] < JUMP_MS) return;
+    jumps.push(now);
+  }
+
+  function liftAt(i, now) {
+    var h = 0;
+    for (var k = 0; k < jumps.length; k++) {
+      var u = (now - jumps[k] - i * TICK_MS) / JUMP_MS;
+      if (u > 0 && u < 1) h = Math.max(h, 4 * u * (1 - u));
+    }
+    return h * JUMP_H;
+  }
+
+  function setDig(on) {
+    if (on && !alive) return;
+    if (on && !digHeld) digAmt = Math.max(digAmt, DIG_TAP);
+    digHeld = on;
+  }
+
+  function updateDig(dt) {
+    digAmt = digHeld ? Math.min(1, digAmt + dt / DIG_IN) : Math.max(0, digAmt - dt / DIG_OUT);
+    digDepth = DIG_MAX * (1 - (1 - digAmt) * (1 - digAmt));
+  }
+
+  function depthAt(x, z) {
+    if (digDepth <= 0) return 0;
+    var dx = x - well.x, dz = z - well.z, d2 = dx * dx + dz * dz;
+    return d2 >= DIG_R * DIG_R ? 0 : digDepth * Math.exp(-d2 / (2 * DIG_SIGMA * DIG_SIGMA));
+  }
+
+  // A floor line at x = at (running along z) or z = at (alongX), from a to b, bent through the well near it.
+  function floorLine(alongX, at, a, b) {
+    function pt(u) { return alongX ? [u, -depthAt(u, at), at] : [at, -depthAt(at, u), u]; }
+    var mid = alongX ? well.x : well.z;
+    var lo = Math.max(a, mid - DIG_R), hi = Math.min(b, mid + DIG_R);
+    if (digDepth <= 0 || Math.abs(at - (alongX ? well.z : well.x)) >= DIG_R || lo >= hi) {
+      worldLine(pt(a), pt(b));
+      return;
+    }
+    var us = [a];
+    for (var u = lo; u < hi; u += 0.3) us.push(u);
+    us.push(hi, b);
+    for (var k = 1; k < us.length; k++) if (us[k] > us[k - 1]) worldLine(pt(us[k - 1]), pt(us[k]));
+  }
+
   function drawClassicArena(horizon, cw, ch, s) {
     fillSky(horizon, cw, ch, '#0f1115', '#1f232a', '#15171c');
 
     fillWorldPoly(BOARD, '#23272e');
     ctx.beginPath();
-    for (var c = 0; c <= COLS; c++) worldLine([c, 0, 0], [c, 0, ROWS]);
-    for (var r = 0; r <= ROWS; r++) worldLine([0, 0, r], [COLS, 0, r]);
+    for (var c = 0; c <= COLS; c++) floorLine(false, c, 0, ROWS);
+    for (var r = 0; r <= ROWS; r++) floorLine(true, r, 0, COLS);
     ctx.strokeStyle = '#323844';
     ctx.lineWidth = 1 * s;
     ctx.stroke();
@@ -834,32 +900,34 @@ window.addEventListener('DOMContentLoaded', function () {
     fillFog(horizon, cw, ch, '31,35,42');
   }
 
-  // Cybernetic: a black floor with a glowing cyan grid, light walls, and a fainter grid that runs on
-  // past the walls to a lit horizon.
-  var OUTER = 60, OUTER_STEP = 5, MAJOR = 5;
+  // Cybernetic: pitch black around the arena, a black floor with a glowing cyan line every five squares, and
+  // light walls. The grid is sparse, so the well also shows as glowing rings.
+  var MAJOR = 5;
 
-  function drawCyberArena(horizon, cw, ch, s) {
-    fillSky(horizon, cw, ch, '#000105', '#05213a', '#010308');
-
-    ctx.beginPath();
-    for (var x = -OUTER; x <= COLS + OUTER; x += OUTER_STEP) worldLine([x, 0, -OUTER], [x, 0, ROWS + OUTER]);
-    for (var z = -OUTER; z <= ROWS + OUTER; z += OUTER_STEP) worldLine([-OUTER, 0, z], [COLS + OUTER, 0, z]);
-    ctx.strokeStyle = 'rgba(0,170,255,0.16)';
-    ctx.lineWidth = 1 * s;
-    ctx.stroke();
+  function drawCyberArena(cw, ch, s) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, cw, ch);
 
     fillWorldPoly(BOARD, '#02060c');
     var c, r;
     ctx.beginPath();
-    for (c = 1; c < COLS; c++) if (c % MAJOR) worldLine([c, 0, 0], [c, 0, ROWS]);
-    for (r = 1; r < ROWS; r++) if (r % MAJOR) worldLine([0, 0, r], [COLS, 0, r]);
-    ctx.strokeStyle = 'rgba(0,200,255,0.26)';
-    ctx.lineWidth = 1 * s;
-    ctx.stroke();
-    ctx.beginPath();
-    for (c = MAJOR; c < COLS; c += MAJOR) worldLine([c, 0, 0], [c, 0, ROWS]);
-    for (r = MAJOR; r < ROWS; r += MAJOR) worldLine([0, 0, r], [COLS, 0, r]);
+    for (c = MAJOR; c < COLS; c += MAJOR) floorLine(false, c, 0, ROWS);
+    for (r = MAJOR; r < ROWS; r += MAJOR) floorLine(true, r, 0, COLS);
     strokeGlow('rgba(0,229,255,0.7)', 'rgba(0,229,255,0.1)', 1.3, s);
+
+    if (digDepth > 0.02) {
+      ctx.beginPath();
+      [0.8, 1.6, 2.4].forEach(function (rr) {
+        var y = -depthAt(well.x + rr, well.z);
+        for (var k = 0; k < 48; k++) {
+          var a0 = k / 48 * Math.PI * 2, a1 = (k + 1) / 48 * Math.PI * 2;
+          worldLine([well.x + Math.cos(a0) * rr, y, well.z + Math.sin(a0) * rr],
+                    [well.x + Math.cos(a1) * rr, y, well.z + Math.sin(a1) * rr]);
+        }
+      });
+      var ra = digDepth / DIG_MAX;
+      strokeGlow('rgba(0,229,255,' + (0.6 * ra).toFixed(3) + ')', 'rgba(0,229,255,' + (0.1 * ra).toFixed(3) + ')', 1, s);
+    }
 
     sortedWalls().forEach(function (w) {
       var top = wallTop(w);
@@ -878,17 +946,6 @@ window.addEventListener('DOMContentLoaded', function () {
       worldLine(w.a, w.b);
       strokeGlow('#9ffcff', 'rgba(0,229,255,0.22)', 1.8, s);
     });
-
-    fillFog(horizon, cw, ch, '1,3,8');
-    var band = ch * 0.06;
-    var glow = ctx.createLinearGradient(0, horizon - band, 0, horizon + band / 2);
-    glow.addColorStop(0, 'rgba(0,229,255,0)');
-    glow.addColorStop(0.67, 'rgba(0,229,255,0.22)');
-    glow.addColorStop(1, 'rgba(0,229,255,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, horizon - band, cw, band * 1.5);
-    ctx.fillStyle = 'rgba(160,250,255,0.85)';
-    ctx.fillRect(0, horizon - 0.75 * s, cw, 1.5 * s);
   }
 
   // Cybernetic theme, outside the walls: a slow particle show after the CyberRMF apps' screensaver. Particles drift
@@ -896,8 +953,8 @@ window.addEventListener('DOMContentLoaded', function () {
   // orb collapses, INTEGRATE lights up where it was, and the sign bursts back out into particles to start again.
   // The camera looks down, so little sky shows: the orb sits at the camera's height, far enough off that it always
   // fits under the top of the view.
-  var FX_N = 900, FX_R = 3.5, FX_CELL = 0.36, FX_DENSE = 0.45;
-  var FX_O = { x: COLS / 2, y: 3.8, z: -22 };
+  var FX_N = 900, FX_R = 3.3, FX_CELL = 0.36, FX_DENSE = 0.45;
+  var FX_O = { x: COLS / 2, y: 3.3, z: -22 };
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
   var FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000, FX_BURST = 7000;
   var FX_SUB_FORM = 3500, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
@@ -1157,15 +1214,17 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Classic: a dark shadow under each ball. Cybernetic: a glow on the floor in the ball's own colour.
+  // Both shrink under a ball in the air and follow the floor down into the well.
   function drawFloorMarks(items) {
     var cyber = theme === 'cyber';
     var off = cyber ? 0 : 0.06, size = cyber ? 1.3 : 0.95;
     if (!cyber) ctx.beginPath();
     items.forEach(function (it) {
-      var pts = [];
+      var pts = [], rr = it.r * size / (1 + it.lift * 0.7);
       for (var k = 0; k < 16; k++) {
         var a = k / 16 * Math.PI * 2;
-        var p = toCam(it.x + off + Math.cos(a) * it.r * size, 0, it.z + off + Math.sin(a) * it.r * size);
+        var px = it.x + off + Math.cos(a) * rr, pz = it.z + off + Math.sin(a) * rr;
+        var p = toCam(px, -depthAt(px, pz), pz);
         if (p.z < NEAR) return;
         pts.push(proj(p));
       }
@@ -1175,7 +1234,7 @@ window.addEventListener('DOMContentLoaded', function () {
       ctx.closePath();
       if (cyber) {
         ctx.save();
-        ctx.globalAlpha = 0.6;
+        ctx.globalAlpha = 0.6 / (1 + it.lift);
         ctx.fillStyle = it.glow;
         ctx.fill();
         ctx.restore();
@@ -1200,12 +1259,19 @@ window.addEventListener('DOMContentLoaded', function () {
     while (turnBy < -Math.PI) turnBy += Math.PI * 2;
     camYaw += dt ? turnBy * (1 - Math.exp(-dt / 60)) : turnBy;
 
-    var head = snake[0], headPrev = prevSnake[0] || head;
-    setCamera(lerp(headPrev.x, head.x, t) + 0.5, lerp(headPrev.y, head.y, t) + 0.5);
+    updateDig(dt);
+    while (jumps.length && now - jumps[0] > JUMP_MS + snake.length * TICK_MS) jumps.shift();
 
-    var horizon = cam.cy - (cam.hx * cam.ux + cam.hz * cam.uz) / (cam.hx * cam.fx + cam.hz * cam.fz) * cam.f;
-    if (theme === 'cyber') { drawCyberArena(horizon, cw, ch, s); drawFx(now, s); }
-    else drawClassicArena(horizon, cw, ch, s);
+    var head = snake[0], headPrev = prevSnake[0] || head;
+    well.x = lerp(headPrev.x, head.x, t) + 0.5;
+    well.z = lerp(headPrev.y, head.y, t) + 0.5;
+    setCamera(well.x, well.z);
+
+    if (theme === 'cyber') { drawCyberArena(cw, ch, s); drawFx(now, s); }
+    else {
+      var horizon = cam.cy - (cam.hx * cam.ux + cam.hz * cam.uz) / (cam.hx * cam.fx + cam.hz * cam.fz) * cam.f;
+      drawClassicArena(horizon, cw, ch, s);
+    }
 
     var items = [];
     var len = snake.length;
@@ -1214,14 +1280,16 @@ window.addEventListener('DOMContentLoaded', function () {
       var cur = snake[i], prev = prevSnake[i] || cur;
       var st = segmentStyle(i, len, sinceAte);
       var segR = (i === 0 ? 0.48 : 0.44 * (1 - (i / len) * 0.25)) + st.grow / G;
-      items.push({ x: lerp(prev.x, cur.x, t) + 0.5, y: segR, z: lerp(prev.y, cur.y, t) + 0.5, r: segR,
+      var sx = lerp(prev.x, cur.x, t) + 0.5, sz = lerp(prev.y, cur.y, t) + 0.5, lift = liftAt(i, now);
+      items.push({ x: sx, y: segR + lift - depthAt(sx, sz), z: sz, r: segR, lift: lift,
                    col: st.col, glow: st.glow, glowStr: st.glowStr });
     }
     var headItem = items[0];
     var pulse = 0.5 + 0.5 * Math.sin(animT);
     var foodR = 0.46 + pulse * 0.05;
-    var food = { x: foodX + 0.5, y: foodR + 0.1 + pulse * 0.12, z: foodY + 0.5, r: foodR,
+    var food = { x: foodX + 0.5, z: foodY + 0.5, r: foodR, lift: 0,
                  col: '#22c55e', glow: 'rgba(34,197,94,0.6)', glowStr: 0.6 + pulse * 0.4 };
+    food.y = foodR + 0.1 + pulse * 0.12 - depthAt(food.x, food.z);
     items.push(food);
 
     drawFloorMarks(items);
@@ -1377,13 +1445,24 @@ window.addEventListener('DOMContentLoaded', function () {
     graceTurn();
   }
 
+  function press(dir) {
+    if (dir === 'up') jump();
+    else if (dir === 'down') setDig(true);
+    else setDir(dir);
+  }
+
+  function release(dir) { if (dir === 'down') setDig(false); }
+
+  var KEY_DIRS = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
+                   ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
   document.addEventListener('keydown', function (e) {
     var k = e.key;
     if (k.indexOf('Arrow') === 0) e.preventDefault();
-    if (e.repeat) return;
-    if (k === 'ArrowLeft' || k === 'a' || k === 'A') setDir('left');
-    else if (k === 'ArrowRight' || k === 'd' || k === 'D') setDir('right');
+    if (e.repeat || !KEY_DIRS[k]) return;
+    press(KEY_DIRS[k]);
   });
+  document.addEventListener('keyup', function (e) { if (KEY_DIRS[e.key]) release(KEY_DIRS[e.key]); });
+  window.addEventListener('blur', function () { setDig(false); });
 
   var dpad = document.getElementById('dpad');
   if (dpad) {
@@ -1395,32 +1474,36 @@ window.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('touchstart', function (e) {
           e.preventDefault();
           btn.classList.add('pressed');
-          setDir(dir);
+          press(dir);
         }, { passive: false });
 
         btn.addEventListener('touchend', function (e) {
           e.preventDefault();
           btn.classList.remove('pressed');
+          release(dir);
         }, { passive: false });
 
         btn.addEventListener('mousedown', function (e) {
           e.preventDefault();
           btn.classList.add('pressed');
-          setDir(dir);
+          press(dir);
         });
 
         btn.addEventListener('mouseup', function () {
           btn.classList.remove('pressed');
+          release(dir);
         });
         btn.addEventListener('mouseleave', function () {
           btn.classList.remove('pressed');
+          release(dir);
         });
       })(btns[b]);
     }
   }
 
-  // Swipes turn as soon as the finger has moved far enough, and one gesture can chain turns (down then
-  // left, say); moving on in the same direction doesn't repeat the turn.
+  // Swipes act as soon as the finger has moved far enough, and one gesture can chain them (left then right,
+  // say); moving on in the same direction doesn't repeat it. Up jumps; down digs until the finger lifts or
+  // turns another way.
   var swipeX0 = null, swipeY0 = null, swipeDir = null;
   canvas.addEventListener('touchstart', function (e) {
     var t = e.touches[0];
@@ -1436,11 +1519,17 @@ window.addEventListener('DOMContentLoaded', function () {
     var minSwipe = 20;
     if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
     var dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-    if (dir !== swipeDir) setDir(dir);
+    if (dir !== swipeDir) {
+      if (swipeDir) release(swipeDir);
+      press(dir);
+    }
     swipeDir = dir;
     swipeX0 = t.clientX; swipeY0 = t.clientY;
   }, { passive: true });
-  canvas.addEventListener('touchend', function () { swipeX0 = null; swipeY0 = null; swipeDir = null; }, { passive: true });
+  canvas.addEventListener('touchend', function () {
+    if (swipeDir) release(swipeDir);
+    swipeX0 = null; swipeY0 = null; swipeDir = null;
+  }, { passive: true });
 
   window.switchMode = function (mode) {
     if (mode === gameMode) return;
