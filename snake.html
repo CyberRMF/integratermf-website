@@ -953,11 +953,12 @@ window.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A field of particles around the
-  // arena gathers, one orb at a time, into five orbs at different distances; each shrinks into a dense core, nine
-  // small orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign beyond the west wall.
-  // Two minutes after the first Start, and every two minutes after that, new particles gather into a quasar
-  // somewhere further off. Nothing comes apart again.
+  // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A field of star-like particles
+  // around the arena falls together into an orb beyond the north wall; it shrinks into a dense core, nine small
+  // orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign beyond the west wall. Then
+  // the sky keeps going: shooting stars now and then, swarms of particles that gravity pulls into the orb, the odd
+  // comet, and, two minutes after the first Start and every two minutes after that, a new object gathering out of
+  // particles further off: a quasar, a magnetar or a nebula. Nothing comes apart again.
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
   var FX_R = 6.6, FX_DENSE = 0.45, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
   var FX_REST = 2000, FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000;
@@ -966,16 +967,9 @@ window.addEventListener('DOMContentLoaded', function () {
   var FX_SPAWN_ORDER = [0, 5, 2, 7, 4, 1, 6, 3, 8];
   var FX_PHASES = [['recruit', FX_RECRUIT], ['hold', FX_HOLD + FX_SHRINK], ['spawn', FX_SPAWN], ['orbit', FX_ORBIT]];
   var FX_BUILT = FX_RECRUIT + FX_HOLD + FX_SHRINK + FX_SPAWN;
-  // Nearest first. The camera looks down, so little sky shows: each orb is low enough that at full size its top
-  // fits under the top of the view from as close as the snake gets, and from further back its lower part may
-  // sink behind the arena. n is its share of the particles; the far ones look smaller and need fewer.
-  var FX_ORBS = [
-    { x: COLS / 2, y: 0, z: -22, n: 2700 },
-    { x: COLS + 36, y: 1.5, z: 10, n: 800 },
-    { x: 6, y: 2.5, z: ROWS + 44, n: 700 },
-    { x: COLS + 30, y: 2.5, z: -40, n: 600 },
-    { x: -46, y: 3.5, z: ROWS + 34, n: 600 }
-  ];
+  // The camera looks down, so little sky shows: at full size the orb's top just fits under the top of the view
+  // from the north wall, and from further back its lower part sinks behind the arena.
+  var FX_ORB = { x: COLS / 2, y: 0, z: -22, n: 2700 };
 
   // The sign faces the arena from beyond the west wall, so its letters run along -z (left to right as the snake
   // sees them).
@@ -997,18 +991,37 @@ window.addEventListener('DOMContentLoaded', function () {
     a: ['00000','00000','01110','00001','01111','10001','01111','00000']
   };
 
+  // A new object every SKY_EVERY after the first Start, taking turns by type; SKY_MAX keeps a long visit from
+  // piling up more than the game can draw. Each gathers the same way: its particles fade in around the arena over
+  // SKY_APPEAR, fly in nearest first over SKY_RECRUIT, and it lights up at SKY_IGNITE.
+  var SKY_EVERY = 120000, SKY_MAX = 9, SKY_TYPES = ['quasar', 'magnetar', 'nebula'];
+  var SKY_APPEAR = 3000, SKY_RECRUIT = 16000, SKY_IGNITE = 21000;
   // A quasar: a white-hot core with spikes of light, a disk of particles swirling round it (two spiral arms that
   // turn together, the rest faster the closer in they are), and a jet streaming out of each face of the disk.
-  // Q_MAX keeps a long visit from piling up more than the game can draw.
-  var Q_EVERY = 120000, Q_MAX = 10, Q_APPEAR = 3000, Q_RECRUIT = 16000, Q_IGNITE = 21000, Q_JETS = 3500;
-  var Q_DISK = 700, Q_JET = 140, Q_IN = 0.9;
+  var Q_JETS = 3500, Q_DISK = 700, Q_JET = 140, Q_IN = 0.9;
   var Q_PALETTES = [
     [[255, 255, 255], [160, 250, 255], [0, 229, 255], [140, 90, 255], [255, 40, 214]],
     [[255, 255, 255], [255, 240, 160], [255, 176, 0], [255, 90, 30], [255, 30, 75]],
     [[255, 255, 255], [185, 255, 240], [57, 255, 160], [0, 200, 255], [60, 110, 255]],
     [[255, 255, 255], [255, 210, 245], [255, 92, 214], [177, 75, 255], [90, 60, 255]]
   ];
-  var fx = null, qStart = 0, quasars = [];
+  // A magnetar: a tiny, fiercely bright star that pulses, loops of its magnetic field traced by particles
+  // streaming from pole to pole, and a beam out of each pole, all swinging round as it spins. Now and then it
+  // flares.
+  var M_LOOPS = 10, M_PER = 56, M_SIZE = 8, M_BEAM = 20, M_SPIN = 9000, M_PULSE = 1100, M_FLARE = 17000;
+  var M_PALETTE = [[255, 255, 255], [200, 180, 255], [130, 100, 255], [80, 200, 255], [255, 90, 230]];
+  // A nebula: glowing clouds of gas in three colours, dust drifting through them, young stars lighting up inside.
+  var N_BLOBS = 10, N_DUST = 520, N_STARS = 7;
+  var N_PALETTES = [
+    [[255, 60, 170], [110, 50, 220], [0, 200, 220]],
+    [[255, 120, 40], [210, 30, 90], [255, 205, 110]],
+    [[40, 220, 180], [40, 100, 255], [180, 90, 255]]
+  ];
+  // The comings and goings, in fx time: a shooting star every STAR_GAP, a swarm falling into the orb every
+  // STREAM_GAP once it's built, and a comet crossing every COMET_GAP.
+  var STAR_GAP = [6000, 16000], STREAM_N = 360, STREAM_GAP = [60000, 110000], STREAM_FALL = 6500;
+  var COMET_GAP = [150000, 240000], COMET_LIFE = 45000, COMET_TAIL = 240;
+  var fx = null, skyStart = 0, sky = [];
 
   function fieldPoint() {
     for (;;) {
@@ -1030,31 +1043,24 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function fxSetup() {
-    var golden = Math.PI * (3 - Math.sqrt(5)), field = [], total = 0, taken = 0, i;
-    FX_ORBS.forEach(function (o) { total += o.n; });
-    for (i = 0; i < total; i++) field.push(fieldPoint());
-    // Shared out at random, so each orb draws its particles from all around.
-    for (i = field.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1)), t = field[i];
-      field[i] = field[j]; field[j] = t;
-    }
-    var orbs = FX_ORBS.map(function (def, oi) {
-      var o = { x: def.x, y: def.y, z: def.z, start: FX_REST + oi * FX_BUILT, orbit: 0, spin: oi * 1.7 };
-      var tl = Math.hypot(COLS / 2 - o.x, ROWS / 2 - o.z);
-      o.tx = (COLS / 2 - o.x) / tl; o.tz = (ROWS / 2 - o.z) / tl;
-      o.p = field.slice(taken, taken += def.n);
-      queueRecruits(o.p, o.x, o.y, o.z, 0, FX_RECRUIT);
-      // Each lands in a ball, spread by a stride so the early ones don't bunch on one side.
-      var N = o.p.length;
-      o.p.forEach(function (p, k) {
-        var jj = (k * 7919) % N, uy = 1 - 2 * (jj + 0.5) / N, ur = Math.sqrt(1 - uy * uy), th = jj * golden;
-        p.rr = Math.cbrt((k + 0.5) / N);
-        p.tx = ur * Math.cos(th) * p.rr; p.ty = uy * p.rr; p.tz = ur * Math.sin(th) * p.rr;
-      });
-      return o;
+    var golden = Math.PI * (3 - Math.sqrt(5)), o = { x: FX_ORB.x, y: FX_ORB.y, z: FX_ORB.z, start: FX_REST, orbit: 0,
+                                                     spin: 0, p: [] };
+    var tl = Math.hypot(COLS / 2 - o.x, ROWS / 2 - o.z);
+    o.tx = (COLS / 2 - o.x) / tl; o.tz = (ROWS / 2 - o.z) / tl;
+    for (var i = 0; i < FX_ORB.n; i++) o.p.push(fieldPoint());
+    queueRecruits(o.p, o.x, o.y, o.z, 0, FX_RECRUIT);
+    // They land in a ball, spread by a stride so the early ones don't bunch on one side.
+    var N = o.p.length;
+    o.p.forEach(function (p, k) {
+      var jj = (k * 7919) % N, uy = 1 - 2 * (jj + 0.5) / N, ur = Math.sqrt(1 - uy * uy), th = jj * golden;
+      p.rr = Math.cbrt((k + 0.5) / N);
+      p.tx = ur * Math.cos(th) * p.rr; p.ty = uy * p.rr; p.tz = ur * Math.sin(th) * p.rr;
     });
-    fx = { t: 0, last: 0, orbs: orbs, sign: signSetup() };
+    fx = { t: 0, last: 0, orb: o, sign: signSetup(), pulse: 0, stars: [], stream: null, comet: null,
+           nextStar: 20000, nextStream: FX_REST + FX_BUILT + 30000, nextComet: 150000 };
   }
+
+  function randIn(r) { return r[0] + Math.random() * (r[1] - r[0]); }
 
   function signSetup() {
     var widths = SIGN.lines.map(function (l) { return l.length * 6 - 1; });
@@ -1084,13 +1090,26 @@ window.addEventListener('DOMContentLoaded', function () {
     var dt = fx.last ? Math.min(now - fx.last, 100) : 0;
     fx.last = now;
     fx.t += dt;
-    fx.orbs.forEach(function (o) {
-      var st = orbPhase(fx.t - o.start), pt = st.pt, speed = 0;
-      if (st.ph === 'spawn') speed = 1;
-      else if (st.ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, FX_CRUISE, easeInOut((pt - 10000) / 4000));
-      else if (st.ph === 'built') speed = FX_CRUISE;
-      o.orbit += dt * 0.0001 * speed;
-    });
+    var o = fx.orb, st = orbPhase(fx.t - o.start), pt = st.pt, speed = 0;
+    if (st.ph === 'spawn') speed = 1;
+    else if (st.ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, FX_CRUISE, easeInOut((pt - 10000) / 4000));
+    else if (st.ph === 'built') speed = FX_CRUISE;
+    o.orbit += dt * 0.0001 * speed;
+  }
+
+  function fxEvents() {
+    if (fx.t >= fx.nextStar) {
+      fx.stars.push(makeShootingStar());
+      fx.nextStar = fx.t + randIn(STAR_GAP);
+    }
+    if (fx.t >= fx.nextStream && !fx.stream) {
+      fx.stream = makeStream();
+      fx.nextStream = fx.t + randIn(STREAM_GAP);
+    }
+    if (fx.t >= fx.nextComet && !fx.comet) {
+      fx.comet = makeComet();
+      fx.nextComet = fx.t + COMET_LIFE + randIn(COMET_GAP);
+    }
   }
 
   function fxScale(ph, pt) {
@@ -1098,29 +1117,45 @@ window.addEventListener('DOMContentLoaded', function () {
     return ph === 'wait' || ph === 'recruit' ? 1 : FX_DENSE;
   }
 
-  function quasarCount(now) { return qStart ? Math.min(Q_MAX, Math.floor((now - qStart) / Q_EVERY)) : 0; }
+  function skyCount(now) { return skyStart ? Math.min(SKY_MAX, Math.floor((now - skyStart) / SKY_EVERY)) : 0; }
 
-  function quasarAge(q, now) { return now - qStart - (q.k + 1) * Q_EVERY; }
+  function skyAge(o, now) { return now - skyStart - (o.k + 1) * SKY_EVERY; }
 
-  // Somewhere 55 to 110 from the middle of the arena, in a direction clear of the orbs, the sign and the
-  // other quasars, with its disk tilted 35 to 65 degrees from flat.
-  function makeQuasar(k) {
-    var q = { k: k, pal: Q_PALETTES[k % Q_PALETTES.length] }, ang, i;
-    var avoid = FX_ORBS.map(function (o) { return [Math.atan2(o.z - ROWS / 2, o.x - COLS / 2), 0.26]; });
-    avoid.push([Math.PI, 0.45]);
-    quasars.forEach(function (o) { avoid.push([o.ang, 0.3]); });
+  function makeSky(k) {
+    var type = SKY_TYPES[k % SKY_TYPES.length], turn = Math.floor(k / SKY_TYPES.length);
+    var o = type === 'quasar' ? makeQuasar(turn) : type === 'magnetar' ? makeMagnetar() : makeNebula(turn);
+    o.type = type; o.k = k;
+    return o;
+  }
+
+  // Somewhere near to far from the middle of the arena, in a direction clear of the orb, the sign and the other
+  // objects.
+  function placeSky(o, near, far) {
+    var avoid = [[Math.atan2(FX_ORB.z - ROWS / 2, FX_ORB.x - COLS / 2), 0.3], [Math.PI, 0.45]], ang;
+    sky.forEach(function (s) { avoid.push([s.ang, 0.32]); });
     for (var tries = 0; tries < 60; tries++) {
       ang = Math.random() * Math.PI * 2;
       if (avoid.every(function (v) { return Math.abs(Math.atan2(Math.sin(ang - v[0]), Math.cos(ang - v[0]))) > v[1]; })) break;
     }
-    var dist = 55 + Math.random() * 55;
-    q.ang = ang; q.x = COLS / 2 + Math.cos(ang) * dist; q.z = ROWS / 2 + Math.sin(ang) * dist;
+    o.ang = ang; o.dist = near + Math.random() * (far - near);
+    o.x = COLS / 2 + Math.cos(ang) * o.dist; o.z = ROWS / 2 + Math.sin(ang) * o.dist;
+  }
+
+  // Two unit vectors square to n and each other.
+  function frameAround(n) {
+    var el = Math.hypot(n[0], n[2]), e1 = el > 1e-6 ? [n[2] / el, 0, -n[0] / el] : [1, 0, 0];
+    return [e1, [n[1] * e1[2] - n[2] * e1[1], n[2] * e1[0] - n[0] * e1[2], n[0] * e1[1] - n[1] * e1[0]]];
+  }
+
+  // Its disk tilted 35 to 65 degrees from flat.
+  function makeQuasar(turn) {
+    var q = { pal: Q_PALETTES[turn % Q_PALETTES.length] }, i;
+    placeSky(q, 55, 110);
+    var dist = q.dist;
     q.R = 6 + Math.random() * 3; q.L = q.R * 3.2;
     var tilt = (35 + Math.random() * 30) * Math.PI / 180, az = Math.random() * Math.PI * 2;
-    var n = [Math.sin(tilt) * Math.cos(az), Math.cos(tilt), Math.sin(tilt) * Math.sin(az)];
-    var el = Math.hypot(n[0], n[2]), e1 = [n[2] / el, 0, -n[0] / el];
-    q.n = n; q.e1 = e1;
-    q.e2 = [n[1] * e1[2] - n[2] * e1[1], n[2] * e1[0] - n[0] * e1[2], n[0] * e1[1] - n[1] * e1[0]];
+    var n = [Math.sin(tilt) * Math.cos(az), Math.cos(tilt), Math.sin(tilt) * Math.sin(az)], fr = frameAround(n);
+    q.n = n; q.e1 = fr[0]; q.e2 = fr[1];
     // Low enough that the top of the disk fits under the top of the view from as close as the snake gets.
     q.y = Math.min(7, 2.9 + 0.12 * (dist - 18) - q.R * Math.sin(tilt));
     var dir = Math.random() < 0.5 ? 1 : -1, wArm = dir * Math.PI * 2 / 24000, wOut = dir * Math.PI * 2 / 40000;
@@ -1141,11 +1176,125 @@ window.addEventListener('DOMContentLoaded', function () {
       p.bk = Math.min(4, Math.floor(fr * 5)); p.a = 0.95 - 0.45 * fr;
       q.p.push(p);
     }
-    queueRecruits(q.p, q.x, q.y, q.z, Q_APPEAR, Q_RECRUIT);
+    queueRecruits(q.p, q.x, q.y, q.z, SKY_APPEAR, SKY_RECRUIT);
     q.j = [];
     for (i = 0; i < Q_JET * 2; i++) q.j.push({ s: Math.random(), phi: Math.random() * Math.PI * 2, side: i < Q_JET ? 1 : -1 });
     q.cols = q.pal.map(rgbStr);
     return q;
+  }
+
+  // Its spin axis up to 20 degrees off vertical and its magnetic axis 35 degrees off that, so the field and
+  // beams sweep round. Each loop is a dipole field line, r = L sin^2(theta) from the star.
+  function makeMagnetar() {
+    var m = { pal: M_PALETTE, dir: Math.random() < 0.5 ? 1 : -1, chi: 0.6 }, a = Math.random() * 0.35, b = Math.random() * Math.PI * 2;
+    placeSky(m, 50, 85);
+    m.y = Math.min(7, 2.9 + 0.12 * (m.dist - 18) - M_SIZE * 0.8);
+    m.A = [Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)];
+    var fr = frameAround(m.A);
+    m.P = fr[0]; m.Q = fr[1];
+    m.p = [];
+    for (var i = 0; i < M_LOOPS; i++) {
+      var phi = i * Math.PI * 2 / M_LOOPS + (Math.random() - 0.5) * 0.3, L = M_SIZE * (0.55 + Math.random() * 0.45);
+      for (var j = 0; j < M_PER; j++) {
+        var p = fieldPoint();
+        p.phi = phi; p.L = L; p.s = (j + Math.random()) / M_PER; p.bk = 2 + i % 3;
+        m.p.push(p);
+      }
+    }
+    queueRecruits(m.p, m.x, m.y, m.z, SKY_APPEAR, SKY_RECRUIT);
+    m.cols = m.pal.map(rgbStr);
+    return m;
+  }
+
+  // The magnetic axis y, swung round the spin axis, with x and z square to it.
+  function magnetarFrame(m, lt) {
+    var w = m.dir * lt * Math.PI * 2 / M_SPIN, c = Math.cos(w), s = Math.sin(w), ci = Math.cos(m.chi), si = Math.sin(m.chi);
+    var y = [], x = [];
+    for (var i = 0; i < 3; i++) {
+      y.push(ci * m.A[i] + si * (c * m.P[i] + s * m.Q[i]));
+      x.push(-s * m.P[i] + c * m.Q[i]);
+    }
+    return { x: x, y: y, z: [x[1] * y[2] - x[2] * y[1], x[2] * y[0] - x[0] * y[2], x[0] * y[1] - x[1] * y[0]] };
+  }
+
+  // Clouds along a curving filament, facing the arena, with dust spread through them and a few stars inside.
+  function makeNebula(turn) {
+    var nb = { pal: N_PALETTES[turn % N_PALETTES.length] }, i;
+    placeSky(nb, 80, 120);
+    nb.S = 18 + Math.random() * 8;
+    // Wide and flat, low enough that the clouds' bright middles fit under the top of the view.
+    nb.y = 1.5 + 0.045 * nb.dist;
+    var wx = (COLS / 2 - nb.x) / nb.dist, wz = (ROWS / 2 - nb.z) / nb.dist, bend = Math.random() * Math.PI * 2;
+    nb.u = [-wz, 0, wx]; nb.w = [wx, 0, wz];
+    nb.blobs = [];
+    for (i = 0; i < N_BLOBS; i++) {
+      var t = i / (N_BLOBS - 1) - 0.5;
+      nb.blobs.push({
+        u: t * nb.S * 1.8 + (Math.random() - 0.5) * nb.S * 0.15,
+        v: Math.sin(t * Math.PI * 1.3 + bend) * nb.S * 0.12 + (Math.random() - 0.5) * nb.S * 0.08,
+        w: (Math.random() - 0.5) * nb.S * 0.3,
+        r: nb.S * (0.28 + Math.random() * 0.22), c: i % 3, ph: Math.random() * 6.28
+      });
+    }
+    nb.p = [];
+    for (i = 0; i < N_DUST; i++) {
+      var bl = nb.blobs[Math.floor(Math.random() * N_BLOBS)], p = fieldPoint(), g = Math.pow(Math.random(), 0.7) * bl.r * 0.9;
+      var gt = Math.random() * Math.PI * 2, gp = Math.acos(2 * Math.random() - 1);
+      p.ou = bl.u + g * Math.sin(gp) * Math.cos(gt); p.ov = bl.v + g * Math.cos(gp) * 0.6; p.ow = bl.w + g * Math.sin(gp) * Math.sin(gt);
+      p.bk = bl.c; p.a = 0.15 + Math.random() * 0.25;
+      nb.p.push(p);
+    }
+    queueRecruits(nb.p, nb.x, nb.y, nb.z, SKY_APPEAR, SKY_RECRUIT);
+    nb.stars = [];
+    for (i = 0; i < N_STARS; i++) {
+      var sb = nb.blobs[1 + Math.floor(Math.random() * (N_BLOBS - 2))];
+      nb.stars.push({ u: sb.u + (Math.random() - 0.5) * sb.r, v: sb.v + (Math.random() - 0.5) * sb.r * 0.6, w: sb.w,
+                      at: SKY_IGNITE - 2000 + i * 900, c: Math.floor(Math.random() * 3), ph: Math.random() * 6.28 });
+    }
+    nb.cols = nb.pal.map(function (c) { return rgbStr(c.map(function (v) { return Math.round(lerp(v, 255, 0.35)); })); });
+    return nb;
+  }
+
+  function nebulaAt(nb, u, v, w) {
+    return [nb.x + nb.u[0] * u + nb.w[0] * w, nb.y + v, nb.z + nb.u[2] * u + nb.w[2] * w];
+  }
+
+  // Low across the sky ahead of the camera, sideways and dropping a little; gone in a second or so.
+  function makeShootingStar() {
+    var yaw = camYaw + (Math.random() - 0.5) * 0.9, D = 45 + Math.random() * 50, el = (2 + Math.random() * 4.5) * Math.PI / 180;
+    var dir = yaw + (Math.random() < 0.5 ? 1 : -1) * (Math.PI / 2 + (Math.random() - 0.5) * 0.7), v = 0.012 + Math.random() * 0.01;
+    return { x: cam.x + Math.cos(yaw) * D, y: cam.y + D * Math.tan(el), z: cam.z + Math.sin(yaw) * D,
+             vx: Math.cos(dir) * v, vy: -v * (0.05 + Math.random() * 0.13), vz: Math.sin(dir) * v,
+             born: fx.t, life: 900 + Math.random() * 700, len: 9 + Math.random() * 7 };
+  }
+
+  // A swarm of star-like particles, mostly in the field round the arena and some low round the snake, wherever
+  // it is, that gravity then pulls into the orb: nearest first, each spiralling in faster and faster.
+  function makeStream() {
+    var o = fx.orb, pts = [], ax = cam.x + Math.cos(camYaw) * 9, az = cam.z + Math.sin(camYaw) * 9;
+    for (var i = 0; i < STREAM_N; i++) {
+      var ar = 13 * Math.sqrt(Math.random()), at = Math.random() * Math.PI * 2;
+      var p = i < STREAM_N * 0.3
+        ? { hx: ax + Math.cos(at) * ar, hy: 0.6 + Math.random() * 2.6, hz: az + Math.sin(at) * ar, tw: Math.random() * 6.28 }
+        : fieldPoint();
+      p.swirl = (Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random() * 1.2);
+      pts.push(p);
+    }
+    queueRecruits(pts, o.x, o.y, o.z, 3000, 9000);
+    return { born: fx.t, p: pts };
+  }
+
+  // Drifting round the arena high up, starting off to one side of where the camera is looking.
+  function makeComet() {
+    var side = Math.random() < 0.5 ? 1 : -1, look = Math.atan2(cam.z + Math.sin(camYaw) * 60 - ROWS / 2, cam.x + Math.cos(camYaw) * 60 - COLS / 2);
+    var c = { a0: look - side * 0.45, side: side, D: 55 + Math.random() * 30, h0: 7 + Math.random() * 3, born: fx.t, t: [] };
+    for (var i = 0; i < COMET_TAIL; i++) c.t.push({ s: Math.random(), sp: (Math.random() - 0.5) * 2, sq: (Math.random() - 0.5) * 2, bk: i % 3 });
+    return c;
+  }
+
+  function cometPos(c, u) {
+    var a = c.a0 + c.side * 0.9 * u;
+    return [COLS / 2 + Math.cos(a) * c.D, c.h0 - 1.5 * u, ROWS / 2 + Math.sin(a) * c.D];
   }
 
   function rgbStr(c) { return 'rgb(' + c.join(',') + ')'; }
@@ -1163,26 +1312,38 @@ window.addEventListener('DOMContentLoaded', function () {
   function drawFx(now, s) {
     if (!fx) fxSetup();
     fxAdvance(now);
-    while (quasars.length < quasarCount(now)) quasars.push(makeQuasar(quasars.length));
-    fx.orbs.forEach(function (o) {
-      var st = orbPhase(fx.t - o.start);
-      o.ph = st.ph; o.pt = st.pt; o.scale = fxScale(o.ph, o.pt);
-    });
+    fxEvents();
+    while (sky.length < skyCount(now)) sky.push(makeSky(sky.length));
+    var o = fx.orb, st = orbPhase(fx.t - o.start);
+    o.ph = st.ph; o.pt = st.pt; o.scale = fxScale(o.ph, o.pt);
     ctx.save();
     clipOutFloor();
     drawFxSign();
     ctx.globalCompositeOperation = 'lighter';
-    fx.orbs.forEach(orbGlow);
-    quasars.forEach(function (q) { quasarGlow(q, now); });
+    sky.forEach(function (k) {
+      if (k.type === 'quasar') quasarGlow(k, now);
+      else if (k.type === 'magnetar') magnetarGlow(k, now);
+      else nebulaGlow(k, now);
+    });
+    orbGlow(o);
+    fx.stars = fx.stars.filter(function (st) { return drawShootingStar(st, s); });
+    if (fx.comet && !cometGlow(fx.comet, s)) fx.comet = null;
     ctx.restore();
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    fx.orbs.forEach(function (o) { orbParticles(o, s); });
-    quasars.forEach(function (q) { quasarParticles(q, now, s); });
+    sky.forEach(function (k) {
+      if (k.type === 'quasar') quasarParticles(k, now, s);
+      else if (k.type === 'magnetar') magnetarParticles(k, now, s);
+      else nebulaParticles(k, now, s);
+    });
+    orbParticles(o, s);
+    fx.pulse = 0;
+    if (fx.stream && !streamParticles(fx.stream, s)) fx.stream = null;
+    if (fx.comet) cometParticles(fx.comet, s);
     ctx.restore();
   }
 
-  // The orbs, quasars and sign stand beyond the walls, so wherever the floor is in front of them they're under
+  // The orb, sky objects and sign stand beyond the walls, so wherever the floor is in front of them they're under
   // it and hidden. Particles also fly over the floor, so they're checked one by one instead.
   function clipOutFloor() {
     ctx.beginPath();
@@ -1197,8 +1358,8 @@ window.addEventListener('DOMContentLoaded', function () {
     if (o.ph === 'wait' || !sphereVisible(o.x, o.y, o.z, FX_R * 1.6)) return;
     var oc = toCam(o.x, o.y, o.z);
     if (oc.z > NEAR + FX_R) {
-      var I = o.ph === 'recruit' ? 0.3 * o.pt / FX_RECRUIT : 0.3;
-      var p = proj(oc), r = FX_R * o.scale * cam.f / oc.z;
+      var I = (o.ph === 'recruit' ? 0.3 * o.pt / FX_RECRUIT : 0.3) + fx.pulse;
+      var p = proj(oc), r = FX_R * o.scale * (1 + fx.pulse * 0.5) * cam.f / oc.z;
       var grad = ctx.createRadialGradient(p.x, p.y, r * 0.6, p.x, p.y, r * 1.6);
       grad.addColorStop(0, 'rgba(0,229,255,0)');
       grad.addColorStop(0.35, 'rgba(0,229,255,' + (I * 0.25).toFixed(3) + ')');
@@ -1235,12 +1396,12 @@ window.addEventListener('DOMContentLoaded', function () {
   // A white-hot core that flares as the quasar ignites, a faint glow in the disk's colour, and spikes of
   // light across the core like a bright star seen through a telescope.
   function quasarGlow(q, now) {
-    var lt = quasarAge(q, now), ign = smooth(clamp01((lt - Q_IGNITE + 3000) / 3000));
+    var lt = skyAge(q, now), ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000));
     if (ign <= 0 || !sphereVisible(q.x, q.y, q.z, q.R * 1.4)) return;
     var c = toCam(q.x, q.y, q.z);
     if (c.z < 2) return;
     var p = proj(c), k = cam.f / c.z, pal = q.pal, white = [255, 255, 255];
-    var flash = lt > Q_IGNITE ? Math.exp(-Math.pow((lt - Q_IGNITE) / 700, 2)) : 0;
+    var flash = lt > SKY_IGNITE ? Math.exp(-Math.pow((lt - SKY_IGNITE) / 700, 2)) : 0;
     var I = ign * (1 + 0.12 * Math.sin(lt * 0.003));
     var hr = q.R * 1.4 * k, g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hr);
     g.addColorStop(0, rgbaStr(pal[3], 0.12 * I));
@@ -1269,6 +1430,124 @@ window.addEventListener('DOMContentLoaded', function () {
       if (d[0]) ctx.fillRect(p.x - sl, p.y - lw / 2, sl * 2, lw);
       else ctx.fillRect(p.x - lw / 2, p.y - sl, lw, sl * 2);
     });
+  }
+
+  function glowDot(x, y, r, stops) {
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    stops.forEach(function (st) { g.addColorStop(st[0], st[1]); });
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // A gradient line between two points on screen: a wide soft stroke and a narrow bright one.
+  function glowLine(a, b, c0, c1, wide, narrow) {
+    var g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+    g.addColorStop(0, c0);
+    g.addColorStop(1, c1);
+    ctx.strokeStyle = g;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    if (wide) {
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = wide;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.lineWidth = narrow;
+    ctx.stroke();
+  }
+
+  // A sharp pulse every M_PULSE; a flash as it ignites, and then every M_FLARE a flare lasting a second and a half.
+  function magnetarBeat(lt) {
+    var ft = (lt - SKY_IGNITE) % M_FLARE, flash = lt > SKY_IGNITE ? Math.exp(-Math.pow((lt - SKY_IGNITE) / 600, 2)) : 0;
+    var flare = lt > SKY_IGNITE + 5000 && ft < 1500 ? Math.sin(ft / 1500 * Math.PI) : 0;
+    return { pulse: Math.pow(Math.max(0, Math.sin(lt * Math.PI * 2 / M_PULSE)), 6), flare: Math.max(flash, flare) };
+  }
+
+  // A small, dazzling core beating fast, a violet haze, and a beam out of each magnetic pole.
+  function magnetarGlow(m, now) {
+    var lt = skyAge(m, now), ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000));
+    if (ign <= 0 || !sphereVisible(m.x, m.y, m.z, M_BEAM)) return;
+    var c = toCam(m.x, m.y, m.z);
+    if (c.z < 2) return;
+    var p = proj(c), k = cam.f / c.z, pal = m.pal, b = magnetarBeat(lt), I = ign * (0.6 + 0.4 * b.pulse + b.flare);
+    var F = magnetarFrame(m, lt);
+    glowDot(p.x, p.y, M_SIZE * 1.1 * k * (1 + 0.4 * b.flare), [[0, rgbaStr(pal[2], 0.13 * I)], [1, rgbaStr(pal[2], 0)]]);
+    [1, -1].forEach(function (sd) {
+      var e = toCam(m.x + F.y[0] * M_BEAM * sd, m.y + F.y[1] * M_BEAM * sd, m.z + F.y[2] * M_BEAM * sd);
+      if (e.z >= 1) glowLine(p, proj(e), rgbaStr(pal[1], 0.6 * I), rgbaStr(pal[3], 0), Math.max(2, 0.9 * k), Math.max(1, 0.25 * k));
+    });
+    glowDot(p.x, p.y, 0.8 * k * (1 + 0.6 * b.pulse + 2.5 * b.flare), [[0, rgbaStr(pal[0], 0.95 * I + b.flare)],
+      [0.3, rgbaStr(pal[1], 0.75 * I)], [0.7, rgbaStr(pal[2], 0.25 * I)], [1, rgbaStr(pal[2], 0)]]);
+  }
+
+  // The clouds fill in as the dust arrives and then breathe slowly; the stars light one by one.
+  function nebulaGlow(nb, now) {
+    var lt = skyAge(nb, now), grow = smooth(clamp01((lt - SKY_APPEAR - SKY_RECRUIT * 0.3) / SKY_RECRUIT));
+    if (grow <= 0 || !sphereVisible(nb.x, nb.y, nb.z, nb.S * 1.2)) return;
+    nb.blobs.forEach(function (bl) {
+      var w = nebulaAt(nb, bl.u, bl.v, bl.w), c = toCam(w[0], w[1], w[2]);
+      if (c.z < bl.r + 1) return;
+      var p = proj(c), col = nb.pal[bl.c], a = 0.24 * grow * (0.8 + 0.2 * Math.sin(lt * 0.0004 + bl.ph));
+      glowDot(p.x, p.y, bl.r * cam.f / c.z, [[0, rgbaStr(col, a)], [0.4, rgbaStr(col, a * 0.55)], [1, rgbaStr(col, 0)]]);
+    });
+    nb.stars.forEach(function (st) {
+      var on = smooth(clamp01((lt - st.at) / 1500));
+      if (on <= 0) return;
+      var w = nebulaAt(nb, st.u, st.v, st.w), c = toCam(w[0], w[1], w[2]);
+      if (c.z < 2) return;
+      var p = proj(c), flash = Math.exp(-Math.pow((lt - st.at - 1500) / 600, 2)), I = on * (0.75 + 0.25 * Math.sin(lt * 0.002 + st.ph));
+      glowDot(p.x, p.y, 1.3 * cam.f / c.z * (1 + 2 * flash), [[0, rgbaStr([255, 255, 255], 0.95 * I + 0.5 * flash)],
+        [0.2, rgbaStr([255, 255, 255], 0.5 * I)], [0.45, rgbaStr(nb.pal[st.c], 0.3 * I)], [1, rgbaStr(nb.pal[st.c], 0)]]);
+    });
+  }
+
+  // A streak that brightens and fades over its short life, with a bright head. False once it's burnt out.
+  function drawShootingStar(st, s) {
+    var age = fx.t - st.born, u = age / st.life;
+    if (u >= 1) return false;
+    if (u < 0) return true;
+    var v = Math.hypot(st.vx, st.vy, st.vz), hx = st.x + st.vx * age, hy = st.y + st.vy * age, hz = st.z + st.vz * age;
+    var a = toCam(hx, hy, hz), b = toCam(hx - st.vx / v * st.len, hy - st.vy / v * st.len, hz - st.vz / v * st.len);
+    if (a.z < 1 || b.z < 1) return true;
+    var pa = proj(a), I = Math.sin(u * Math.PI);
+    glowLine(proj(b), pa, rgbaStr(FX_LIGHT, 0), rgbaStr([255, 255, 255], 0.95 * I), 5 * s, 2 * s);
+    glowDot(pa.x, pa.y, 8 * s, [[0, rgbaStr([255, 255, 255], 0.9 * I)], [0.3, rgbaStr(FX_LIGHT, 0.4 * I)], [1, rgbaStr(FX_LIGHT, 0)]]);
+    return true;
+  }
+
+  // Where the comet is, which way it's heading, which way its tails stream (back along its path and away from
+  // the orb, so from the arena they lie across the sky) and how bright it is: it fades in and out at the ends of
+  // its crossing. Null once it's gone.
+  function cometState(c) {
+    var u = (fx.t - c.born) / COMET_LIFE;
+    if (u >= 1) return null;
+    var h = cometPos(c, Math.max(0, u)), b = cometPos(c, Math.max(0, u) - 0.01), o = fx.orb;
+    var m = [h[0] - b[0], h[1] - b[1], h[2] - b[2]], ml = Math.hypot(m[0], m[1], m[2]);
+    var a = [h[0] - o.x, h[1] - o.y, h[2] - o.z], al = Math.hypot(a[0], a[1], a[2]), d = [], i;
+    for (i = 0; i < 3; i++) { m[i] /= ml; d.push(a[i] / al * 0.5 - m[i]); }
+    var dl = Math.hypot(d[0], d[1], d[2]);
+    for (i = 0; i < 3; i++) d[i] /= dl;
+    return { u: u, h: h, m: m, d: d, I: smooth(clamp01(u / 0.12)) * smooth(clamp01((1 - u) / 0.12)) };
+  }
+
+  // The head and its haze, and the ion tail: a straight, thin blue streak.
+  function cometGlow(c, s) {
+    var cs = cometState(c);
+    if (!cs) return false;
+    var a = toCam(cs.h[0], cs.h[1], cs.h[2]);
+    if (cs.I <= 0 || a.z < 2) return true;
+    var p = proj(a), k = cam.f / a.z, h = cs.h, d = cs.d;
+    var e = toCam(h[0] + d[0] * 24, h[1] + d[1] * 24, h[2] + d[2] * 24);
+    if (e.z >= 1) glowLine(p, proj(e), rgbaStr([120, 200, 255], 0.55 * cs.I), rgbaStr([60, 120, 255], 0), Math.max(3, 0.8 * k), Math.max(1.2, 0.15 * k));
+    glowDot(p.x, p.y, 3.5 * k, [[0, rgbaStr([200, 255, 250], 0.28 * cs.I)], [1, rgbaStr([80, 200, 255], 0)]]);
+    glowDot(p.x, p.y, Math.max(4 * s, 0.8 * k), [[0, rgbaStr([255, 255, 255], 0.95 * cs.I)],
+      [0.4, rgbaStr([170, 255, 240], 0.6 * cs.I)], [1, rgbaStr([80, 200, 255], 0)]]);
+    return true;
   }
 
   var PT_CAP = 4096, ptBuf = new Float32Array(PT_CAP * 4), ptBk = new Uint8Array(PT_CAP), ptN = 0;
@@ -1347,10 +1626,10 @@ window.addEventListener('DOMContentLoaded', function () {
   // New particles fade in around the arena, then fly in, nearest first, and fall into the turning disk; the
   // core ignites as the last arrive and the jets shoot out of it.
   function quasarParticles(q, now, s) {
-    var lt = quasarAge(q, now);
+    var lt = skyAge(q, now);
     if (lt < 0) return;
-    if (lt > Q_APPEAR + Q_RECRUIT + FX_TRAVEL && !sphereVisible(q.x, q.y, q.z, q.L)) return;
-    var fadeIn = clamp01(lt / Q_APPEAR), n = q.n, e1 = q.e1, e2 = q.e2, k;
+    if (lt > SKY_APPEAR + SKY_RECRUIT + FX_TRAVEL && !sphereVisible(q.x, q.y, q.z, q.L)) return;
+    var fadeIn = clamp01(lt / SKY_APPEAR), n = q.n, e1 = q.e1, e2 = q.e2, k;
     for (k = 0; k < q.p.length; k++) {
       var p = q.p[k], e = easeInOut((lt - p.at) / FX_TRAVEL), x, y, z, a;
       if (e <= 0) {
@@ -1365,8 +1644,8 @@ window.addEventListener('DOMContentLoaded', function () {
       }
       pushPt(x, y, z, a, 1, p.bk, s);
     }
-    if (lt > Q_IGNITE) {
-      var reach = q.L * (1 - Math.pow(1 - clamp01((lt - Q_IGNITE) / Q_JETS), 3));
+    if (lt > SKY_IGNITE) {
+      var reach = q.L * (1 - Math.pow(1 - clamp01((lt - SKY_IGNITE) / Q_JETS), 3));
       for (k = 0; k < q.j.length; k++) {
         var jp = q.j[k], d = ((jp.s + lt / 2200) % 1) * q.L;
         if (d > reach) continue;
@@ -1377,6 +1656,101 @@ window.addEventListener('DOMContentLoaded', function () {
       }
     }
     flushPts(q.cols);
+  }
+
+  // New particles fade in round the arena, fly in nearest first and join the field loops, streaming from pole
+  // to pole, brightest near the star.
+  function magnetarParticles(m, now, s) {
+    var lt = skyAge(m, now);
+    if (lt < 0) return;
+    if (lt > SKY_APPEAR + SKY_RECRUIT + FX_TRAVEL && !sphereVisible(m.x, m.y, m.z, M_SIZE)) return;
+    var fadeIn = clamp01(lt / SKY_APPEAR), F = magnetarFrame(m, lt), boost = 1 + 0.5 * magnetarBeat(lt).flare;
+    for (var k = 0; k < m.p.length; k++) {
+      var p = m.p[k], e = easeInOut((lt - p.at) / FX_TRAVEL), x, y, z, a, bk = p.bk;
+      if (e <= 0) {
+        x = p.hx; y = p.hy; z = p.hz;
+        a = (0.32 + 0.1 * Math.sin(now * 0.002 + p.tw)) * fadeIn;
+      } else {
+        var th = 0.35 + (Math.PI - 0.7) * ((p.s + lt / 2600) % 1), sn = Math.sin(th), r = p.L * sn * sn;
+        var lx = r * sn * Math.cos(p.phi), ly = r * Math.cos(th), lz = r * sn * Math.sin(p.phi);
+        x = lerp(p.hx, m.x + lx * F.x[0] + ly * F.y[0] + lz * F.z[0], e);
+        y = lerp(p.hy, m.y + lx * F.x[1] + ly * F.y[1] + lz * F.z[1], e) + Math.sin(e * Math.PI) * p.arc;
+        z = lerp(p.hz, m.z + lx * F.x[2] + ly * F.y[2] + lz * F.z[2], e);
+        a = lerp(0.32, (0.3 + 0.6 * (1 - r / p.L)) * boost, e);
+        if (r < p.L * 0.3) bk = 1;
+      }
+      pushPt(x, y, z, a, 1, bk, s);
+    }
+    flushPts(m.cols);
+  }
+
+  // Dust fades in round the arena, flies in nearest first and settles into the clouds, where it drifts slowly.
+  function nebulaParticles(nb, now, s) {
+    var lt = skyAge(nb, now);
+    if (lt < 0) return;
+    if (lt > SKY_APPEAR + SKY_RECRUIT + FX_TRAVEL && !sphereVisible(nb.x, nb.y, nb.z, nb.S * 1.2)) return;
+    var fadeIn = clamp01(lt / SKY_APPEAR), sw = lt * 0.00004;
+    for (var k = 0; k < nb.p.length; k++) {
+      var p = nb.p[k], e = easeInOut((lt - p.at) / FX_TRAVEL), x, y, z, a;
+      if (e <= 0) {
+        x = p.hx; y = p.hy; z = p.hz;
+        a = (0.32 + 0.1 * Math.sin(now * 0.002 + p.tw)) * fadeIn;
+      } else {
+        var w = nebulaAt(nb, p.ou + Math.sin(sw + p.tw) * 0.8, p.ov + Math.sin(sw * 1.7 + p.tw * 2) * 0.4, p.ow + Math.cos(sw + p.tw) * 0.8);
+        x = lerp(p.hx, w[0], e);
+        y = lerp(p.hy, w[1], e) + Math.sin(e * Math.PI) * p.arc;
+        z = lerp(p.hz, w[2], e);
+        a = lerp(0.32, p.a, e);
+      }
+      pushPt(x, y, z, a, 1, p.bk, s);
+    }
+    flushPts(nb.cols);
+  }
+
+  var STREAM_COLS = ['rgb(235,255,255)', 'rgb(200,230,255)', 'rgb(160,245,255)', 'rgb(255,250,235)'];
+
+  // Until gravity takes them the swarm twinkles like stars; then each falls, slowly at first and faster and
+  // faster, on a path that spirals in as it nears the orb, and is gone when it hits. The orb flares as they do.
+  // False once they all have.
+  function streamParticles(st, s) {
+    var o = fx.orb, lt = fx.t - st.born, fadeIn = clamp01(lt / 2500), live = 0, hits = 0;
+    for (var k = 0; k < st.p.length; k++) {
+      var p = st.p[k], u = (lt - p.at) / STREAM_FALL, x, y, z, a;
+      if (u >= 1) continue;
+      live++;
+      if (u <= 0) {
+        x = p.hx; y = p.hy; z = p.hz;
+        a = (0.32 + 0.1 * Math.sin(fx.t * 0.002 + p.tw)) * fadeIn;
+      } else {
+        var e = 1 - u * u * u, th = p.swirl * u * u, cs = Math.cos(th), sn = Math.sin(th), rx = p.hx - o.x, rz = p.hz - o.z;
+        x = o.x + (rx * cs - rz * sn) * e;
+        y = o.y + (p.hy - o.y) * e + Math.sin(u * Math.PI) * p.arc * 0.5;
+        z = o.z + (rx * sn + rz * cs) * e;
+        a = lerp(0.35, 1, u);
+        if (u > 0.85) hits++;
+      }
+      pushPt(x, y, z, a, 1, u > 0.6 ? 0 : 1 + k % 3, s);
+    }
+    fx.pulse = Math.min(0.5, hits / STREAM_N * 8);
+    flushPts(STREAM_COLS);
+    return live > 0;
+  }
+
+  var COMET_COLS = ['rgb(255,255,255)', 'rgb(190,255,245)', 'rgb(140,210,255)'];
+
+  // The dust tail: particles shed by the head drift back along it, spreading and fading as they go and curving a
+  // little behind the comet's path.
+  function cometParticles(c, s) {
+    var cs = cometState(c);
+    if (!cs || cs.I <= 0) return;
+    var h = cs.h, d = cs.d, fr = frameAround(d), mx = cs.m[0], my = cs.m[1], mz = cs.m[2];
+    for (var k = 0; k < c.t.length; k++) {
+      var tp = c.t[k], age = (tp.s + fx.t / 4000) % 1, dist = age * 15, spread = 0.2 + age * 1.8, bend = age * age * 5;
+      var ox = fr[0][0] * tp.sp + fr[1][0] * tp.sq, oy = fr[0][1] * tp.sp + fr[1][1] * tp.sq, oz = fr[0][2] * tp.sp + fr[1][2] * tp.sq;
+      pushPt(h[0] + d[0] * dist + ox * spread - mx * bend, h[1] + d[1] * dist + oy * spread - my * bend,
+             h[2] + d[2] * dist + oz * spread - mz * bend, Math.pow(1 - age, 1.5) * 0.8 * cs.I, 1, tp.bk, s);
+    }
+    flushPts(COMET_COLS);
   }
 
   // A panel of blocks, the letters lit and the rest dim, standing upright and facing the arena.
@@ -1619,7 +1993,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     initSnake();
     alive = true;
-    if (!qStart) qStart = performance.now();
+    if (!skyStart) skyStart = performance.now();
     lastTick = performance.now();
     tickProgress = 0;
     rafId = requestAnimationFrame(render);
