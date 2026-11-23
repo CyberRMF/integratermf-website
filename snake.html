@@ -180,6 +180,17 @@
       color: var(--accent);
       background: rgba(96,165,250,0.08);
     }
+    .game-tab:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+    .game-tab:disabled:not(.active):hover { color: var(--dim); }
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
     /* ── D-pad ── */
     .dpad {
@@ -221,6 +232,7 @@
     .dpad-down  { bottom: 0; left: 50%; transform: translateX(-50%); }
     .dpad-left  { left: 0;  top: 50%;  transform: translateY(-50%); }
     .dpad-right { right: 0; top: 50%;  transform: translateY(-50%); }
+    .dpad.third .dpad-up, .dpad.third .dpad-down { opacity: .3; pointer-events: none; }
 
     @media (max-width: 600px), (pointer: coarse) {
       .dpad { display: block; }
@@ -237,11 +249,17 @@
   <div class="game-wrap">
     <div style="text-align:center">
       <div class="game-title">NIST SP 800-53 Snake</div>
-      <div class="game-sub">Eat the controls. Arrow keys, WASD, or D-pad.</div>
+      <div class="game-sub" id="game-sub">Eat the controls. Arrow keys, WASD, or D-pad.</div>
     </div>
-    <div class="game-tabs">
-      <button class="game-tab active" id="tab-controls" onclick="switchMode('controls')">800-53 Controls</button>
-      <button class="game-tab" id="tab-ports" onclick="switchMode('ports')">Ports &amp; Protocols</button>
+    <div class="tab-row">
+      <div class="game-tabs">
+        <button class="game-tab active" id="tab-controls" onclick="switchMode('controls')">800-53 Controls</button>
+        <button class="game-tab" id="tab-ports" onclick="switchMode('ports')">Ports &amp; Protocols</button>
+      </div>
+      <div class="game-tabs" id="view-tabs">
+        <button class="game-tab active" id="view-birds" onclick="switchView('birds')">Bird's Eye</button>
+        <button class="game-tab" id="view-third" onclick="switchView('third')">3rd Person</button>
+      </div>
     </div>
     <div class="flash-area">
       <span class="flash-id" id="flash-id"></span>
@@ -408,6 +426,14 @@ window.addEventListener('DOMContentLoaded', function () {
   var ateTime = 0;
   var CASCADE_DURATION = 180;
   var CASCADE_STAGGER = 35;
+  var THIRD_TICK_MS = 140;
+  var view = 'birds';
+  var turnQueue = [];
+  var camYaw = 0;
+  var lastFrame = 0;
+  var answer = '';
+
+  function tickMs() { return view === 'third' ? THIRD_TICK_MS : TICK_MS; }
 
   function shuffle() {
     var data = activeData();
@@ -443,6 +469,7 @@ window.addEventListener('DOMContentLoaded', function () {
     prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
     dirX = 1; dirY = 0; ndX = 1; ndY = 0;
     score = 0; animT = 0; justAte = false;
+    answer = ''; turnQueue = []; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
     if (scoreEl) scoreEl.textContent = '0';
     if (ctrlEl) ctrlEl.textContent = '-';
     if (hudLabelEl) hudLabelEl.textContent = gameMode === 'controls' ? 'Control' : 'Port';
@@ -470,13 +497,16 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function drawBubble(cx, cy, r, color, glowColor, glowStrength, alpha) {
     var s = S();
-    cx *= s; cy *= s; r *= s;
+    drawBall(cx * s, cy * s, r * s, color, glowColor, glowStrength, alpha, 6 * s);
+  }
+
+  function drawBall(cx, cy, r, color, glowColor, glowStrength, alpha, glowPad) {
     ctx.save();
     ctx.globalAlpha = alpha;
 
     if (glowStrength > 0) {
       ctx.beginPath();
-      ctx.arc(cx, cy, r + 6 * s, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r + glowPad, 0, Math.PI * 2);
       ctx.fillStyle = glowColor;
       ctx.globalAlpha = alpha * glowStrength * 0.35;
       ctx.fill();
@@ -586,18 +616,88 @@ window.addEventListener('DOMContentLoaded', function () {
     return '#' + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
   }
 
+  function segmentStyle(i, len, sinceAte) {
+    var col = colorForSegment(i, len);
+    var glow = glowForSegment(i, len);
+    var glowStr = i === 0 ? 0.8 : (0.5 - (i / len) * 0.3);
+    var grow = 0;
+
+    var segDelay = i * CASCADE_STAGGER;
+    var segElapsed = sinceAte - segDelay;
+    if (segElapsed > 0 && segElapsed < CASCADE_DURATION) {
+      var half = CASCADE_DURATION / 2;
+      var greenT = segElapsed < half
+        ? segElapsed / half
+        : 1 - (segElapsed - half) / half;
+      greenT = greenT * greenT * (3 - 2 * greenT);
+      col = blendHex(col, '#22c55e', greenT * 0.85);
+      glow = 'rgba(34,197,94,' + (0.5 * greenT).toFixed(2) + ')';
+      glowStr = Math.max(glowStr, 0.7 * greenT);
+      grow = 1.5 * greenT;
+    }
+    return { col: col, glow: glow, glowStr: Math.max(0, glowStr), grow: grow };
+  }
+
+  function tagFont(px) { return 'bold ' + Math.round(px) + 'px -apple-system, "Segoe UI", Consolas, monospace'; }
+
+  function tagWidth(text, px) {
+    ctx.save();
+    ctx.font = tagFont(px);
+    var w = ctx.measureText(text).width + px * 1.2;
+    ctx.restore();
+    return w;
+  }
+
+  function pillPath(x, y, w, h) {
+    var r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(x + r, y + h);
+    ctx.arc(x + r, y + r, r, Math.PI / 2, Math.PI * 1.5);
+    ctx.closePath();
+  }
+
+  // align is the side of the tag that sits at x ('left', 'right' or 'center'); y is its vertical middle.
+  function drawTag(text, x, y, align, px, border) {
+    var w = tagWidth(text, px);
+    var h = px * 1.8;
+    var left = align === 'left' ? x : align === 'right' ? x - w : x - w / 2;
+    left = Math.max(2, Math.min(canvas.width - w - 2, left));
+    ctx.save();
+    pillPath(left, y - h / 2, w, h);
+    ctx.fillStyle = 'rgba(17,19,24,0.85)';
+    ctx.fill();
+    ctx.lineWidth = Math.max(1, px * 0.1);
+    ctx.strokeStyle = border;
+    ctx.stroke();
+    ctx.font = tagFont(px);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#e4e6eb';
+    ctx.fillText(text, left + w / 2, y + px * 0.05);
+    ctx.restore();
+  }
+
   function render(now) {
     if (!alive && tickProgress >= 1) {
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       return;
     }
 
+    tickProgress = Math.min((now - lastTick) / tickMs(), 1);
+    animT += 0.04;
+    if (view === 'third') drawThird(now); else drawBirds(now);
+
+    rafId = requestAnimationFrame(render);
+  }
+
+  function drawBirds(now) {
     var s = S();
     var cw = canvas.width;
     var ch = canvas.height;
 
-    var elapsed = now - lastTick;
-    tickProgress = Math.min(elapsed / TICK_MS, 1);
     var ease = tickProgress * tickProgress * (3 - 2 * tickProgress);
 
     ctx.clearRect(0, 0, cw, ch);
@@ -616,7 +716,6 @@ window.addEventListener('DOMContentLoaded', function () {
     var bubbleR = G * 0.44;
     var len = snake.length;
     var sinceAte = ateTime > 0 ? now - ateTime : 99999;
-    var greenCol = '#22c55e';
 
     for (var i = len - 1; i >= 0; i--) {
       var cur = snake[i];
@@ -626,29 +725,11 @@ window.addEventListener('DOMContentLoaded', function () {
 
       var segAlpha = 1 - (i / len) * 0.4;
       var segR = bubbleR * (i === 0 ? 1.1 : (1 - (i / len) * 0.25));
+      var st = segmentStyle(i, len, sinceAte);
 
-      var col = colorForSegment(i, len);
-      var glow = glowForSegment(i, len);
-      var glowStr = i === 0 ? 0.8 : (0.5 - (i / len) * 0.3);
-
-      var segDelay = i * CASCADE_STAGGER;
-      var segElapsed = sinceAte - segDelay;
-      if (segElapsed > 0 && segElapsed < CASCADE_DURATION) {
-        var half = CASCADE_DURATION / 2;
-        var greenT = segElapsed < half
-          ? segElapsed / half
-          : 1 - (segElapsed - half) / half;
-        greenT = greenT * greenT * (3 - 2 * greenT);
-        col = blendHex(col, greenCol, greenT * 0.85);
-        glow = 'rgba(34,197,94,' + (0.5 * greenT).toFixed(2) + ')';
-        glowStr = Math.max(glowStr, 0.7 * greenT);
-        segR += 1.5 * greenT;
-      }
-
-      drawBubble(px, py, segR, col, glow, Math.max(0, glowStr), segAlpha);
+      drawBubble(px, py, segR + st.grow, st.col, st.glow, st.glowStr, segAlpha);
     }
 
-    animT += 0.04;
     var pulse = 0.5 + 0.5 * Math.sin(animT);
     var fcx = foodX * G + G / 2;
     var fcy = foodY * G + G / 2;
@@ -667,11 +748,235 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.fillText(label, fcx * s, fcy * s);
     ctx.restore();
 
-    rafId = requestAnimationFrame(render);
+    drawAnswerBeside(ease);
+  }
+
+  function drawAnswerBeside(ease) {
+    if (!answer) return;
+    var s = S();
+    var head = snake[0], prev = prevSnake[0] || head;
+    var hx = (lerp(prev.x, head.x, ease) * G + G / 2) * s;
+    var hy = (lerp(prev.y, head.y, ease) * G + G / 2) * s;
+    var gap = (G * 0.44 * 1.1 + 5) * s;
+    var px = 11 * s;
+    var border = 'rgba(96,165,250,0.7)';
+    if (hx + gap + tagWidth(answer, px) <= canvas.width - 2) {
+      drawTag(answer, hx + gap, hy, 'left', px, border);
+      return;
+    }
+    // No room on the right: sit above the head, or below it when the body trails above.
+    var h = px * 1.8, off = gap + h / 2 - 2 * s;
+    var up = dirY !== 1;
+    if (up && hy - off - h / 2 < 0) up = false;
+    else if (!up && hy + off + h / 2 > canvas.height) up = true;
+    drawTag(answer, hx, up ? hy - off : hy + off, 'center', px, border);
+  }
+
+  // 3rd person: world units are grid cells, the board lies on y = 0 from (0, 0) to (COLS, ROWS),
+  // and the camera rides just behind and above the head, turning with it.
+  var CAM_BACK = 3.2, CAM_UP = 2.9, LOOK_AHEAD = 4, LOOK_UP = 0.3, NEAR = 0.15, WALL_H = 0.7;
+  var cam = null;
+
+  function setCamera(hx, hz) {
+    var fx = Math.cos(camYaw), fz = Math.sin(camYaw);
+    var vx = fx * (CAM_BACK + LOOK_AHEAD), vy = LOOK_UP - CAM_UP, vz = fz * (CAM_BACK + LOOK_AHEAD);
+    var vl = Math.sqrt(vx * vx + vy * vy + vz * vz);
+    vx /= vl; vy /= vl; vz /= vl;
+    var rl = Math.sqrt(vx * vx + vz * vz);
+    var rx = -vz / rl, rz = vx / rl;
+    cam = {
+      x: hx - fx * CAM_BACK, y: CAM_UP, z: hz - fz * CAM_BACK,
+      fx: vx, fy: vy, fz: vz,
+      rx: rx, rz: rz,
+      ux: -rz * vy, uy: rz * vx - rx * vz, uz: rx * vy,
+      hx: fx, hz: fz,
+      f: canvas.height * 0.95, cx: canvas.width / 2, cy: canvas.height / 2
+    };
+  }
+
+  function toCam(x, y, z) {
+    var dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
+    return {
+      x: dx * cam.rx + dz * cam.rz,
+      y: dx * cam.ux + dy * cam.uy + dz * cam.uz,
+      z: dx * cam.fx + dy * cam.fy + dz * cam.fz
+    };
+  }
+
+  function proj(c) { return { x: cam.cx + c.x * cam.f / c.z, y: cam.cy - c.y * cam.f / c.z }; }
+
+  function lerpCam(a, b, t) { return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), z: lerp(a.z, b.z, t) }; }
+
+  function clipNear(pts) {
+    var out = [];
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[i], b = pts[(i + 1) % pts.length];
+      var aIn = a.z >= NEAR, bIn = b.z >= NEAR;
+      if (aIn) out.push(a);
+      if (aIn !== bIn) out.push(lerpCam(a, b, (NEAR - a.z) / (b.z - a.z)));
+    }
+    return out;
+  }
+
+  function fillWorldPoly(world, style) {
+    var pts = clipNear(world.map(function (p) { return toCam(p[0], p[1], p[2]); }));
+    if (pts.length < 3) return;
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var p = proj(pts[i]);
+      if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = style;
+    ctx.fill();
+  }
+
+  function worldLine(a, b) {
+    var ca = toCam(a[0], a[1], a[2]), cb = toCam(b[0], b[1], b[2]);
+    if (ca.z < NEAR && cb.z < NEAR) return;
+    if (ca.z < NEAR) ca = lerpCam(ca, cb, (NEAR - ca.z) / (cb.z - ca.z));
+    else if (cb.z < NEAR) cb = lerpCam(cb, ca, (NEAR - cb.z) / (ca.z - cb.z));
+    var pa = proj(ca), pb = proj(cb);
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+  }
+
+  function drawThird(now) {
+    var s = S();
+    var cw = canvas.width;
+    var ch = canvas.height;
+    var t = tickProgress;
+
+    var dt = lastFrame ? Math.min(now - lastFrame, 100) : 0;
+    lastFrame = now;
+    var turnBy = Math.atan2(dirY, dirX) - camYaw;
+    while (turnBy > Math.PI) turnBy -= Math.PI * 2;
+    while (turnBy < -Math.PI) turnBy += Math.PI * 2;
+    camYaw += dt ? turnBy * (1 - Math.exp(-dt / 110)) : turnBy;
+
+    var head = snake[0], headPrev = prevSnake[0] || head;
+    setCamera(lerp(headPrev.x, head.x, t) + 0.5, lerp(headPrev.y, head.y, t) + 0.5);
+
+    var horizon = cam.cy - (cam.hx * cam.ux + cam.hz * cam.uz) / (cam.hx * cam.fx + cam.hz * cam.fz) * cam.f;
+    var sky = ctx.createLinearGradient(0, 0, 0, Math.max(horizon, 1));
+    sky.addColorStop(0, '#0f1115');
+    sky.addColorStop(1, '#1f232a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.fillStyle = '#15171c';
+    ctx.fillRect(0, Math.max(0, horizon), cw, ch);
+
+    fillWorldPoly([[0, 0, 0], [COLS, 0, 0], [COLS, 0, ROWS], [0, 0, ROWS]], '#23272e');
+    ctx.beginPath();
+    for (var c = 0; c <= COLS; c++) worldLine([c, 0, 0], [c, 0, ROWS]);
+    for (var r = 0; r <= ROWS; r++) worldLine([0, 0, r], [COLS, 0, r]);
+    ctx.strokeStyle = '#323844';
+    ctx.lineWidth = 1 * s;
+    ctx.stroke();
+
+    var walls = [
+      [[0, 0, 0], [COLS, 0, 0]], [[COLS, 0, 0], [COLS, 0, ROWS]],
+      [[COLS, 0, ROWS], [0, 0, ROWS]], [[0, 0, ROWS], [0, 0, 0]]
+    ].map(function (w) {
+      return { a: w[0], b: w[1], d: toCam((w[0][0] + w[1][0]) / 2, 0, (w[0][2] + w[1][2]) / 2).z };
+    }).sort(function (p, q) { return q.d - p.d; });
+    walls.forEach(function (w) {
+      fillWorldPoly([w.a, w.b, [w.b[0], WALL_H, w.b[2]], [w.a[0], WALL_H, w.a[2]]], '#3a3f4b');
+      ctx.beginPath();
+      worldLine([w.a[0], WALL_H, w.a[2]], [w.b[0], WALL_H, w.b[2]]);
+      ctx.strokeStyle = 'rgba(96,165,250,0.8)';
+      ctx.lineWidth = 2 * s;
+      ctx.stroke();
+    });
+
+    var fog = ctx.createLinearGradient(0, horizon, 0, horizon + ch * 0.2);
+    fog.addColorStop(0, 'rgba(31,35,42,0.95)');
+    fog.addColorStop(1, 'rgba(31,35,42,0)');
+    ctx.fillStyle = fog;
+    ctx.fillRect(0, horizon, cw, ch * 0.2);
+
+    var items = [];
+    var len = snake.length;
+    var sinceAte = ateTime > 0 ? now - ateTime : 99999;
+    for (var i = 0; i < len; i++) {
+      var cur = snake[i], prev = prevSnake[i] || cur;
+      var st = segmentStyle(i, len, sinceAte);
+      var segR = (i === 0 ? 0.48 : 0.44 * (1 - (i / len) * 0.25)) + st.grow / G;
+      items.push({ x: lerp(prev.x, cur.x, t) + 0.5, y: segR, z: lerp(prev.y, cur.y, t) + 0.5, r: segR,
+                   col: st.col, glow: st.glow, glowStr: st.glowStr });
+    }
+    var headItem = items[0];
+    var pulse = 0.5 + 0.5 * Math.sin(animT);
+    var foodR = 0.46 + pulse * 0.05;
+    var food = { x: foodX + 0.5, y: foodR + 0.1 + pulse * 0.12, z: foodY + 0.5, r: foodR,
+                 col: '#22c55e', glow: 'rgba(34,197,94,0.6)', glowStr: 0.6 + pulse * 0.4 };
+    items.push(food);
+
+    ctx.beginPath();
+    items.forEach(function (it) {
+      var pts = [];
+      for (var k = 0; k < 16; k++) {
+        var a = k / 16 * Math.PI * 2;
+        var p = toCam(it.x + 0.06 + Math.cos(a) * it.r * 0.95, 0, it.z + 0.06 + Math.sin(a) * it.r * 0.95);
+        if (p.z < NEAR) return;
+        pts.push(proj(p));
+      }
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y);
+      ctx.closePath();
+    });
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fill();
+
+    items.forEach(function (it) {
+      it.c = toCam(it.x, it.y, it.z);
+      if (it.c.z < NEAR + it.r) return;
+      var p = proj(it.c);
+      it.sx = p.x; it.sy = p.y; it.sr = it.r * cam.f / it.c.z;
+    });
+    items.slice().sort(function (p, q) { return q.c.z - p.c.z; }).forEach(function (it) {
+      if (!it.sr) return;
+      var hidesHead = it !== headItem && it.c.z < headItem.c.z &&
+        Math.hypot(it.sx - headItem.sx, it.sy - headItem.sy) < it.sr + headItem.sr;
+      drawBall(it.sx, it.sy, it.sr, it.col, it.glow, it.glowStr, hidesHead ? 0.45 : 1, it.sr * 0.2);
+    });
+
+    var foodSeen = food.sr && food.sx > 0 && food.sx < cw && food.sy > 0 && food.sy < ch;
+    if (foodSeen) {
+      var fpx = Math.max(10 * s, Math.min(15 * s, food.sr * 0.7));
+      drawTag(currentCtrl[0], food.sx, food.sy - food.sr - fpx * 0.9 - 3 * s, 'center', fpx, 'rgba(34,197,94,0.7)');
+    } else {
+      var dx = food.x - cam.x, dz = food.z - cam.z;
+      var onLeft = dx * cam.rx + dz * cam.rz < 0;
+      var ax = onLeft ? 14 * s : cw - 14 * s, ay = ch * 0.55;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(ax + (onLeft ? -8 : 8) * s, ay);
+      ctx.lineTo(ax + (onLeft ? 4 : -4) * s, ay - 9 * s);
+      ctx.lineTo(ax + (onLeft ? 4 : -4) * s, ay + 9 * s);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(34,197,94,0.9)';
+      ctx.fill();
+      ctx.restore();
+      drawTag(currentCtrl[0], ax + (onLeft ? 10 : -10) * s, ay, onLeft ? 'left' : 'right', 11 * s, 'rgba(34,197,94,0.7)');
+    }
+
+    if (answer && headItem.sr) {
+      var ap = proj(toCam(headItem.x, headItem.y + headItem.r + 0.3, headItem.z));
+      drawTag(answer, ap.x, ap.y, 'center', 13 * s, 'rgba(96,165,250,0.7)');
+    }
   }
 
   function tick() {
-    dirX = ndX; dirY = ndY;
+    if (view === 'third') {
+      var turn = turnQueue.shift();
+      var oldX = dirX;
+      if (turn === 'left') { dirX = dirY; dirY = -oldX; }
+      else if (turn === 'right') { dirX = -dirY; dirY = oldX; }
+      ndX = dirX; ndY = dirY;
+    } else {
+      dirX = ndX; dirY = ndY;
+    }
     var nx = snake[0].x + dirX;
     var ny = snake[0].y + dirY;
 
@@ -691,8 +996,9 @@ window.addEventListener('DOMContentLoaded', function () {
       if (scoreEl) scoreEl.textContent = String(score);
       if (ctrlEl) ctrlEl.textContent = currentCtrl[0];
       flash(currentCtrl);
+      answer = currentCtrl[1];
       dropFood();
-      prevSnake.unshift({ x: nx, y: ny });
+      prevSnake.unshift(view === 'third' ? { x: prevSnake[0].x, y: prevSnake[0].y } : { x: nx, y: ny });
     } else {
       snake.pop();
       justAte = false;
@@ -704,6 +1010,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function die() {
     alive = false;
+    lockView(false);
     if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
@@ -735,16 +1042,31 @@ window.addEventListener('DOMContentLoaded', function () {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     initSnake();
     alive = true;
+    lockView(true);
     lastTick = performance.now();
     tickProgress = 0;
-    tickTimer = setInterval(tick, TICK_MS);
+    tickTimer = setInterval(tick, tickMs());
     rafId = requestAnimationFrame(render);
   }
 
   startBtn.addEventListener('click', startGame);
 
+  var viewTabs = document.getElementById('view-tabs');
+  var viewBtns = viewTabs ? viewTabs.querySelectorAll('.game-tab') : [];
+
+  function lockView(locked) {
+    for (var i = 0; i < viewBtns.length; i++) {
+      viewBtns[i].disabled = locked;
+      viewBtns[i].title = locked ? 'Change the view between rounds' : '';
+    }
+  }
+
   function setDir(dir) {
     if (!alive) return;
+    if (view === 'third') {
+      if ((dir === 'left' || dir === 'right') && turnQueue.length < 2) turnQueue.push(dir);
+      return;
+    }
     var oldNdX = ndX, oldNdY = ndY;
     if (dir === 'up'    && dirY !== 1)  { ndX = 0;  ndY = -1; }
     if (dir === 'down'  && dirY !== -1) { ndX = 0;  ndY = 1;  }
@@ -831,8 +1153,29 @@ window.addEventListener('DOMContentLoaded', function () {
     if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     alive = false;
+    lockView(false);
     initSnake();
     sizeCanvas();
+    lastTick = performance.now();
+    tickProgress = 1;
+    prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
+    doInitialRender();
+  };
+
+  window.switchView = function (v) {
+    if (alive || v === view) return;
+    view = v;
+    var birds = document.getElementById('view-birds');
+    var third = document.getElementById('view-third');
+    if (birds) birds.classList.toggle('active', v === 'birds');
+    if (third) third.classList.toggle('active', v === 'third');
+    var sub = document.getElementById('game-sub');
+    if (sub) sub.textContent = v === 'third'
+      ? 'Eat the controls. Left and right turn the snake: arrow keys, A/D, or D-pad.'
+      : 'Eat the controls. Arrow keys, WASD, or D-pad.';
+    var pad = document.getElementById('dpad');
+    if (pad) pad.classList.toggle('third', v === 'third');
+    initSnake();
     lastTick = performance.now();
     tickProgress = 1;
     prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
@@ -846,6 +1189,11 @@ window.addEventListener('DOMContentLoaded', function () {
   prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
 
   function doInitialRender() {
+    if (view === 'third') {
+      lastFrame = 0;
+      drawThird(performance.now());
+      return;
+    }
     var s = S();
     var cw = canvas.width;
     var ch = canvas.height;
