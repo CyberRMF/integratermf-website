@@ -13,12 +13,14 @@
   "rewrites": [
     { "source": "/", "has": [{ "type": "host", "value": "snake.integratermf.com" }], "destination": "/snake.html" },
     { "source": "/license", "destination": "/license.html" },
+    { "source": "/snake", "destination": "/snake.html" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ],
   "redirects": [
     { "source": "/activate",   "destination": "/license?action=activate&mode=airgap",   "permanent": false },
     { "source": "/activate/",  "destination": "/license?action=activate&mode=airgap",   "permanent": false },
     { "source": "/license/",    "destination": "/license", "permanent": false },
+    { "source": "/snake/",      "destination": "/snake", "permanent": false },
     { "source": "/deactivate",  "destination": "/license", "permanent": false },
     { "source": "/deactivate/", "destination": "/license", "permanent": false },
     { "source": "/deactivate.html", "destination": "/license", "permanent": true },
