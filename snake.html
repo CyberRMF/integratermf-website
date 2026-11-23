@@ -494,6 +494,9 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp01(t) { return t < 0 ? 0 : t > 1 ? 1 : t; }
+  function smooth(t) { t = clamp01(t); return t * t * (3 - 2 * t); }
+  function easeInOut(t) { t = clamp01(t); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
   function drawBall(cx, cy, r, color, glowColor, glowStrength, alpha, glowPad) {
     ctx.save();
@@ -888,6 +891,271 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.fillRect(0, horizon - 0.75 * s, cw, 1.5 * s);
   }
 
+  // Cybernetic theme, outside the walls: a slow particle show after the CyberRMF apps' screensaver. Particles drift
+  // in from all around to an orb beyond the north wall, nine small orbs form and circle it, then merge back in, the
+  // orb collapses, INTEGRATE lights up where it was, and the sign bursts back out into particles to start again.
+  // The camera looks down, so little sky shows: the orb sits at the camera's height, far enough off that it always
+  // fits under the top of the view.
+  var FX_N = 900, FX_R = 3.5, FX_CELL = 0.36, FX_DENSE = 0.45;
+  var FX_O = { x: COLS / 2, y: 3.8, z: -22 };
+  var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
+  var FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000, FX_BURST = 7000;
+  var FX_SUB_FORM = 3500, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
+  var FX_SPAWN_AT = [0, 1200, 3500, 5500, 7500, 9500, 11500, 13500, 15500];
+  var FX_SPAWN_ORDER = [0, 5, 2, 7, 4, 1, 6, 3, 8];
+  var FX_ORBIT = 14000, FX_MERGE = 4000, FX_COLLAPSE = 5000, FX_DISSOLVE = 3000;
+  var FX_PHASES = [
+    ['rest', 2000], ['recruit', FX_RECRUIT], ['hold', FX_HOLD + FX_SHRINK], ['spawn', 15500 + FX_SUB_FORM],
+    ['orbit', FX_ORBIT], ['merge', FX_MERGE], ['collapse', FX_COLLAPSE], ['flicker', 3500], ['sweep', 1200],
+    ['text', 10000], ['fill', 6000], ['dissolve', FX_DISSOLVE], ['burst', FX_BURST]
+  ];
+  var FX_FONT = {
+    I: ['01110','00100','00100','00100','00100','00100','01110'],
+    N: ['10001','11001','10101','10011','10001','10001','10001'],
+    T: ['11111','00100','00100','00100','00100','00100','00100'],
+    E: ['11111','10000','10000','11110','10000','10000','11111'],
+    G: ['01110','10001','10000','10011','10001','10001','01110'],
+    R: ['11110','10001','10001','11110','10010','10001','10001'],
+    A: ['01110','10001','10001','11111','10001','10001','10001']
+  };
+  var fx = null;
+
+  function fxSetup() {
+    var golden = Math.PI * (3 - Math.sqrt(5)), PW = 73, PH = 15;
+    var pts = [], k;
+    while (pts.length < FX_N) {
+      var x = -45 + Math.random() * (COLS + 90), z = -45 + Math.random() * (ROWS + 90);
+      if (x > -4 && x < COLS + 4 && z > -4 && z < ROWS + 4) continue;
+      pts.push({ hx: x, hy: 0.25 + Math.pow(Math.random(), 1.5) * 7, hz: z });
+    }
+    pts.forEach(function (p) { p.d = Math.hypot(p.hx - FX_O.x, p.hy - FX_O.y, p.hz - FX_O.z); });
+    pts.sort(function (a, b) { return a.d - b.d; });
+    // Nearest first, slowly at first and then faster; each lands in a ball, spread by a stride so the
+    // early ones don't bunch on one side.
+    for (k = 0; k < FX_N; k++) {
+      var p = pts[k], j = (k * 7919) % FX_N;
+      var uy = 1 - 2 * (j + 0.5) / FX_N, ur = Math.sqrt(1 - uy * uy), th = j * golden;
+      p.rr = Math.cbrt((k + 0.5) / FX_N);
+      p.tx = ur * Math.cos(th) * p.rr; p.ty = uy * p.rr; p.tz = ur * Math.sin(th) * p.rr;
+      p.at = FX_RECRUIT * Math.sqrt(k / FX_N);
+      p.arc = Math.min(6, p.d * 0.08);
+      p.ord = k / FX_N;
+      p.tw = Math.random() * 6.28;
+      p.bx = (Math.random() - 0.5) * PW * FX_CELL; p.by = (Math.random() - 0.5) * PH * FX_CELL;
+      p.bd = Math.random() * 1500;
+    }
+    var word = 'INTEGRATE', ww = word.length * 7 - 2;
+    var c0 = Math.floor((PW - ww) / 2), r0 = Math.floor((PH - 7) / 2), lit = {};
+    for (var ci = 0; ci < word.length; ci++) {
+      var bm = FX_FONT[word[ci]];
+      for (var r = 0; r < 7; r++) for (var c = 0; c < 5; c++) if (bm[r][c] === '1') lit[(c0 + ci * 7 + c) + ',' + (r0 + r)] = 1;
+    }
+    var text = [], fill = [];
+    for (var gr = 0; gr < PH; gr++) for (var gc = 0; gc < PW; gc++) {
+      if (lit[gc + ',' + gr]) text.push({ c: gc, r: gr, at: Math.random() * 3500 });
+      else fill.push({ c: gc, r: gr, at: Math.random() * 6000 });
+    }
+    fx = { p: pts, text: text, fill: fill, pw: PW, ph: PH, pi: 0, pt: 0, t: 0, last: 0, orbit: 0,
+           buf: new Float32Array(FX_N * 4), bk: new Uint8Array(FX_N) };
+  }
+
+  function fxAdvance(now) {
+    var dt = fx.last ? Math.min(now - fx.last, 100) : 0;
+    fx.last = now;
+    fx.t += dt; fx.pt += dt;
+    while (fx.pt >= FX_PHASES[fx.pi][1]) { fx.pt -= FX_PHASES[fx.pi][1]; fx.pi = (fx.pi + 1) % FX_PHASES.length; }
+    var ph = FX_PHASES[fx.pi][0], pt = fx.pt, speed = 0;
+    if (ph === 'spawn') speed = 1;
+    else if (ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, 1, easeInOut((pt - 10000) / 4000));
+    else if (ph === 'merge') speed = 1 + easeInOut(pt / FX_MERGE) * 5;
+    fx.orbit += dt * 0.0001 * speed;
+  }
+
+  function fxScale(ph, pt) {
+    if (ph === 'hold') return pt < FX_HOLD ? 1 : lerp(1, FX_DENSE, easeInOut((pt - FX_HOLD) / FX_SHRINK));
+    if (ph === 'spawn' || ph === 'orbit') return FX_DENSE;
+    if (ph === 'merge') return lerp(FX_DENSE, 1, smooth(easeInOut(pt / FX_MERGE)));
+    if (ph === 'collapse') return lerp(1, 0, easeInOut(pt / FX_COLLAPSE));
+    return 1;
+  }
+
+  function drawFx(now, s) {
+    if (!fx) fxSetup();
+    fxAdvance(now);
+    var ph = FX_PHASES[fx.pi][0], pt = fx.pt;
+    var textPhase = ph === 'flicker' || ph === 'sweep' || ph === 'text' || ph === 'fill' || ph === 'dissolve';
+    if (textPhase || ph === 'burst') drawFxSign(ph, pt);
+    if (textPhase) return;
+    var scale = fxScale(ph, pt);
+    var subs = ph === 'spawn' || ph === 'orbit' || ph === 'merge' ? fxSubOrbs(ph, pt) : [];
+    var oc = toCam(FX_O.x, FX_O.y, FX_O.z);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    fxHalo(ph, pt, scale, oc);
+    subs.forEach(function (sb) { if (sb.c.z >= oc.z) fxSubOrb(sb); });
+    fxParticles(ph, pt, scale, s);
+    subs.forEach(function (sb) { if (sb.c.z < oc.z) fxSubOrb(sb); });
+    ctx.restore();
+  }
+
+  // The small orbs circle on a ring tilted towards the arena, so from the snake they pass in front of the
+  // orb and behind it.
+  function fxSubOrbs(ph, pt) {
+    var out = [], mT = ph === 'merge' ? easeInOut(pt / FX_MERGE) : 0;
+    var fadeOut = ph === 'merge' ? 1 - smooth(pt / FX_MERGE) : 1;
+    var orbitR = lerp(FX_ORBIT_R, FX_R * FX_DENSE * 0.3, mT), rad = lerp(FX_SUB_R, FX_SUB_R * 0.2, mT);
+    var ct = Math.cos(FX_TILT), st = Math.sin(FX_TILT);
+    for (var i = 0; i < FX_SPAWN_AT.length; i++) {
+      var formT = ph === 'spawn' ? clamp01((pt - FX_SPAWN_AT[i]) / FX_SUB_FORM) : 1;
+      if (formT < 0.1) continue;
+      var a = FX_SPAWN_ORDER[i] * Math.PI * 2 / FX_SPAWN_AT.length + fx.orbit;
+      var lx = Math.cos(a) * orbitR, lz = Math.sin(a) * orbitR;
+      var c = toCam(FX_O.x + lx, FX_O.y - lz * st, FX_O.z + lz * ct);
+      if (c.z < NEAR + rad) continue;
+      out.push({ c: c, r: rad, i: smooth(formT) * fadeOut });
+    }
+    return out;
+  }
+
+  function fxSubOrb(sb) {
+    var p = proj(sb.c), g = sb.r * cam.f / sb.c.z * 1.6;
+    var grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, g);
+    grad.addColorStop(0, 'rgba(235,255,255,' + (0.95 * sb.i).toFixed(3) + ')');
+    grad.addColorStop(0.45, 'rgba(120,245,255,' + (0.7 * sb.i).toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(0,150,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, g, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function fxHalo(ph, pt, scale, oc) {
+    if (ph === 'rest' || ph === 'burst' || oc.z < NEAR + FX_R) return;
+    var I = 0.3, rgb = '0,229,255';
+    if (ph === 'recruit') I = 0.3 * pt / FX_RECRUIT;
+    else if (ph === 'collapse') { I = easeInOut(pt / FX_COLLAPSE) * 1.25; rgb = '255,255,255'; }
+    var p = proj(oc), r = FX_R * Math.max(scale, ph === 'collapse' ? 0.35 : 0.06) * cam.f / oc.z;
+    var grad = ctx.createRadialGradient(p.x, p.y, r * 0.6, p.x, p.y, r * 1.6);
+    grad.addColorStop(0, 'rgba(' + rgb + ',0)');
+    grad.addColorStop(0.35, 'rgba(' + rgb + ',' + (I * 0.25).toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(' + rgb + ',0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function fxParticles(ph, pt, scale, s) {
+    var spin = fx.t * 0.0002, cs = Math.cos(spin), sn = Math.sin(spin), R = FX_R * scale;
+    var rt = ph === 'recruit' ? pt : ph === 'hold' ? FX_RECRUIT + pt : -1;
+    var beat = ph === 'recruit' ? Math.sin((fx.t % 1200) / 1200 * Math.PI) * 0.35 : 0;
+    var wave = 0;
+    if (ph === 'hold' && pt < FX_HOLD) wave = lerp(0.3, 0, smooth((pt - FX_HOLD * 0.75) / (FX_HOLD * 0.25)));
+    else if (ph === 'collapse') wave = lerp(0.6, 0, smooth(pt / FX_COLLAPSE));
+    var white = ph === 'collapse' ? easeInOut(pt / FX_COLLAPSE) * 0.7
+      : ph === 'rest' || ph === 'recruit' || ph === 'burst' ? 0 : clamp01((1 - scale) / (1 - FX_DENSE)) * 0.6;
+    var buf = fx.buf, bk = fx.bk, n = 0, f = cam.f, W = canvas.width, H = canvas.height;
+    for (var k = 0; k < FX_N; k++) {
+      var p = fx.p[k], x, y, z, a, e, grow = 1;
+      if (ph === 'burst') {
+        e = 1 - Math.pow(1 - clamp01((pt - p.bd) / (FX_BURST - 1500)), 3);
+        x = lerp(FX_O.x + p.bx, p.hx, e);
+        y = lerp(FX_O.y + p.by, p.hy, e) + Math.sin(e * Math.PI) * p.arc * 0.5;
+        z = lerp(FX_O.z, p.hz, e);
+        a = lerp(0.85, 0.32, e);
+      } else {
+        e = rt < 0 ? (ph === 'rest' ? 0 : 1) : easeInOut((rt - p.at) / FX_TRAVEL);
+        if (e <= 0) {
+          x = p.hx; y = p.hy; z = p.hz;
+          a = 0.32 + 0.1 * Math.sin(fx.t * 0.002 + p.tw);
+        } else {
+          x = lerp(p.hx, FX_O.x + (p.tx * cs - p.tz * sn) * R, e);
+          y = lerp(p.hy, FX_O.y + p.ty * R, e) + Math.sin(e * Math.PI) * p.arc;
+          z = lerp(p.hz, FX_O.z + (p.tx * sn + p.tz * cs) * R, e);
+          a = lerp(0.32, 0.85, e);
+          if (wave) { var w = (fx.t * 0.0004 + p.rr) % 1; if (w < 0.18) a += Math.sin(w / 0.18 * Math.PI) * wave; }
+          grow = 1 + beat * e;
+        }
+      }
+      var dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
+      var cz = dx * cam.fx + dy * cam.fy + dz * cam.fz;
+      if (cz < 1) continue;
+      var sx = cam.cx + (dx * cam.rx + dz * cam.rz) * f / cz;
+      var sy = cam.cy - (dx * cam.ux + dy * cam.uy + dz * cam.uz) * f / cz;
+      if (sx < -8 || sx > W + 8 || sy < -8 || sy > H + 8) continue;
+      if (cz > 55) a *= Math.max(0, 1 - (cz - 55) / 50);
+      if (a < 0.02) continue;
+      buf[n * 4] = sx; buf[n * 4 + 1] = sy;
+      buf[n * 4 + 2] = Math.max(1.4 * s, Math.min(4 * s, 0.13 * f / cz)) * grow;
+      buf[n * 4 + 3] = Math.min(a, 1);
+      bk[n] = Math.min(3, Math.floor((0.5 + 0.5 * Math.sin(fx.t * 0.0008 - p.ord * 6)) * 4));
+      n++;
+    }
+    for (var b = 0; b < 4; b++) {
+      var t = (b + 0.5) / 4, rgb = [];
+      for (var ch = 0; ch < 3; ch++) rgb.push(Math.round(lerp(lerp(FX_PRIMARY[ch], FX_LIGHT[ch], t), 255, white)));
+      ctx.fillStyle = 'rgb(' + rgb.join(',') + ')';
+      for (var i = 0; i < n; i++) {
+        if (bk[i] !== b) continue;
+        var q = buf[i * 4 + 2];
+        ctx.globalAlpha = buf[i * 4 + 3];
+        ctx.fillRect(buf[i * 4] - q / 2, buf[i * 4 + 1] - q / 2, q, q);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // INTEGRATE on a panel of blocks standing where the orb was, facing the arena.
+  function drawFxSign(ph, pt) {
+    var fade = ph === 'burst' ? 1 - smooth(pt / 3000) : 1;
+    if (fade <= 0) return;
+    var C = FX_CELL, f = cam.f, W = canvas.width, H = canvas.height;
+    var o = toCam(FX_O.x - (fx.pw - 1) / 2 * C, FX_O.y + (fx.ph - 1) / 2 * C, FX_O.z);
+    var exX = C * cam.rx, exY = C * cam.ux, exZ = C * cam.fx, eyY = -C * cam.uy, eyZ = -C * cam.fy;
+    var side = 0.75 * C * f, squash = Math.max(Math.abs(cam.rx), 0.15);
+    var dissolve = ph === 'dissolve' ? smooth(pt / FX_DISSOLVE) : ph === 'burst' ? 1 : 0;
+    function block(cell, a) {
+      var cz = o.z + cell.c * exZ + cell.r * eyZ;
+      if (cz < 1) return;
+      var sx = cam.cx + (o.x + cell.c * exX) * f / cz, sy = cam.cy - (o.y + cell.c * exY + cell.r * eyY) * f / cz;
+      if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) return;
+      var q = side / cz;
+      ctx.globalAlpha = a * fade;
+      ctx.fillRect(sx - q * squash / 2, sy - q / 2, q * squash, q);
+    }
+    var i, cell, hw = fx.pw / 2 * C, hh = fx.ph / 2 * C;
+    ctx.save();
+    ctx.globalAlpha = fade * (ph === 'flicker' ? smooth(pt / 800) : 1);
+    fillWorldPoly([[FX_O.x - hw, FX_O.y + hh, FX_O.z], [FX_O.x + hw, FX_O.y + hh, FX_O.z],
+                   [FX_O.x + hw, FX_O.y - hh, FX_O.z], [FX_O.x - hw, FX_O.y - hh, FX_O.z]], 'rgba(1,3,8,0.85)');
+    if (ph === 'fill' || ph === 'dissolve' || ph === 'burst') {
+      ctx.fillStyle = 'rgb(' + FX_PRIMARY.join(',') + ')';
+      for (i = 0; i < fx.fill.length; i++) {
+        cell = fx.fill[i];
+        var fa = 0.2;
+        if (ph === 'fill') {
+          if (pt < cell.at) continue;
+          if (pt - cell.at < 180) fa = Math.sin((pt - cell.at) * 0.07) > 0 ? 0.3 : 0.06;
+        }
+        block(cell, fa);
+      }
+    }
+    var tc = [];
+    for (var ch = 0; ch < 3; ch++) tc.push(Math.round(lerp(lerp(FX_LIGHT[ch], 255, 0.4), FX_PRIMARY[ch], dissolve)));
+    ctx.fillStyle = 'rgb(' + tc.join(',') + ')';
+    for (i = 0; i < fx.text.length; i++) {
+      cell = fx.text[i];
+      var br = 0.9;
+      if (ph === 'flicker') {
+        if (pt < cell.at) continue;
+        var age = pt - cell.at;
+        br = age < 250 ? (Math.sin(age * 0.06) > 0 ? 0.85 : 0.12) : 0.7;
+      } else if (dissolve) br = lerp(0.9, 0.32, dissolve);
+      block(cell, lerp(br * 0.75, 0.2, dissolve));
+    }
+    ctx.restore();
+  }
+
   // Classic: a dark shadow under each ball. Cybernetic: a glow on the floor in the ball's own colour.
   function drawFloorMarks(items) {
     var cyber = theme === 'cyber';
@@ -936,7 +1204,8 @@ window.addEventListener('DOMContentLoaded', function () {
     setCamera(lerp(headPrev.x, head.x, t) + 0.5, lerp(headPrev.y, head.y, t) + 0.5);
 
     var horizon = cam.cy - (cam.hx * cam.ux + cam.hz * cam.uz) / (cam.hx * cam.fx + cam.hz * cam.fz) * cam.f;
-    if (theme === 'cyber') drawCyberArena(horizon, cw, ch, s); else drawClassicArena(horizon, cw, ch, s);
+    if (theme === 'cyber') { drawCyberArena(horizon, cw, ch, s); drawFx(now, s); }
+    else drawClassicArena(horizon, cw, ch, s);
 
     var items = [];
     var len = snake.length;
@@ -1044,6 +1313,20 @@ window.addEventListener('DOMContentLoaded', function () {
     over = true;
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     drawGameOver();
+    runIdle();
+  }
+
+  // Between rounds the Cybernetic theme keeps its particle show moving under the still frame.
+  var idleId = null;
+  function idleFrame(now) {
+    idleId = null;
+    if (alive || theme !== 'cyber') return;
+    drawScene(now);
+    if (over) drawGameOver();
+    idleId = requestAnimationFrame(idleFrame);
+  }
+  function runIdle() {
+    if (!idleId && !alive && theme === 'cyber') idleId = requestAnimationFrame(idleFrame);
   }
 
   function drawGameOver() {
@@ -1174,6 +1457,7 @@ window.addEventListener('DOMContentLoaded', function () {
     tickProgress = 1;
     prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
     doInitialRender();
+    runIdle();
   };
 
   // The theme only changes the arena's look, so it can change mid-round; between rounds the still
@@ -1194,6 +1478,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (alive) return;
     doInitialRender();
     if (over) drawGameOver();
+    runIdle();
   };
 
   initSnake();
@@ -1208,6 +1493,7 @@ window.addEventListener('DOMContentLoaded', function () {
   }
   showTheme();
   doInitialRender();
+  runIdle();
 });
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
