@@ -953,121 +953,237 @@ window.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Cybernetic theme, outside the walls: a slow particle show after the CyberRMF apps' screensaver. Particles drift
-  // in from all around to an orb beyond the north wall, nine small orbs form and circle it, then merge back in, the
-  // orb collapses, INTEGRATE lights up where it was, and the sign bursts back out into particles to start again.
-  // The camera looks down, so little sky shows: the orb is centred at floor level, so from the north wall its top
-  // just fits under the top of the view, and from further back its lower part sinks behind the arena.
-  var FX_N = 2700, FX_R = 6.6, FX_CELL = 0.36, FX_DENSE = 0.45;
-  var FX_O = { x: COLS / 2, y: 0, z: -22 };
-  // INTEGRATE stands a little higher, so from the far end of the arena the north wall stays below the letters.
-  var FX_SIGN_Y = 1.2;
+  // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A field of particles around the
+  // arena gathers, one orb at a time, into five orbs at different distances; each shrinks into a dense core, nine
+  // small orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign beyond the west wall.
+  // Two minutes after the first Start, and every two minutes after that, new particles gather into a quasar
+  // somewhere further off. Nothing comes apart again.
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
-  var FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000, FX_BURST = 7000;
-  var FX_SUB_FORM = 3500, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = -0.5;
+  var FX_R = 6.6, FX_DENSE = 0.45, FX_ORBIT_R = FX_R * 0.85, FX_SUB_R = FX_R * 0.12, FX_TILT = 0.5;
+  var FX_REST = 2000, FX_RECRUIT = 24000, FX_TRAVEL = 4500, FX_HOLD = 5000, FX_SHRINK = 3000;
+  var FX_SUB_FORM = 3500, FX_SPAWN = 15500 + FX_SUB_FORM, FX_ORBIT = 14000, FX_CRUISE = 5;
   var FX_SPAWN_AT = [0, 1200, 3500, 5500, 7500, 9500, 11500, 13500, 15500];
   var FX_SPAWN_ORDER = [0, 5, 2, 7, 4, 1, 6, 3, 8];
-  var FX_ORBIT = 14000, FX_MERGE = 4000, FX_COLLAPSE = 5000, FX_DISSOLVE = 3000;
-  var FX_PHASES = [
-    ['rest', 2000], ['recruit', FX_RECRUIT], ['hold', FX_HOLD + FX_SHRINK], ['spawn', 15500 + FX_SUB_FORM],
-    ['orbit', FX_ORBIT], ['merge', FX_MERGE], ['collapse', FX_COLLAPSE], ['flicker', 3500], ['sweep', 1200],
-    ['text', 10000], ['fill', 6000], ['dissolve', FX_DISSOLVE], ['burst', FX_BURST]
+  var FX_PHASES = [['recruit', FX_RECRUIT], ['hold', FX_HOLD + FX_SHRINK], ['spawn', FX_SPAWN], ['orbit', FX_ORBIT]];
+  var FX_BUILT = FX_RECRUIT + FX_HOLD + FX_SHRINK + FX_SPAWN;
+  // Nearest first. The camera looks down, so little sky shows: each orb is low enough that at full size its top
+  // fits under the top of the view from as close as the snake gets, and from further back its lower part may
+  // sink behind the arena. n is its share of the particles; the far ones look smaller and need fewer.
+  var FX_ORBS = [
+    { x: COLS / 2, y: 0, z: -22, n: 2700 },
+    { x: COLS + 36, y: 1.5, z: 10, n: 800 },
+    { x: 6, y: 2.5, z: ROWS + 44, n: 700 },
+    { x: COLS + 30, y: 2.5, z: -40, n: 600 },
+    { x: -46, y: 3.5, z: ROWS + 34, n: 600 }
   ];
-  var FX_FONT = {
-    I: ['01110','00100','00100','00100','00100','00100','01110'],
-    N: ['10001','11001','10101','10011','10001','10001','10001'],
-    T: ['11111','00100','00100','00100','00100','00100','00100'],
-    E: ['11111','10000','10000','11110','10000','10000','11111'],
-    G: ['01110','10001','10000','10011','10001','10001','01110'],
-    R: ['11110','10001','10001','11110','10010','10001','10001'],
-    A: ['01110','10001','10001','11111','10001','10001','10001']
-  };
-  var fx = null;
 
-  function fxSetup() {
-    var golden = Math.PI * (3 - Math.sqrt(5)), PW = 73, PH = 15;
-    var pts = [], k;
-    while (pts.length < FX_N) {
+  // The sign faces the arena from beyond the west wall, so its letters run along -z (left to right as the snake
+  // sees them).
+  var SIGN = { x: -22, y: 2.6, z: ROWS / 2, ux: 0, uz: -1, cell: 0.34, lines: ['CyberRMF', 'Integrate'] };
+  // 5 x 8 blocks: capitals fill the top seven rows; the last row holds the tails of g and y.
+  var SIGN_FONT = {
+    C: ['01110','10001','10000','10000','10000','10001','01110','00000'],
+    R: ['11110','10001','10001','11110','10010','10001','10001','00000'],
+    M: ['10001','11011','10101','10101','10001','10001','10001','00000'],
+    F: ['11111','10000','10000','11110','10000','10000','10000','00000'],
+    I: ['01110','00100','00100','00100','00100','00100','01110','00000'],
+    y: ['00000','00000','10001','10001','10001','01111','00001','01110'],
+    b: ['10000','10000','10110','11001','10001','10001','11110','00000'],
+    e: ['00000','00000','01110','10001','11111','10000','01110','00000'],
+    r: ['00000','00000','10110','11001','10000','10000','10000','00000'],
+    n: ['00000','00000','10110','11001','10001','10001','10001','00000'],
+    t: ['01000','01000','11100','01000','01000','01001','00110','00000'],
+    g: ['00000','00000','01111','10001','10001','01111','00001','01110'],
+    a: ['00000','00000','01110','00001','01111','10001','01111','00000']
+  };
+
+  // A quasar: a white-hot core with spikes of light, a disk of particles swirling round it (two spiral arms that
+  // turn together, the rest faster the closer in they are), and a jet streaming out of each face of the disk.
+  // Q_MAX keeps a long visit from piling up more than the game can draw.
+  var Q_EVERY = 120000, Q_MAX = 10, Q_APPEAR = 3000, Q_RECRUIT = 16000, Q_IGNITE = 21000, Q_JETS = 3500;
+  var Q_DISK = 700, Q_JET = 140, Q_IN = 0.9;
+  var Q_PALETTES = [
+    [[255, 255, 255], [160, 250, 255], [0, 229, 255], [140, 90, 255], [255, 40, 214]],
+    [[255, 255, 255], [255, 240, 160], [255, 176, 0], [255, 90, 30], [255, 30, 75]],
+    [[255, 255, 255], [185, 255, 240], [57, 255, 160], [0, 200, 255], [60, 110, 255]],
+    [[255, 255, 255], [255, 210, 245], [255, 92, 214], [177, 75, 255], [90, 60, 255]]
+  ];
+  var fx = null, qStart = 0, quasars = [];
+
+  function fieldPoint() {
+    for (;;) {
       var x = -45 + Math.random() * (COLS + 90), z = -45 + Math.random() * (ROWS + 90);
       if (x > -4 && x < COLS + 4 && z > -4 && z < ROWS + 4) continue;
-      pts.push({ hx: x, hy: 0.25 + Math.pow(Math.random(), 1.5) * 7, hz: z });
+      return { hx: x, hy: 0.25 + Math.pow(Math.random(), 1.5) * 7, hz: z, tw: Math.random() * 6.28 };
     }
-    pts.forEach(function (p) { p.d = Math.hypot(p.hx - FX_O.x, p.hy - FX_O.y, p.hz - FX_O.z); });
-    pts.sort(function (a, b) { return a.d - b.d; });
-    // Nearest first, slowly at first and then faster; each lands in a ball, spread by a stride so the
-    // early ones don't bunch on one side.
-    for (k = 0; k < FX_N; k++) {
-      var p = pts[k], j = (k * 7919) % FX_N;
-      var uy = 1 - 2 * (j + 0.5) / FX_N, ur = Math.sqrt(1 - uy * uy), th = j * golden;
-      p.rr = Math.cbrt((k + 0.5) / FX_N);
-      p.tx = ur * Math.cos(th) * p.rr; p.ty = uy * p.rr; p.tz = ur * Math.sin(th) * p.rr;
-      p.at = FX_RECRUIT * Math.sqrt(k / FX_N);
-      p.arc = Math.min(6, p.d * 0.08);
-      p.ord = k / FX_N;
-      p.tw = Math.random() * 6.28;
-      p.bx = (Math.random() - 0.5) * PW * FX_CELL; p.by = (Math.random() - 0.5) * PH * FX_CELL;
-      p.bd = Math.random() * 1500;
-    }
-    var word = 'INTEGRATE', ww = word.length * 7 - 2;
-    var c0 = Math.floor((PW - ww) / 2), r0 = Math.floor((PH - 7) / 2), lit = {};
-    for (var ci = 0; ci < word.length; ci++) {
-      var bm = FX_FONT[word[ci]];
-      for (var r = 0; r < 7; r++) for (var c = 0; c < 5; c++) if (bm[r][c] === '1') lit[(c0 + ci * 7 + c) + ',' + (r0 + r)] = 1;
-    }
-    var text = [], fill = [];
-    for (var gr = 0; gr < PH; gr++) for (var gc = 0; gc < PW; gc++) {
-      if (lit[gc + ',' + gr]) text.push({ c: gc, r: gr, at: Math.random() * 3500 });
-      else fill.push({ c: gc, r: gr, at: Math.random() * 6000 });
-    }
-    fx = { p: pts, text: text, fill: fill, pw: PW, ph: PH, pi: 0, pt: 0, t: 0, last: 0, orbit: 0,
-           buf: new Float32Array(FX_N * 4), bk: new Uint8Array(FX_N) };
   }
 
+  // Nearest first, slowly at first and then faster.
+  function queueRecruits(pts, x, y, z, start, span) {
+    pts.forEach(function (p) { p.d = Math.hypot(p.hx - x, p.hy - y, p.hz - z); });
+    pts.sort(function (a, b) { return a.d - b.d; });
+    pts.forEach(function (p, k) {
+      p.at = start + span * Math.sqrt(k / pts.length);
+      p.arc = Math.min(6, p.d * 0.08);
+      p.ord = k / pts.length;
+    });
+  }
+
+  function fxSetup() {
+    var golden = Math.PI * (3 - Math.sqrt(5)), field = [], total = 0, taken = 0, i;
+    FX_ORBS.forEach(function (o) { total += o.n; });
+    for (i = 0; i < total; i++) field.push(fieldPoint());
+    // Shared out at random, so each orb draws its particles from all around.
+    for (i = field.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = field[i];
+      field[i] = field[j]; field[j] = t;
+    }
+    var orbs = FX_ORBS.map(function (def, oi) {
+      var o = { x: def.x, y: def.y, z: def.z, start: FX_REST + oi * FX_BUILT, orbit: 0, spin: oi * 1.7 };
+      var tl = Math.hypot(COLS / 2 - o.x, ROWS / 2 - o.z);
+      o.tx = (COLS / 2 - o.x) / tl; o.tz = (ROWS / 2 - o.z) / tl;
+      o.p = field.slice(taken, taken += def.n);
+      queueRecruits(o.p, o.x, o.y, o.z, 0, FX_RECRUIT);
+      // Each lands in a ball, spread by a stride so the early ones don't bunch on one side.
+      var N = o.p.length;
+      o.p.forEach(function (p, k) {
+        var jj = (k * 7919) % N, uy = 1 - 2 * (jj + 0.5) / N, ur = Math.sqrt(1 - uy * uy), th = jj * golden;
+        p.rr = Math.cbrt((k + 0.5) / N);
+        p.tx = ur * Math.cos(th) * p.rr; p.ty = uy * p.rr; p.tz = ur * Math.sin(th) * p.rr;
+      });
+      return o;
+    });
+    fx = { t: 0, last: 0, orbs: orbs, sign: signSetup() };
+  }
+
+  function signSetup() {
+    var widths = SIGN.lines.map(function (l) { return l.length * 6 - 1; });
+    var pw = Math.max.apply(null, widths) + 4, ph = SIGN.lines.length * 9 + 1, lit = {}, text = [], fill = [];
+    SIGN.lines.forEach(function (line, li) {
+      var c0 = Math.floor((pw - widths[li]) / 2), r0 = 1 + li * 9;
+      for (var ci = 0; ci < line.length; ci++) {
+        var bm = SIGN_FONT[line[ci]];
+        for (var r = 0; r < 8; r++) for (var c = 0; c < 5; c++) if (bm[r][c] === '1') lit[(c0 + ci * 6 + c) + ',' + (r0 + r)] = 1;
+      }
+    });
+    for (var r = 0; r < ph; r++) for (var c = 0; c < pw; c++) (lit[c + ',' + r] ? text : fill).push({ c: c, r: r });
+    return { text: text, fill: fill, pw: pw, ph: ph };
+  }
+
+  function orbPhase(lt) {
+    if (lt < 0) return { ph: 'wait', pt: lt };
+    for (var i = 0; i < FX_PHASES.length; i++) {
+      if (lt < FX_PHASES[i][1]) return { ph: FX_PHASES[i][0], pt: lt };
+      lt -= FX_PHASES[i][1];
+    }
+    return { ph: 'built', pt: lt };
+  }
+
+  // The small orbs circle slowly as they form, spin up once all nine are out, then settle to a steady pace.
   function fxAdvance(now) {
     var dt = fx.last ? Math.min(now - fx.last, 100) : 0;
     fx.last = now;
-    fx.t += dt; fx.pt += dt;
-    while (fx.pt >= FX_PHASES[fx.pi][1]) { fx.pt -= FX_PHASES[fx.pi][1]; fx.pi = (fx.pi + 1) % FX_PHASES.length; }
-    var ph = FX_PHASES[fx.pi][0], pt = fx.pt, speed = 0;
-    if (ph === 'spawn') speed = 1;
-    else if (ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, 1, easeInOut((pt - 10000) / 4000));
-    else if (ph === 'merge') speed = 1 + easeInOut(pt / FX_MERGE) * 5;
-    fx.orbit += dt * 0.0001 * speed;
+    fx.t += dt;
+    fx.orbs.forEach(function (o) {
+      var st = orbPhase(fx.t - o.start), pt = st.pt, speed = 0;
+      if (st.ph === 'spawn') speed = 1;
+      else if (st.ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, FX_CRUISE, easeInOut((pt - 10000) / 4000));
+      else if (st.ph === 'built') speed = FX_CRUISE;
+      o.orbit += dt * 0.0001 * speed;
+    });
   }
 
   function fxScale(ph, pt) {
     if (ph === 'hold') return pt < FX_HOLD ? 1 : lerp(1, FX_DENSE, easeInOut((pt - FX_HOLD) / FX_SHRINK));
-    if (ph === 'spawn' || ph === 'orbit') return FX_DENSE;
-    if (ph === 'merge') return lerp(FX_DENSE, 1, smooth(easeInOut(pt / FX_MERGE)));
-    if (ph === 'collapse') return lerp(1, 0, easeInOut(pt / FX_COLLAPSE));
-    return 1;
+    return ph === 'wait' || ph === 'recruit' ? 1 : FX_DENSE;
+  }
+
+  function quasarCount(now) { return qStart ? Math.min(Q_MAX, Math.floor((now - qStart) / Q_EVERY)) : 0; }
+
+  function quasarAge(q, now) { return now - qStart - (q.k + 1) * Q_EVERY; }
+
+  // Somewhere 55 to 110 from the middle of the arena, in a direction clear of the orbs, the sign and the
+  // other quasars, with its disk tilted 35 to 65 degrees from flat.
+  function makeQuasar(k) {
+    var q = { k: k, pal: Q_PALETTES[k % Q_PALETTES.length] }, ang, i;
+    var avoid = FX_ORBS.map(function (o) { return [Math.atan2(o.z - ROWS / 2, o.x - COLS / 2), 0.26]; });
+    avoid.push([Math.PI, 0.45]);
+    quasars.forEach(function (o) { avoid.push([o.ang, 0.3]); });
+    for (var tries = 0; tries < 60; tries++) {
+      ang = Math.random() * Math.PI * 2;
+      if (avoid.every(function (v) { return Math.abs(Math.atan2(Math.sin(ang - v[0]), Math.cos(ang - v[0]))) > v[1]; })) break;
+    }
+    var dist = 55 + Math.random() * 55;
+    q.ang = ang; q.x = COLS / 2 + Math.cos(ang) * dist; q.z = ROWS / 2 + Math.sin(ang) * dist;
+    q.R = 6 + Math.random() * 3; q.L = q.R * 3.2;
+    var tilt = (35 + Math.random() * 30) * Math.PI / 180, az = Math.random() * Math.PI * 2;
+    var n = [Math.sin(tilt) * Math.cos(az), Math.cos(tilt), Math.sin(tilt) * Math.sin(az)];
+    var el = Math.hypot(n[0], n[2]), e1 = [n[2] / el, 0, -n[0] / el];
+    q.n = n; q.e1 = e1;
+    q.e2 = [n[1] * e1[2] - n[2] * e1[1], n[2] * e1[0] - n[0] * e1[2], n[0] * e1[1] - n[1] * e1[0]];
+    // Low enough that the top of the disk fits under the top of the view from as close as the snake gets.
+    q.y = Math.min(7, 2.9 + 0.12 * (dist - 18) - q.R * Math.sin(tilt));
+    var dir = Math.random() < 0.5 ? 1 : -1, wArm = dir * Math.PI * 2 / 24000, wOut = dir * Math.PI * 2 / 40000;
+    q.p = [];
+    for (i = 0; i < Q_DISK; i++) {
+      var p = fieldPoint(), r;
+      if (i < Q_DISK * 0.6) {
+        r = Q_IN + (q.R - Q_IN) * Math.sqrt(Math.random());
+        p.th = (i % 2) * Math.PI + 2.4 * Math.log(r / Q_IN) + (Math.random() - 0.5) * 0.5;
+        p.w = wArm;
+      } else {
+        r = Q_IN + (q.R - Q_IN) * Math.pow(Math.random(), 1.6);
+        p.th = Math.random() * Math.PI * 2;
+        p.w = wOut * Math.min(14, Math.pow(q.R / r, 1.5));
+      }
+      var fr = (r - Q_IN) / (q.R - Q_IN);
+      p.r = r; p.h = (Math.random() - 0.5) * 0.3 * (0.3 + fr);
+      p.bk = Math.min(4, Math.floor(fr * 5)); p.a = 0.95 - 0.45 * fr;
+      q.p.push(p);
+    }
+    queueRecruits(q.p, q.x, q.y, q.z, Q_APPEAR, Q_RECRUIT);
+    q.j = [];
+    for (i = 0; i < Q_JET * 2; i++) q.j.push({ s: Math.random(), phi: Math.random() * Math.PI * 2, side: i < Q_JET ? 1 : -1 });
+    q.cols = q.pal.map(rgbStr);
+    return q;
+  }
+
+  function rgbStr(c) { return 'rgb(' + c.join(',') + ')'; }
+
+  function rgbaStr(c, a) { return 'rgba(' + c.join(',') + ',' + Math.min(1, a).toFixed(3) + ')'; }
+
+  function sphereVisible(x, y, z, r) {
+    var c = toCam(x, y, z);
+    if (c.z < -r) return false;
+    if (c.z < r + 1) return true;
+    var p = proj(c), m = r * cam.f / c.z;
+    return p.x > -m && p.x < canvas.width + m && p.y > -m && p.y < canvas.height + m;
   }
 
   function drawFx(now, s) {
     if (!fx) fxSetup();
     fxAdvance(now);
-    var ph = FX_PHASES[fx.pi][0], pt = fx.pt;
-    var textPhase = ph === 'flicker' || ph === 'sweep' || ph === 'text' || ph === 'fill' || ph === 'dissolve';
-    if (textPhase || ph === 'burst') drawFxSign(ph, pt);
-    if (textPhase) return;
-    var scale = fxScale(ph, pt);
-    var subs = ph === 'spawn' || ph === 'orbit' || ph === 'merge' ? fxSubOrbs(ph, pt) : [];
-    var oc = toCam(FX_O.x, FX_O.y, FX_O.z);
+    while (quasars.length < quasarCount(now)) quasars.push(makeQuasar(quasars.length));
+    fx.orbs.forEach(function (o) {
+      var st = orbPhase(fx.t - o.start);
+      o.ph = st.ph; o.pt = st.pt; o.scale = fxScale(o.ph, o.pt);
+    });
+    ctx.save();
+    clipOutFloor();
+    drawFxSign();
+    ctx.globalCompositeOperation = 'lighter';
+    fx.orbs.forEach(orbGlow);
+    quasars.forEach(function (q) { quasarGlow(q, now); });
+    ctx.restore();
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.save();
-    clipOutFloor();
-    fxHalo(ph, pt, scale, oc);
-    subs.forEach(function (sb) { if (sb.c.z >= oc.z) fxSubOrb(sb); });
-    ctx.restore();
-    fxParticles(ph, pt, scale, s);
-    clipOutFloor();
-    subs.forEach(function (sb) { if (sb.c.z < oc.z) fxSubOrb(sb); });
+    fx.orbs.forEach(function (o) { orbParticles(o, s); });
+    quasars.forEach(function (q) { quasarParticles(q, now, s); });
     ctx.restore();
   }
 
-  // The orb, its small orbs and the sign stand beyond the north wall, so wherever the floor is in front of
-  // them they're under it and hidden. Particles also fly over the floor, so they're checked one by one.
+  // The orbs, quasars and sign stand beyond the walls, so wherever the floor is in front of them they're under
+  // it and hidden. Particles also fly over the floor, so they're checked one by one instead.
   function clipOutFloor() {
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height);
@@ -1075,30 +1191,40 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.clip('evenodd');
   }
 
-  // The small orbs circle on a tilted ring, raised on the arena's side, so from the snake they pass across the
-  // front of the orb and then behind it, low enough to sink behind the arena from further back.
-  function fxSubOrbs(ph, pt) {
-    var out = [], mT = ph === 'merge' ? easeInOut(pt / FX_MERGE) : 0;
-    var fadeOut = ph === 'merge' ? 1 - smooth(pt / FX_MERGE) : 1;
-    var orbitR = lerp(FX_ORBIT_R, FX_R * FX_DENSE * 0.3, mT), rad = lerp(FX_SUB_R, FX_SUB_R * 0.2, mT);
+  // The halo, and the small orbs on a ring tilted up on the side facing the arena, so from the snake they pass
+  // across the front of the orb and then behind it.
+  function orbGlow(o) {
+    if (o.ph === 'wait' || !sphereVisible(o.x, o.y, o.z, FX_R * 1.6)) return;
+    var oc = toCam(o.x, o.y, o.z);
+    if (oc.z > NEAR + FX_R) {
+      var I = o.ph === 'recruit' ? 0.3 * o.pt / FX_RECRUIT : 0.3;
+      var p = proj(oc), r = FX_R * o.scale * cam.f / oc.z;
+      var grad = ctx.createRadialGradient(p.x, p.y, r * 0.6, p.x, p.y, r * 1.6);
+      grad.addColorStop(0, 'rgba(0,229,255,0)');
+      grad.addColorStop(0.35, 'rgba(0,229,255,' + (I * 0.25).toFixed(3) + ')');
+      grad.addColorStop(1, 'rgba(0,229,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (o.ph !== 'spawn' && o.ph !== 'orbit' && o.ph !== 'built') return;
     var ct = Math.cos(FX_TILT), st = Math.sin(FX_TILT);
     for (var i = 0; i < FX_SPAWN_AT.length; i++) {
-      var formT = ph === 'spawn' ? clamp01((pt - FX_SPAWN_AT[i]) / FX_SUB_FORM) : 1;
+      var formT = o.ph === 'spawn' ? clamp01((o.pt - FX_SPAWN_AT[i]) / FX_SUB_FORM) : 1;
       if (formT < 0.1) continue;
-      var a = FX_SPAWN_ORDER[i] * Math.PI * 2 / FX_SPAWN_AT.length + fx.orbit;
-      var lx = Math.cos(a) * orbitR, lz = Math.sin(a) * orbitR;
-      var c = toCam(FX_O.x + lx, FX_O.y - lz * st, FX_O.z + lz * ct);
-      if (c.z < NEAR + rad) continue;
-      out.push({ c: c, r: rad, i: smooth(formT) * fadeOut });
+      var a = FX_SPAWN_ORDER[i] * Math.PI * 2 / FX_SPAWN_AT.length + o.orbit;
+      var lx = Math.cos(a) * FX_ORBIT_R, lz = Math.sin(a) * FX_ORBIT_R;
+      var c = toCam(o.x + lx * o.tz + lz * ct * o.tx, o.y + lz * st, o.z - lx * o.tx + lz * ct * o.tz);
+      if (c.z >= NEAR + FX_SUB_R) fxSubOrb(c, smooth(formT));
     }
-    return out;
   }
 
-  function fxSubOrb(sb) {
-    var p = proj(sb.c), g = sb.r * cam.f / sb.c.z * 1.6;
+  function fxSubOrb(c, i) {
+    var p = proj(c), g = FX_SUB_R * cam.f / c.z * 1.6;
     var grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, g);
-    grad.addColorStop(0, 'rgba(235,255,255,' + (0.95 * sb.i).toFixed(3) + ')');
-    grad.addColorStop(0.45, 'rgba(120,245,255,' + (0.7 * sb.i).toFixed(3) + ')');
+    grad.addColorStop(0, 'rgba(235,255,255,' + (0.95 * i).toFixed(3) + ')');
+    grad.addColorStop(0.45, 'rgba(120,245,255,' + (0.7 * i).toFixed(3) + ')');
     grad.addColorStop(1, 'rgba(0,150,255,0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -1106,133 +1232,179 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.fill();
   }
 
-  function fxHalo(ph, pt, scale, oc) {
-    if (ph === 'rest' || ph === 'burst' || oc.z < NEAR + FX_R) return;
-    var I = 0.3, rgb = '0,229,255';
-    if (ph === 'recruit') I = 0.3 * pt / FX_RECRUIT;
-    else if (ph === 'collapse') { I = easeInOut(pt / FX_COLLAPSE) * 1.25; rgb = '255,255,255'; }
-    var p = proj(oc), r = FX_R * Math.max(scale, ph === 'collapse' ? 0.35 : 0.06) * cam.f / oc.z;
-    var grad = ctx.createRadialGradient(p.x, p.y, r * 0.6, p.x, p.y, r * 1.6);
-    grad.addColorStop(0, 'rgba(' + rgb + ',0)');
-    grad.addColorStop(0.35, 'rgba(' + rgb + ',' + (I * 0.25).toFixed(3) + ')');
-    grad.addColorStop(1, 'rgba(' + rgb + ',0)');
-    ctx.fillStyle = grad;
+  // A white-hot core that flares as the quasar ignites, a faint glow in the disk's colour, and spikes of
+  // light across the core like a bright star seen through a telescope.
+  function quasarGlow(q, now) {
+    var lt = quasarAge(q, now), ign = smooth(clamp01((lt - Q_IGNITE + 3000) / 3000));
+    if (ign <= 0 || !sphereVisible(q.x, q.y, q.z, q.R * 1.4)) return;
+    var c = toCam(q.x, q.y, q.z);
+    if (c.z < 2) return;
+    var p = proj(c), k = cam.f / c.z, pal = q.pal, white = [255, 255, 255];
+    var flash = lt > Q_IGNITE ? Math.exp(-Math.pow((lt - Q_IGNITE) / 700, 2)) : 0;
+    var I = ign * (1 + 0.12 * Math.sin(lt * 0.003));
+    var hr = q.R * 1.4 * k, g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hr);
+    g.addColorStop(0, rgbaStr(pal[3], 0.12 * I));
+    g.addColorStop(1, rgbaStr(pal[3], 0));
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, r * 1.6, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, hr, 0, Math.PI * 2);
     ctx.fill();
+    var rc = 1.1 * k * (1 + 3 * flash);
+    g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rc);
+    g.addColorStop(0, rgbaStr(white, 0.95 * I + flash));
+    g.addColorStop(0.3, rgbaStr(pal[1], 0.7 * I));
+    g.addColorStop(0.65, rgbaStr(pal[2], 0.22 * I));
+    g.addColorStop(1, rgbaStr(pal[2], 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, rc, 0, Math.PI * 2);
+    ctx.fill();
+    var sl = rc * (6 + 8 * flash), lw = Math.max(1, rc * 0.08);
+    [[1, 0], [0, 1]].forEach(function (d) {
+      var sg = ctx.createLinearGradient(p.x - d[0] * sl, p.y - d[1] * sl, p.x + d[0] * sl, p.y + d[1] * sl);
+      sg.addColorStop(0, rgbaStr(pal[1], 0));
+      sg.addColorStop(0.5, rgbaStr(white, 0.8 * I));
+      sg.addColorStop(1, rgbaStr(pal[1], 0));
+      ctx.fillStyle = sg;
+      if (d[0]) ctx.fillRect(p.x - sl, p.y - lw / 2, sl * 2, lw);
+      else ctx.fillRect(p.x - lw / 2, p.y - sl, lw, sl * 2);
+    });
   }
 
-  function fxParticles(ph, pt, scale, s) {
-    var spin = fx.t * 0.0002, cs = Math.cos(spin), sn = Math.sin(spin), R = FX_R * scale;
-    var rt = ph === 'recruit' ? pt : ph === 'hold' ? FX_RECRUIT + pt : -1;
-    var beat = ph === 'recruit' ? Math.sin((fx.t % 1200) / 1200 * Math.PI) * 0.35 : 0;
-    var wave = 0;
-    if (ph === 'hold' && pt < FX_HOLD) wave = lerp(0.3, 0, smooth((pt - FX_HOLD * 0.75) / (FX_HOLD * 0.25)));
-    else if (ph === 'collapse') wave = lerp(0.6, 0, smooth(pt / FX_COLLAPSE));
-    var white = ph === 'collapse' ? easeInOut(pt / FX_COLLAPSE) * 0.7
-      : ph === 'rest' || ph === 'recruit' || ph === 'burst' ? 0 : clamp01((1 - scale) / (1 - FX_DENSE)) * 0.6;
-    var buf = fx.buf, bk = fx.bk, n = 0, f = cam.f, W = canvas.width, H = canvas.height;
-    for (var k = 0; k < FX_N; k++) {
-      var p = fx.p[k], x, y, z, a, e, grow = 1;
-      if (ph === 'burst') {
-        e = 1 - Math.pow(1 - clamp01((pt - p.bd) / (FX_BURST - 1500)), 3);
-        x = lerp(FX_O.x + p.bx, p.hx, e);
-        y = lerp(FX_SIGN_Y + p.by, p.hy, e) + Math.sin(e * Math.PI) * p.arc * 0.5;
-        z = lerp(FX_O.z, p.hz, e);
-        a = lerp(0.85, 0.32, e);
-      } else {
-        e = rt < 0 ? (ph === 'rest' ? 0 : 1) : easeInOut((rt - p.at) / FX_TRAVEL);
-        if (e <= 0) {
-          x = p.hx; y = p.hy; z = p.hz;
-          a = 0.32 + 0.1 * Math.sin(fx.t * 0.002 + p.tw);
-        } else {
-          x = lerp(p.hx, FX_O.x + (p.tx * cs - p.tz * sn) * R, e);
-          y = lerp(p.hy, FX_O.y + p.ty * R, e) + Math.sin(e * Math.PI) * p.arc;
-          z = lerp(p.hz, FX_O.z + (p.tx * sn + p.tz * cs) * R, e);
-          a = lerp(0.32, 0.85, e);
-          if (wave) { var w = (fx.t * 0.0004 + p.rr) % 1; if (w < 0.18) a += Math.sin(w / 0.18 * Math.PI) * wave; }
-          grow = 1 + beat * e;
-        }
-      }
-      var dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
-      if (y < 0) {
-        var ft = cam.y / (cam.y - y), ix = cam.x + dx * ft, iz = cam.z + dz * ft;
-        if (ix > 0 && ix < COLS && iz > 0 && iz < ROWS) continue;
-      }
-      var cz = dx * cam.fx + dy * cam.fy + dz * cam.fz;
-      if (cz < 1) continue;
-      var sx = cam.cx + (dx * cam.rx + dz * cam.rz) * f / cz;
-      var sy = cam.cy - (dx * cam.ux + dy * cam.uy + dz * cam.uz) * f / cz;
-      if (sx < -8 || sx > W + 8 || sy < -8 || sy > H + 8) continue;
-      if (cz > 55) a *= Math.max(0, 1 - (cz - 55) / 50);
-      if (a < 0.02) continue;
-      buf[n * 4] = sx; buf[n * 4 + 1] = sy;
-      buf[n * 4 + 2] = Math.max(1.4 * s, Math.min(4 * s, 0.13 * f / cz)) * grow;
-      buf[n * 4 + 3] = Math.min(a, 1);
-      bk[n] = Math.min(3, Math.floor((0.5 + 0.5 * Math.sin(fx.t * 0.0008 - p.ord * 6)) * 4));
-      n++;
+  var PT_CAP = 4096, ptBuf = new Float32Array(PT_CAP * 4), ptBk = new Uint8Array(PT_CAP), ptN = 0;
+
+  // Queues a particle as a square on screen, unless it's off screen or under the floor with the floor in
+  // front of it. bk picks its colour from the list given to flushPts.
+  function pushPt(x, y, z, a, grow, bk, s) {
+    var dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
+    if (y < 0) {
+      var ft = cam.y / (cam.y - y), ix = cam.x + dx * ft, iz = cam.z + dz * ft;
+      if (ix > 0 && ix < COLS && iz > 0 && iz < ROWS) return;
     }
-    for (var b = 0; b < 4; b++) {
-      var t = (b + 0.5) / 4, rgb = [];
-      for (var ch = 0; ch < 3; ch++) rgb.push(Math.round(lerp(lerp(FX_PRIMARY[ch], FX_LIGHT[ch], t), 255, white)));
-      ctx.fillStyle = 'rgb(' + rgb.join(',') + ')';
-      for (var i = 0; i < n; i++) {
-        if (bk[i] !== b) continue;
-        var q = buf[i * 4 + 2];
-        ctx.globalAlpha = buf[i * 4 + 3];
-        ctx.fillRect(buf[i * 4] - q / 2, buf[i * 4 + 1] - q / 2, q, q);
+    var cz = dx * cam.fx + dy * cam.fy + dz * cam.fz;
+    if (cz < 1 || ptN >= PT_CAP) return;
+    var f = cam.f, sx = cam.cx + (dx * cam.rx + dz * cam.rz) * f / cz;
+    var sy = cam.cy - (dx * cam.ux + dy * cam.uy + dz * cam.uz) * f / cz;
+    if (sx < -8 || sx > canvas.width + 8 || sy < -8 || sy > canvas.height + 8) return;
+    if (cz > 80) a *= Math.max(0, 1 - (cz - 80) / 120);
+    if (a < 0.02) return;
+    var i = ptN * 4;
+    ptBuf[i] = sx; ptBuf[i + 1] = sy;
+    ptBuf[i + 2] = Math.max(1.4 * s, Math.min(4 * s, 0.13 * f / cz)) * grow;
+    ptBuf[i + 3] = Math.min(a, 1);
+    ptBk[ptN++] = bk;
+  }
+
+  function flushPts(colors) {
+    for (var b = 0; b < colors.length; b++) {
+      ctx.fillStyle = colors[b];
+      for (var i = 0; i < ptN; i++) {
+        if (ptBk[i] !== b) continue;
+        var q = ptBuf[i * 4 + 2];
+        ctx.globalAlpha = ptBuf[i * 4 + 3];
+        ctx.fillRect(ptBuf[i * 4] - q / 2, ptBuf[i * 4 + 1] - q / 2, q, q);
       }
     }
     ctx.globalAlpha = 1;
+    ptN = 0;
   }
 
-  // INTEGRATE on a panel of blocks standing where the orb was, facing the arena.
-  function drawFxSign(ph, pt) {
-    var fade = ph === 'burst' ? 1 - smooth(pt / 3000) : 1;
-    if (fade <= 0) return;
-    var C = FX_CELL, f = cam.f, W = canvas.width, H = canvas.height;
-    var o = toCam(FX_O.x - (fx.pw - 1) / 2 * C, FX_SIGN_Y + (fx.ph - 1) / 2 * C, FX_O.z);
-    var exX = C * cam.rx, exY = C * cam.ux, exZ = C * cam.fx, eyY = -C * cam.uy, eyZ = -C * cam.fy;
-    var side = 0.75 * C * f, squash = Math.max(Math.abs(cam.rx), 0.15);
-    var dissolve = ph === 'dissolve' ? smooth(pt / FX_DISSOLVE) : ph === 'burst' ? 1 : 0;
-    function block(cell, a) {
+  // Until its turn an orb's particles twinkle in the field; then they fly in, nearest first, to a ball that
+  // pulses as it fills, ripples, and shrinks into a dense white core.
+  function orbParticles(o, s) {
+    var ph = o.ph, pt = o.pt;
+    if ((ph === 'spawn' || ph === 'orbit' || ph === 'built') && !sphereVisible(o.x, o.y, o.z, FX_R * FX_DENSE)) return;
+    var spin = fx.t * 0.0002 + o.spin, cs = Math.cos(spin), sn = Math.sin(spin), R = FX_R * o.scale;
+    var rt = ph === 'recruit' ? pt : ph === 'hold' ? FX_RECRUIT + pt : -1;
+    var beat = ph === 'recruit' ? Math.sin((fx.t % 1200) / 1200 * Math.PI) * 0.35 : 0;
+    var wave = ph === 'hold' && pt < FX_HOLD ? lerp(0.3, 0, smooth((pt - FX_HOLD * 0.75) / (FX_HOLD * 0.25))) : 0;
+    var white = ph === 'wait' || ph === 'recruit' ? 0 : clamp01((1 - o.scale) / (1 - FX_DENSE)) * 0.6;
+    for (var k = 0; k < o.p.length; k++) {
+      var p = o.p[k], x, y, z, a, grow = 1;
+      var e = rt < 0 ? (ph === 'wait' ? 0 : 1) : easeInOut((rt - p.at) / FX_TRAVEL);
+      if (e <= 0) {
+        x = p.hx; y = p.hy; z = p.hz;
+        a = 0.32 + 0.1 * Math.sin(fx.t * 0.002 + p.tw);
+      } else {
+        x = lerp(p.hx, o.x + (p.tx * cs - p.tz * sn) * R, e);
+        y = lerp(p.hy, o.y + p.ty * R, e) + Math.sin(e * Math.PI) * p.arc;
+        z = lerp(p.hz, o.z + (p.tx * sn + p.tz * cs) * R, e);
+        a = lerp(0.32, 0.85, e);
+        if (wave) { var w = (fx.t * 0.0004 + p.rr) % 1; if (w < 0.18) a += Math.sin(w / 0.18 * Math.PI) * wave; }
+        grow = 1 + beat * e;
+      }
+      pushPt(x, y, z, a, grow, Math.min(3, Math.floor((0.5 + 0.5 * Math.sin(fx.t * 0.0008 - p.ord * 6)) * 4)), s);
+    }
+    var cols = [];
+    for (var b = 0; b < 4; b++) {
+      var t = (b + 0.5) / 4, rgb = [];
+      for (var ch = 0; ch < 3; ch++) rgb.push(Math.round(lerp(lerp(FX_PRIMARY[ch], FX_LIGHT[ch], t), 255, white)));
+      cols.push(rgbStr(rgb));
+    }
+    flushPts(cols);
+  }
+
+  // New particles fade in around the arena, then fly in, nearest first, and fall into the turning disk; the
+  // core ignites as the last arrive and the jets shoot out of it.
+  function quasarParticles(q, now, s) {
+    var lt = quasarAge(q, now);
+    if (lt < 0) return;
+    if (lt > Q_APPEAR + Q_RECRUIT + FX_TRAVEL && !sphereVisible(q.x, q.y, q.z, q.L)) return;
+    var fadeIn = clamp01(lt / Q_APPEAR), n = q.n, e1 = q.e1, e2 = q.e2, k;
+    for (k = 0; k < q.p.length; k++) {
+      var p = q.p[k], e = easeInOut((lt - p.at) / FX_TRAVEL), x, y, z, a;
+      if (e <= 0) {
+        x = p.hx; y = p.hy; z = p.hz;
+        a = (0.32 + 0.1 * Math.sin(now * 0.002 + p.tw)) * fadeIn;
+      } else {
+        var th = p.th + p.w * lt, u = Math.cos(th) * p.r, v = Math.sin(th) * p.r;
+        x = lerp(p.hx, q.x + e1[0] * u + e2[0] * v + n[0] * p.h, e);
+        y = lerp(p.hy, q.y + e2[1] * v + n[1] * p.h, e) + Math.sin(e * Math.PI) * p.arc;
+        z = lerp(p.hz, q.z + e1[2] * u + e2[2] * v + n[2] * p.h, e);
+        a = lerp(0.32, p.a, e);
+      }
+      pushPt(x, y, z, a, 1, p.bk, s);
+    }
+    if (lt > Q_IGNITE) {
+      var reach = q.L * (1 - Math.pow(1 - clamp01((lt - Q_IGNITE) / Q_JETS), 3));
+      for (k = 0; k < q.j.length; k++) {
+        var jp = q.j[k], d = ((jp.s + lt / 2200) % 1) * q.L;
+        if (d > reach) continue;
+        var rad = 0.12 + d * 0.045, ang = jp.phi + d * 0.5 + lt * 0.0015;
+        var cu = Math.cos(ang) * rad, cv = Math.sin(ang) * rad, dd = d * jp.side;
+        pushPt(q.x + n[0] * dd + e1[0] * cu + e2[0] * cv, q.y + n[1] * dd + e2[1] * cv,
+               q.z + n[2] * dd + e1[2] * cu + e2[2] * cv, Math.pow(1 - d / q.L, 1.3), 1.6, d < q.L * 0.2 ? 0 : 1, s);
+      }
+    }
+    flushPts(q.cols);
+  }
+
+  // A panel of blocks, the letters lit and the rest dim, standing upright and facing the arena.
+  function drawFxSign() {
+    var sg = fx.sign, C = SIGN.cell, f = cam.f, W = canvas.width, H = canvas.height;
+    if (!sphereVisible(SIGN.x, SIGN.y, SIGN.z, sg.pw * C * 0.6)) return;
+    var hw = (sg.pw - 1) / 2 * C, hx = SIGN.ux * C, hz = SIGN.uz * C;
+    var o = toCam(SIGN.x - SIGN.ux * hw, SIGN.y + (sg.ph - 1) / 2 * C, SIGN.z - SIGN.uz * hw);
+    var exX = hx * cam.rx + hz * cam.rz, exY = hx * cam.ux + hz * cam.uz, exZ = hx * cam.fx + hz * cam.fz;
+    var eyY = -C * cam.uy, eyZ = -C * cam.fy;
+    var side = 0.75 * C * f, squash = Math.max(Math.abs(SIGN.ux * cam.rx + SIGN.uz * cam.rz), 0.15);
+    function block(cell) {
       var cz = o.z + cell.c * exZ + cell.r * eyZ;
       if (cz < 1) return;
       var sx = cam.cx + (o.x + cell.c * exX) * f / cz, sy = cam.cy - (o.y + cell.c * exY + cell.r * eyY) * f / cz;
       if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) return;
       var q = side / cz;
-      ctx.globalAlpha = a * fade;
       ctx.fillRect(sx - q * squash / 2, sy - q / 2, q * squash, q);
     }
-    var i, cell;
-    ctx.save();
-    clipOutFloor();
-    if (ph === 'fill' || ph === 'dissolve' || ph === 'burst') {
-      ctx.fillStyle = 'rgb(' + FX_PRIMARY.join(',') + ')';
-      for (i = 0; i < fx.fill.length; i++) {
-        cell = fx.fill[i];
-        var fa = 0.2;
-        if (ph === 'fill') {
-          if (pt < cell.at) continue;
-          if (pt - cell.at < 180) fa = Math.sin((pt - cell.at) * 0.07) > 0 ? 0.3 : 0.06;
-        }
-        block(cell, fa);
-      }
-    }
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = rgbStr(FX_PRIMARY);
+    sg.fill.forEach(block);
     var tc = [];
-    for (var ch = 0; ch < 3; ch++) tc.push(Math.round(lerp(lerp(FX_LIGHT[ch], 255, 0.4), FX_PRIMARY[ch], dissolve)));
-    ctx.fillStyle = 'rgb(' + tc.join(',') + ')';
-    for (i = 0; i < fx.text.length; i++) {
-      cell = fx.text[i];
-      var br = 0.9;
-      if (ph === 'flicker') {
-        if (pt < cell.at) continue;
-        var age = pt - cell.at;
-        br = age < 250 ? (Math.sin(age * 0.06) > 0 ? 0.85 : 0.12) : 0.7;
-      } else if (dissolve) br = lerp(0.9, 0.32, dissolve);
-      block(cell, lerp(br * 0.75, 0.2, dissolve));
-    }
-    ctx.restore();
+    for (var ch = 0; ch < 3; ch++) tc.push(Math.round(lerp(FX_LIGHT[ch], 255, 0.4)));
+    ctx.globalAlpha = 0.675;
+    ctx.fillStyle = rgbStr(tc);
+    sg.text.forEach(block);
+    ctx.globalAlpha = 1;
   }
 
   // Classic: a dark shadow under each ball. Cybernetic: a glow on the floor in the ball's own colour.
@@ -1447,6 +1619,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     initSnake();
     alive = true;
+    if (!qStart) qStart = performance.now();
     lastTick = performance.now();
     tickProgress = 0;
     rafId = requestAnimationFrame(render);
