@@ -308,7 +308,8 @@ window.addEventListener('DOMContentLoaded', function () {
   var COLS = BASE_W / G;
   var ROWS = BASE_H / G;
   var TICK_MS = 80;
-  var INPUT_THRESHOLD = 25;
+  var TURN_GRACE = 0.4;
+  var TURN_BUFFER = 2;
   var dpr = Math.min(window.devicePixelRatio || 1, 3);
 
   function sizeCanvas() {
@@ -412,12 +413,12 @@ window.addEventListener('DOMContentLoaded', function () {
   var snake = [];
   var prevSnake = [];
   var dirX = 1, dirY = 0;
-  var ndX = 1, ndY = 0;
+  var turnBuf = [];
+  var lastStep = null;
   var foodX = 5, foodY = 5;
   var currentCtrl = CONTROLS[0];
   var score = 0;
   var alive = false;
-  var tickTimer = null;
   var animT = 0;
   var lastTick = 0;
   var tickProgress = 1;
@@ -428,7 +429,6 @@ window.addEventListener('DOMContentLoaded', function () {
   var CASCADE_STAGGER = 35;
   var THIRD_TICK_MS = 140;
   var view = 'birds';
-  var turnQueue = [];
   var camYaw = 0;
   var lastFrame = 0;
   var answer = '';
@@ -467,9 +467,9 @@ window.addEventListener('DOMContentLoaded', function () {
     var my = Math.floor(ROWS / 2);
     snake = [{ x: mx, y: my }, { x: mx - 1, y: my }, { x: mx - 2, y: my }];
     prevSnake = snake.map(function (s) { return { x: s.x, y: s.y }; });
-    dirX = 1; dirY = 0; ndX = 1; ndY = 0;
+    dirX = 1; dirY = 0;
     score = 0; animT = 0; justAte = false;
-    answer = ''; turnQueue = []; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
+    answer = ''; turnBuf = []; lastStep = null; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
     if (scoreEl) scoreEl.textContent = '0';
     if (ctrlEl) ctrlEl.textContent = '-';
     if (hudLabelEl) hudLabelEl.textContent = gameMode === 'controls' ? 'Control' : 'Port';
@@ -686,6 +686,15 @@ window.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    if (alive) {
+      var step = tickMs();
+      if (now - lastTick > step * 5) lastTick = now;
+      while (alive && now - lastTick >= step) {
+        lastTick += step;
+        tick();
+      }
+      if (!alive) return;
+    }
     tickProgress = Math.min((now - lastTick) / tickMs(), 1);
     animT += 0.04;
     if (view === 'third') drawThird(now); else drawBirds(now);
@@ -698,7 +707,7 @@ window.addEventListener('DOMContentLoaded', function () {
     var cw = canvas.width;
     var ch = canvas.height;
 
-    var ease = tickProgress * tickProgress * (3 - 2 * tickProgress);
+    var ease = tickProgress;
 
     ctx.clearRect(0, 0, cw, ch);
     ctx.fillStyle = '#23272e';
@@ -852,7 +861,7 @@ window.addEventListener('DOMContentLoaded', function () {
     var turnBy = Math.atan2(dirY, dirX) - camYaw;
     while (turnBy > Math.PI) turnBy -= Math.PI * 2;
     while (turnBy < -Math.PI) turnBy += Math.PI * 2;
-    camYaw += dt ? turnBy * (1 - Math.exp(-dt / 110)) : turnBy;
+    camYaw += dt ? turnBy * (1 - Math.exp(-dt / 60)) : turnBy;
 
     var head = snake[0], headPrev = prevSnake[0] || head;
     setCamera(lerp(headPrev.x, head.x, t) + 0.5, lerp(headPrev.y, head.y, t) + 0.5);
@@ -968,15 +977,9 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function tick() {
-    if (view === 'third') {
-      var turn = turnQueue.shift();
-      var oldX = dirX;
-      if (turn === 'left') { dirX = dirY; dirY = -oldX; }
-      else if (turn === 'right') { dirX = -dirY; dirY = oldX; }
-      ndX = dirX; ndY = dirY;
-    } else {
-      dirX = ndX; dirY = ndY;
-    }
+    var next = turnBuf.shift();
+    var turned = !!next && (next.x !== dirX || next.y !== dirY);
+    if (next) { dirX = next.x; dirY = next.y; }
     var nx = snake[0].x + dirX;
     var ny = snake[0].y + dirY;
 
@@ -1003,15 +1006,22 @@ window.addEventListener('DOMContentLoaded', function () {
       snake.pop();
       justAte = false;
     }
+    lastStep = { turned: turned };
+  }
 
-    lastTick = performance.now();
-    tickProgress = 0;
+  // A turn pressed early in a step re-runs that step with the turn, so the head turns from the square it
+  // was leaving rather than one square later. Not after a step that turned (that could reverse the snake)
+  // or ate (the food has already moved).
+  function graceTurn() {
+    if (!lastStep || lastStep.turned || justAte || turnBuf.length !== 1) return;
+    if (performance.now() - lastTick > tickMs() * TURN_GRACE) return;
+    snake = prevSnake.map(function (s) { return { x: s.x, y: s.y }; });
+    tick();
   }
 
   function die() {
     alive = false;
     lockView(false);
-    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
     var s = S();
@@ -1038,14 +1048,12 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function startGame() {
-    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     initSnake();
     alive = true;
     lockView(true);
     lastTick = performance.now();
     tickProgress = 0;
-    tickTimer = setInterval(tick, tickMs());
     rafId = requestAnimationFrame(render);
   }
 
@@ -1061,31 +1069,33 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Turns wait in a short line, each checked against the one before it, so two quick turns both happen.
+  // In 3rd person, left and right turn from the direction the snake will be facing by then.
   function setDir(dir) {
-    if (!alive) return;
+    if (!alive || turnBuf.length >= TURN_BUFFER) return;
+    var last = turnBuf.length ? turnBuf[turnBuf.length - 1] : { x: dirX, y: dirY };
+    var nx, ny;
     if (view === 'third') {
-      if ((dir === 'left' || dir === 'right') && turnQueue.length < 2) turnQueue.push(dir);
-      return;
+      if (dir === 'left') { nx = last.y; ny = -last.x; }
+      else if (dir === 'right') { nx = -last.y; ny = last.x; }
+      else return;
+    } else {
+      nx = dir === 'left' ? -1 : dir === 'right' ? 1 : 0;
+      ny = dir === 'up' ? -1 : dir === 'down' ? 1 : 0;
+      if ((nx === last.x && ny === last.y) || (nx === -last.x && ny === -last.y)) return;
     }
-    var oldNdX = ndX, oldNdY = ndY;
-    if (dir === 'up'    && dirY !== 1)  { ndX = 0;  ndY = -1; }
-    if (dir === 'down'  && dirY !== -1) { ndX = 0;  ndY = 1;  }
-    if (dir === 'left'  && dirX !== 1)  { ndX = -1; ndY = 0;  }
-    if (dir === 'right' && dirX !== -1) { ndX = 1;  ndY = 0;  }
-    if ((ndX !== oldNdX || ndY !== oldNdY) && performance.now() - lastTick >= INPUT_THRESHOLD) {
-      clearInterval(tickTimer);
-      tick();
-      tickTimer = setInterval(tick, TICK_MS);
-    }
+    turnBuf.push({ x: nx, y: ny });
+    graceTurn();
   }
 
   document.addEventListener('keydown', function (e) {
     var k = e.key;
+    if (k.indexOf('Arrow') === 0) e.preventDefault();
+    if (e.repeat) return;
     if (k === 'ArrowUp'    || k === 'w' || k === 'W') setDir('up');
     else if (k === 'ArrowDown'  || k === 's' || k === 'S') setDir('down');
     else if (k === 'ArrowLeft'  || k === 'a' || k === 'A') setDir('left');
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') setDir('right');
-    if (k.indexOf('Arrow') === 0) e.preventDefault();
   });
 
   var dpad = document.getElementById('dpad');
@@ -1122,26 +1132,28 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  var swipeX0 = null, swipeY0 = null;
+  // Swipes turn as soon as the finger has moved far enough, and one gesture can chain turns (down then
+  // left, say); moving on in the same direction doesn't repeat the turn.
+  var swipeX0 = null, swipeY0 = null, swipeDir = null;
   canvas.addEventListener('touchstart', function (e) {
     var t = e.touches[0];
     swipeX0 = t.clientX;
     swipeY0 = t.clientY;
+    swipeDir = null;
   }, { passive: true });
-  canvas.addEventListener('touchend', function (e) {
+  canvas.addEventListener('touchmove', function (e) {
     if (swipeX0 === null) return;
-    var t = e.changedTouches[0];
+    var t = e.touches[0];
     var dx = t.clientX - swipeX0;
     var dy = t.clientY - swipeY0;
     var minSwipe = 20;
     if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      setDir(dx > 0 ? 'right' : 'left');
-    } else {
-      setDir(dy > 0 ? 'down' : 'up');
-    }
-    swipeX0 = null; swipeY0 = null;
+    var dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    if (dir !== swipeDir) setDir(dir);
+    swipeDir = dir;
+    swipeX0 = t.clientX; swipeY0 = t.clientY;
   }, { passive: true });
+  canvas.addEventListener('touchend', function () { swipeX0 = null; swipeY0 = null; swipeDir = null; }, { passive: true });
 
   window.switchMode = function (mode) {
     if (mode === gameMode) return;
@@ -1150,7 +1162,6 @@ window.addEventListener('DOMContentLoaded', function () {
     var tabP = document.getElementById('tab-ports');
     if (tabC) tabC.classList.toggle('active', mode === 'controls');
     if (tabP) tabP.classList.toggle('active', mode === 'ports');
-    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     alive = false;
     lockView(false);
