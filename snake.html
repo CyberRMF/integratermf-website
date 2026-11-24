@@ -126,6 +126,53 @@
       position: relative;
       align-self: stretch;
     }
+    /* Points over every round, with a gold +1 rising off them as the CyberRMF apps' points do: under the
+       canvas's bottom-left corner where there is room beside the centred row, otherwise just inside it. */
+    .total-points {
+      position: absolute;
+      left: 10px;
+      bottom: 8px;
+      z-index: 2;
+      pointer-events: none;
+      font-size: 11px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+    .total-points[hidden] { display: none; }
+    .total-label { color: var(--text); font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+    .total-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: #facc15;
+      text-shadow: 0 0 6px rgba(250,204,21,.4);
+      letter-spacing: .02em;
+    }
+    .total-num.ping { animation: total-ping 0.9s ease-out; }
+    @keyframes total-ping {
+      0%   { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+      15%  { filter: brightness(1.6) drop-shadow(0 0 8px rgba(250,204,21,0.7)); }
+      60%  { filter: brightness(1.1) drop-shadow(0 0 3px rgba(250,204,21,0.15)); }
+      100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+    }
+    .total-float {
+      position: absolute;
+      left: 0;
+      bottom: 100%;
+      font-size: 14px;
+      font-weight: 800;
+      color: #facc15;
+      text-shadow: 0 0 8px rgba(250,204,21,.6), 0 1px 2px rgba(0,0,0,.5);
+      white-space: nowrap;
+      animation: total-float-up 0.9s ease-out forwards;
+    }
+    @keyframes total-float-up {
+      0%   { opacity: 1; transform: translateY(0); }
+      40%  { opacity: 1; transform: translateY(-18px); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    @media (min-width: 760px) {
+      .total-points { left: 0; bottom: auto; top: calc(100% + 6px); }
+    }
     /* Keyboard shortcuts, only where there is room beside the centred row and a keyboard is likely. */
     .shortcuts { display: none; }
     @media (min-width: 760px) and (hover: hover) and (pointer: fine) {
@@ -359,6 +406,10 @@
     <div class="canvas-wrap">
       <canvas id="snake-canvas"></canvas>
       <button class="fov-btn" id="fov-btn" type="button" title="Switch between the wide view and the close-up view">FOV: Wide</button>
+      <div class="total-points" id="total-points" hidden>
+        <div class="total-label">Total points</div>
+        <div class="total-num" id="total-num">0</div>
+      </div>
     </div>
     <div class="hud">
       <span class="score">Score: <strong id="snake-score">0</strong></span>
@@ -367,8 +418,9 @@
       <button class="btn" id="snake-pause" type="button" disabled>Pause</button>
       <div class="shortcuts">
         <div class="shortcuts-title">Shortcuts</div>
-        <div>Z: Hold for speed</div>
-        <div>X: Change FOV</div>
+        <div>Z: Hold for +50% speed</div>
+        <div>X: Hold for +25% speed</div>
+        <div>C: Change FOV</div>
       </div>
     </div>
 
@@ -537,6 +589,35 @@ window.addEventListener('DOMContentLoaded', function () {
   var foodX = 5, foodY = 5;
   var currentCtrl = CONTROLS[0];
   var score = 0;
+
+  // Points over every round, kept in this browser. Each one won rises off the total as a +1 for TOTAL_FLOAT_MS
+  // and the total lights up, as the CyberRMF apps' points do. Hidden until there's a point.
+  var TOTAL_KEY = 'cyber-snake-total', TOTAL_FLOAT_MS = 1000;
+  var totalEl = document.getElementById('total-points'), totalNumEl = document.getElementById('total-num'), total = 0;
+  try { total = parseInt(localStorage.getItem(TOTAL_KEY), 10) || 0; } catch (e) {}
+
+  function showTotal() {
+    if (!totalEl || !totalNumEl) return;
+    totalNumEl.textContent = total.toLocaleString();
+    totalEl.hidden = total <= 0;
+  }
+
+  function addPoints(n) {
+    total += n;
+    try { localStorage.setItem(TOTAL_KEY, String(total)); } catch (e) {}
+    showTotal();
+    if (!totalEl || !totalNumEl) return;
+    var fl = document.createElement('div');
+    fl.className = 'total-float';
+    fl.textContent = '+' + n;
+    totalEl.appendChild(fl);
+    setTimeout(function () { if (fl.parentNode) fl.parentNode.removeChild(fl); }, TOTAL_FLOAT_MS);
+    totalNumEl.classList.remove('ping');
+    void totalNumEl.offsetWidth;
+    totalNumEl.classList.add('ping');
+  }
+  showTotal();
+
   var alive = false;
   var animT = 0;
   var lastTick = 0;
@@ -595,7 +676,7 @@ window.addEventListener('DOMContentLoaded', function () {
     dirX = 1; dirY = 0;
     score = 0; animT = 0; justAte = false; over = false; endScene = null;
     jumps = []; digHeld = false; digAmt = 0; digDepth = 0;
-    stepCount = 0; crossing = false; boost = 1; fastHeld = false; fastAmt = 0;
+    stepCount = 0; crossing = false; boost = 1; fastHeld = { z: false, x: false }; fastAmt = 0;
     answer = ''; ateAt = -1e9; turnBuf = []; lastStep = null; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
     if (scoreEl) scoreEl.textContent = '0';
     if (ctrlEl) ctrlEl.textContent = '-';
@@ -1014,17 +1095,23 @@ window.addEventListener('DOMContentLoaded', function () {
     return false;
   }
 
-  // Holding Z runs the snake FAST times faster, easing in and out over about FAST_EASE.
-  var FAST = 1.25, FAST_EASE = 90, fastHeld = false, fastAmt = 0;
+  // Holding Z runs the snake FAST.z times faster and holding X FAST.x times (Z if both are held), easing in and
+  // out over about FAST_EASE. fastAmt is how much faster than normal it's running.
+  var FAST = { z: 1.5, x: 1.25 }, FAST_EASE = 90, fastHeld = { z: false, x: false }, fastAmt = 0;
 
   function updateSpeed(dt) {
     boost += ((crossing ? BOOST : 1) - boost) * (1 - Math.exp(-dt / (crossing ? 70 : 600)));
-    fastAmt += ((fastHeld ? 1 : 0) - fastAmt) * (1 - Math.exp(-dt / FAST_EASE));
+    var want = fastHeld.z ? FAST.z - 1 : fastHeld.x ? FAST.x - 1 : 0;
+    fastAmt += (want - fastAmt) * (1 - Math.exp(-dt / FAST_EASE));
   }
 
-  function speedNow() { return boost * (1 + (FAST - 1) * fastAmt) * (1 - SLOW * digAmt); }
+  function speedNow() { return boost * (1 + fastAmt) * (1 - SLOW * digAmt); }
 
-  function setFast(on) { fastHeld = on && alive && !paused; }
+  // A key given, or both let go when there's none.
+  function setFast(on, key) {
+    if (key) fastHeld[key] = on && alive && !paused;
+    else fastHeld.z = fastHeld.x = false;
+  }
 
   function setDig(on) {
     if (on && (!alive || paused)) return;
@@ -1197,14 +1284,16 @@ window.addEventListener('DOMContentLoaded', function () {
 
   // The arena's four sides, as directions from its middle (x across, z down the board): east, south, west and
   // north. Space events take one slot a side, so they're never crowded together even in a phone's narrower view:
-  // up over the orb and N_OFF to one side of it, and off the east and south sides SLOT_OFF to one side, with the
-  // fractal there FRAC_OFF to the other (none behind the sign). The other nebulas form off the corners, up to
-  // NEB_JIT either way.
-  var SIDES = [0, Math.PI / 2, Math.PI, -Math.PI / 2], SLOT_OFF = 0.22, FRAC_OFF = 0.28, N_OFF = 0.28, NEB_JIT = 0.08;
+  // up over the orb and N_OFF to one side of it, off the west side W_OFF to one side of the sign and W_FAR times
+  // further off than elsewhere (smaller, so it fits beside the sign), and off the east and south sides SLOT_OFF to
+  // one side, with the fractal there FRAC_OFF to the other. Which side of the orb or the sign is picked afresh for
+  // each event. The other nebulas form off the corners, up to NEB_JIT either way.
+  var SIDES = [0, Math.PI / 2, Math.PI, -Math.PI / 2], SLOT_OFF = 0.22, FRAC_OFF = 0.28, N_OFF = 0.28;
+  var W_OFF = 0.42, W_FAR = 1.3, NEB_JIT = 0.08;
   // A quasar, a magnetar, then a black hole, and round again: one every SKY_PER balls eaten, in the free slot
-  // furthest from the others. Once all three are out, each new one takes over from the last of its kind, which
-  // fades out over SKY_FADE, and forms in its slot once it's gone. Each forms where it stands over SKY_FORM and
-  // lights up at SKY_IGNITE.
+  // whose side has gone longest without one (the first four sides in no set order), so every side has one before
+  // any side has another. Once all three are out, each new one takes over from the last of its kind, which fades
+  // out over SKY_FADE. Each forms where it stands over SKY_FORM and lights up at SKY_IGNITE.
   var SKY_PER = 5, SKY_TYPES = ['quasar', 'magnetar', 'blackhole'], SKY_FORM = 5000, SKY_IGNITE = 5500, SKY_FADE = 4000;
   // A quasar: a white-hot core with spikes of light, a disk of particles swirling round it (two spiral arms that
   // turn together, the rest faster the closer in they are), and a short jet out of each face of the disk, Q_JET
@@ -1280,8 +1369,10 @@ window.addEventListener('DOMContentLoaded', function () {
            skyN: 0, nebulas: [], nextNeb: NEB_FIRST, pals: shuffled(N_PALETTES), palN: 0,
            kinds: shuffled(['mandelbrot', 'julia'].concat(N_SHAPES)),
            fractals: { mandelbrot: { side: mSide, off: mOff }, julia: { side: 1 - mSide, off: jOff } },
-           slots: [{ side: 3, off: pick([-1, 1]) * N_OFF, high: true },
-                   { side: mSide, off: mOff > 0 ? -SLOT_OFF : SLOT_OFF }, { side: 1 - mSide, off: jOff > 0 ? -SLOT_OFF : SLOT_OFF }],
+           slotN: 0,
+           slots: [{ side: 3, offs: [-N_OFF, N_OFF], high: true },
+                   { side: mSide, offs: [mOff > 0 ? -SLOT_OFF : SLOT_OFF] }, { side: 1 - mSide, offs: [jOff > 0 ? -SLOT_OFF : SLOT_OFF] },
+                   { side: 2, offs: [-W_OFF, W_OFF], far: W_FAR, outward: true }],
            corners: SIDES.map(function (a) { return { ang: a + Math.PI / 4 }; }) };
   }
 
@@ -1368,24 +1459,21 @@ window.addEventListener('DOMContentLoaded', function () {
       if (!old) { old = sky[0]; dropSky(old); left = 0; }
       slot = old.slot; born = now + Math.max(left, 0);
     }
+    slot.used = ++fx.slotN;
     var o = type === 'quasar' ? makeQuasar(pick(Q_PALETTES), slot) : type === 'magnetar' ? makeMagnetar(slot) : makeBlackHole(slot);
     o.type = type; o.born = born;
     sky.push(o);
     return o;
   }
 
-  function slotAng(sl) { return SIDES[sl.side] + sl.off; }
-
   function angGap(a, b) { return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b))); }
 
-  // The free slot furthest round the sky from the events out already, or null if there's none.
+  // The free slot that's gone longest without an event, one that's never had one first, or null if there's none.
   function freeSlot() {
-    var free = fx.slots.filter(function (sl) { return !sky.some(function (o) { return o.slot === sl; }); });
-    var best = null, bestGap = -1;
-    shuffled(free).forEach(function (sl) {
-      var gap = 9;
-      sky.forEach(function (o) { gap = Math.min(gap, angGap(slotAng(sl), o.ang)); });
-      if (gap > bestGap) { bestGap = gap; best = sl; }
+    var best = null;
+    shuffled(fx.slots).forEach(function (sl) {
+      if (sky.some(function (o) { return o.slot === sl; })) return;
+      if (!best || (sl.used || 0) < (best.used || 0)) best = sl;
     });
     return best;
   }
@@ -1397,11 +1485,12 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // In its slot, near to far from the middle of the arena; up over the orb, in the far part of that, so it's
-  // small enough to clear the orb.
+  // small enough to clear the orb; beside the sign, the slot's far times further off.
   function placeSky(o, slot, near, far) {
     if (slot.high) near = lerp(near, far, 0.6);
-    o.slot = slot; o.side = slot.side; o.high = !!slot.high;
-    o.ang = slotAng(slot) + (Math.random() - 0.5) * 0.06;
+    if (slot.far) { near *= slot.far; far *= slot.far; }
+    o.slot = slot; o.side = slot.side; o.high = !!slot.high; o.off = pick(slot.offs);
+    o.ang = SIDES[slot.side] + o.off + (Math.random() - 0.5) * 0.06;
     o.dist = near + Math.random() * (far - near);
     o.x = COLS / 2 + Math.cos(o.ang) * o.dist; o.z = ROWS / 2 + Math.sin(o.ang) * o.dist;
   }
@@ -1534,14 +1623,15 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Facing the arena, U either side of its middle and V above and below, with a few stars in it; next to the
-  // quasar or magnetar given, on the side towards the middle of its side of the sky, or else in the corner given.
+  // quasar or magnetar given, on the side towards the middle of its side of the sky (away from it, beside the
+  // sign), or else in the corner given.
   function makeShaped(kind, U, near, corner) {
     var nb = { kind: kind, pal: nextPal(), at: fx.t, form: N_FORMS[kind], roll: (Math.random() * 2 - 1) * N_ROLL[kind],
                spin: pick([-1, 1]), U: U }, sh = N_BUILD[kind](), eu = 0, ev = 0;
     sh.blobs.forEach(function (bl) { eu = Math.max(eu, Math.abs(bl.u) + bl.r); ev = Math.max(ev, Math.abs(bl.v) + bl.r); });
     nb.S = U / (eu * 1.04); nb.V = ev * 1.04 * nb.S;
     if (near) {
-      var sd = near.slot.off > 0 ? -1 : 1, gap = (near.type === 'quasar' ? near.R * 1.1 : M_SIZE) + 0.8 * U;
+      var sd = (near.off > 0 ? -1 : 1) * (near.slot.outward ? -1 : 1), gap = (near.type === 'quasar' ? near.R * 1.1 : M_SIZE) + 0.8 * U;
       nb.near = near; nb.side = near.side; nb.dist = near.dist + (Math.random() - 0.5) * 6;
       nb.ang = near.ang + sd * gap / near.dist;
       nb.y = near.y + (Math.random() - 0.5) * 4;
@@ -1846,7 +1936,6 @@ window.addEventListener('DOMContentLoaded', function () {
     var o = fx.orb, st = orbPhase(fx.t - o.start);
     o.ph = st.ph; o.pt = st.pt;
     ctx.save();
-    drawFxSign();
     ctx.globalCompositeOperation = 'lighter';
     fx.nebulas.forEach(function (nb) { nebulaGlow(nb); });
     sky.forEach(function (k) {
@@ -1864,6 +1953,8 @@ window.addEventListener('DOMContentLoaded', function () {
     });
     fx.nebulas.forEach(function (nb) { if (nb.eat) eatParticles(nb, now, s); });
     ctx.restore();
+    // The sign is nearer than the nebulas and space events, so it stands in front of them.
+    drawFxSign();
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     drawOrb(o);
@@ -2611,37 +2702,17 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     var since = playMs - ateAt;
-    if (headItem.sr && since < ANSWER_MS) {
-      var ap = proj(toCam(headItem.x, headItem.y + headItem.r + 0.3, headItem.z)), tagH = 13 * s * 1.8;
-      if (answer) {
-        ctx.globalAlpha = 1 - smooth((since - ANSWER_MS + ANSWER_FADE) / ANSWER_FADE);
-        drawTag(answer, ap.x, ap.y, 'center', 13 * s, 'rgba(96,165,250,0.7)');
-        ctx.globalAlpha = 1;
-      }
-      if (since < PLUS_MS) drawPlusOne(ap.x, ap.y - (answer ? tagH * 0.5 + 10 * s : 0), since / PLUS_MS, s);
+    if (headItem.sr && answer && since < ANSWER_MS) {
+      var ap = proj(toCam(headItem.x, headItem.y + headItem.r + 0.3, headItem.z));
+      ctx.globalAlpha = 1 - smooth((since - ANSWER_MS + ANSWER_FADE) / ANSWER_FADE);
+      drawTag(answer, ap.x, ap.y, 'center', 13 * s, 'rgba(96,165,250,0.7)');
+      ctx.globalAlpha = 1;
     }
     if (paused) drawPaused(cw, ch, s);
   }
 
-  // The answer shows over the head for ANSWER_MS after eating, fading out over the last ANSWER_FADE of it. A gold
-  // +1 rises over it as the app's points do: up 18px at full strength over the first 40% of PLUS_MS, then on to
-  // 40px as it fades.
-  var ANSWER_MS = 2000, ANSWER_FADE = 500, PLUS_MS = 900;
-  function drawPlusOne(x, y, p, s) {
-    var ease = function (u) { u = clamp01(u); return 1 - (1 - u) * (1 - u); };
-    var rise = p < 0.4 ? 18 * ease(p / 0.4) : 18 + 22 * ease((p - 0.4) / 0.6);
-    ctx.save();
-    ctx.globalAlpha = p < 0.4 ? 1 : 1 - ease((p - 0.4) / 0.6);
-    ctx.font = '800 ' + Math.round(16 * s) + 'px -apple-system, "Segoe UI", Consolas, monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillStyle = '#facc15';
-    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 2 * s; ctx.shadowOffsetY = s;
-    ctx.fillText('+1', x, y - rise * s);
-    ctx.shadowColor = 'rgba(250,204,21,0.6)'; ctx.shadowBlur = 8 * s; ctx.shadowOffsetY = 0;
-    ctx.fillText('+1', x, y - rise * s);
-    ctx.restore();
-  }
+  // The answer shows over the head for ANSWER_MS after eating, fading out over the last ANSWER_FADE of it.
+  var ANSWER_MS = 2000, ANSWER_FADE = 500;
 
   function drawPaused(cw, ch, s) {
     ctx.fillStyle = 'rgba(0,0,0,0.45)';
@@ -2678,6 +2749,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     if (nx === foodX && ny === foodY) {
       score++;
+      addPoints(1);
       fxAte(score);
       justAte = true;
       ateTime = performance.now();
@@ -2880,15 +2952,21 @@ window.addEventListener('DOMContentLoaded', function () {
 
   var KEY_DIRS = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
                    ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
-  // Enter starts a round, Space pauses one and X switches the view, except while typing in a box.
+  // Enter starts a round, Space pauses one, Z and X are held to speed up and C switches the view, except while
+  // typing in a box.
   function typing(e) { var tag = e.target && e.target.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'; }
+  function fastKey(e) {
+    if (e.code === 'KeyZ' || e.key === 'z' || e.key === 'Z') return 'z';
+    if (e.code === 'KeyX' || e.key === 'x' || e.key === 'X') return 'x';
+    return null;
+  }
   document.addEventListener('keydown', function (e) {
-    var k = e.key;
+    var k = e.key, fk = fastKey(e);
     if (typing(e)) return;
     if (k === 'Enter') { e.preventDefault(); if (!e.repeat && !alive) startGame(); return; }
     if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat && alive) setPaused(!paused); return; }
-    if (e.code === 'KeyZ' || k === 'z' || k === 'Z') { if (!e.repeat) setFast(true); return; }
-    if (e.code === 'KeyX' || k === 'x' || k === 'X') {
+    if (fk) { if (!e.repeat) setFast(true, fk); return; }
+    if (e.code === 'KeyC' || k === 'c' || k === 'C') {
       if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) setView(view === 'close' ? 'wide' : 'close');
       return;
     }
@@ -2897,8 +2975,9 @@ window.addEventListener('DOMContentLoaded', function () {
     press(KEY_DIRS[k]);
   });
   document.addEventListener('keyup', function (e) {
+    var fk = fastKey(e);
     if ((e.key === ' ' || e.key === 'Spacebar') && !typing(e)) e.preventDefault();
-    if (e.code === 'KeyZ' || e.key === 'z' || e.key === 'Z') setFast(false);
+    if (fk) setFast(false, fk);
     if (KEY_DIRS[e.key]) release(KEY_DIRS[e.key]);
   });
   window.addEventListener('blur', function () { setDig(false); setFast(false); });
