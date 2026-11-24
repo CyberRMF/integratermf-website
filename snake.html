@@ -272,10 +272,10 @@
     }
     .tab-row {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
     }
+    .tab-row .game-tabs + .game-tabs { margin-top: 2px; }
 
     /* ── D-pad ── */
     .dpad {
@@ -318,59 +318,8 @@
     .dpad-left  { left: 0;  top: 50%;  transform: translateY(-50%); }
     .dpad-right { right: 0; top: 50%;  transform: translateY(-50%); }
 
-    /* ── Joystick ── */
-    .joy {
-      display: none;
-      width: 180px;
-      height: 180px;
-      position: relative;
-      margin: 12px auto 20px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(96,165,250,0.05) 0, var(--bg3) 72%);
-      border: 1px solid var(--border);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .joy-hint { position: absolute; width: 18px; height: 18px; fill: var(--muted); opacity: 0.6; }
-    .joy-up    { top: 10px; left: 50%; margin-left: -9px; }
-    .joy-down  { bottom: 10px; left: 50%; margin-left: -9px; }
-    .joy-left  { left: 10px; top: 50%; margin-top: -9px; }
-    .joy-right { right: 10px; top: 50%; margin-top: -9px; }
-    .joy-knob {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 72px;
-      height: 72px;
-      margin: -36px 0 0 -36px;
-      border-radius: 50%;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      box-shadow: 0 3px 10px rgba(0,0,0,0.45);
-      transition: transform .15s ease-out, border-color .1s, background .1s;
-      pointer-events: none;
-    }
-    .joy.active .joy-knob { transition: border-color .1s, background .1s; border-color: var(--accent); background: rgba(96,165,250,0.15); }
-    .pad-switch {
-      display: none;
-      margin: 0 auto 20px;
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 6px 14px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      cursor: pointer;
-    }
     @media (max-width: 600px), (pointer: coarse) {
       .dpad { display: block; }
-      .pad-switch { display: block; }
-      .game-wrap.use-joy .dpad { display: none; }
-      .game-wrap.use-joy .joy { display: block; }
       .game-sub { font-size: 10px; }
     }
     @media (min-width: 900px) and (pointer: fine) {
@@ -387,7 +336,7 @@
   <div class="game-wrap">
     <div style="text-align:center">
       <div class="game-title">NIST SP 800-53 Snake</div>
-      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn, up jumps (even over yourself), hold down to slow down: arrow keys, WASD, D-pad or joystick. Hold Z to speed up. Enter starts, Space pauses.</div>
+      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn, up jumps (even over yourself), hold down to slow down: arrow keys, WASD or the D-pad. Hold Z to speed up. Enter starts, Space pauses.</div>
     </div>
     <div class="tab-row">
       <div class="game-tabs">
@@ -438,14 +387,6 @@
         <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-5H4v-6h8V4z"/></svg>
       </div>
     </div>
-    <div class="joy" id="joy">
-      <svg class="joy-hint joy-up" viewBox="0 0 24 24"><path d="M12 6l-7 8h14z"/></svg>
-      <svg class="joy-hint joy-down" viewBox="0 0 24 24"><path d="M12 18l7-8H5z"/></svg>
-      <svg class="joy-hint joy-left" viewBox="0 0 24 24"><path d="M6 12l8 7V5z"/></svg>
-      <svg class="joy-hint joy-right" viewBox="0 0 24 24"><path d="M18 12l-8-7v14z"/></svg>
-      <div class="joy-knob" id="joy-knob"></div>
-    </div>
-    <button class="pad-switch" id="pad-switch" type="button">Use joystick</button>
   </div>
 
   <script>
@@ -1465,8 +1406,6 @@ window.addEventListener('DOMContentLoaded', function () {
     sky.push(o);
     return o;
   }
-
-  function angGap(a, b) { return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b))); }
 
   // The free slot that's gone longest without an event, one that's never had one first, or null if there's none.
   function freeSlot() {
@@ -3018,64 +2957,6 @@ window.addEventListener('DOMContentLoaded', function () {
       })(btns[b]);
     }
   }
-
-  // The joystick does what the arrows do: push it left or right to turn, up to jump, and hold it down to slow
-  // down. A push counts once the knob is JOY_DEAD of the way out, and holds while it stays within JOY_HOLD
-  // either side of that way, so a thumb near a diagonal doesn't flick between two. Back in the middle lets go.
-  var JOY_DEAD = 0.35, JOY_HOLD = Math.PI / 3, PAD_KEY = 'cyber-snake-pad';
-  var joy = document.getElementById('joy'), knob = document.getElementById('joy-knob');
-  var padSwitch = document.getElementById('pad-switch'), gameWrap = document.querySelector('.game-wrap');
-  var JOY_ANG = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
-  var joyId = null, joyDir = null;
-  function joyMove(e) {
-    var r = joy.getBoundingClientRect(), R = r.width / 2, lim = R - knob.offsetWidth / 2;
-    var dx = e.clientX - r.left - R, dy = e.clientY - r.top - R, d = Math.hypot(dx, dy);
-    if (d > lim) { dx *= lim / d; dy *= lim / d; }
-    knob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
-    var dir = null, a = Math.atan2(dy, dx);
-    if (d >= JOY_DEAD * lim) {
-      if (joyDir && angGap(a, JOY_ANG[joyDir]) < JOY_HOLD) dir = joyDir;
-      else dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-    }
-    if (dir === joyDir) return;
-    if (joyDir) release(joyDir);
-    joyDir = dir;
-    if (dir) press(dir);
-  }
-  function joyEnd(e) {
-    if (e.pointerId !== joyId) return;
-    joyId = null;
-    joy.classList.remove('active');
-    knob.style.transform = '';
-    if (joyDir) release(joyDir);
-    joyDir = null;
-  }
-  if (joy && knob) {
-    joy.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      joyId = e.pointerId;
-      try { joy.setPointerCapture(e.pointerId); } catch (err) {}
-      joy.classList.add('active');
-      joyMove(e);
-    });
-    joy.addEventListener('pointermove', function (e) { if (e.pointerId === joyId) joyMove(e); });
-    joy.addEventListener('pointerup', joyEnd);
-    joy.addEventListener('pointercancel', joyEnd);
-  }
-
-  function showPad(useJoy) {
-    if (gameWrap) gameWrap.classList.toggle('use-joy', useJoy);
-    if (padSwitch) padSwitch.textContent = useJoy ? 'Use arrows' : 'Use joystick';
-  }
-  var useJoy = false;
-  try { useJoy = localStorage.getItem(PAD_KEY) === 'joy'; } catch (e) {}
-  showPad(useJoy);
-  if (padSwitch) padSwitch.addEventListener('click', function () {
-    useJoy = !useJoy;
-    try { localStorage.setItem(PAD_KEY, useJoy ? 'joy' : 'arrows'); } catch (e) {}
-    showPad(useJoy);
-    padSwitch.blur();
-  });
 
   // Swipes act as soon as the finger has moved far enough, and one gesture can chain them (left then right,
   // say); moving on in the same direction doesn't repeat it. Up jumps; down slows the snake until the finger
