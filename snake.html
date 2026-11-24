@@ -123,6 +123,23 @@
       padding: 10px 0;
       flex-wrap: wrap;
       justify-content: center;
+      position: relative;
+      align-self: stretch;
+    }
+    /* Keyboard shortcuts, only where there is room beside the centred row and a keyboard is likely. */
+    .shortcuts { display: none; }
+    @media (min-width: 760px) and (hover: hover) and (pointer: fine) {
+      .shortcuts {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 6px;
+        font-size: 11px;
+        line-height: 1.4;
+        color: var(--muted);
+        -webkit-font-smoothing: antialiased;
+      }
+      .shortcuts-title { color: var(--text); font-weight: 600; }
     }
     .score {
       font-size: 13px;
@@ -348,6 +365,11 @@
       <span class="score"><span id="hud-label">Control</span>: <strong id="snake-ctrl">-</strong></span>
       <button class="btn" id="snake-start" type="button">Start</button>
       <button class="btn" id="snake-pause" type="button" disabled>Pause</button>
+      <div class="shortcuts">
+        <div class="shortcuts-title">Shortcuts</div>
+        <div>Z: Hold for speed</div>
+        <div>X: Change FOV</div>
+      </div>
     </div>
 
     <div class="dpad" id="dpad">
@@ -1063,8 +1085,8 @@ window.addEventListener('DOMContentLoaded', function () {
   // Cybernetic: drawn over the sky, a black floor with a glowing cyan line every five squares, and light walls.
   // The walls are backed in black first, so nothing in the sky shows through them, but the floor drawn after
   // still shows through the near wall from outside the arena. The grid is sparse, so round the well a finer mesh
-  // shows the floor caving in.
-  var MAJOR = 5, MESH = 0.5, MESH_BANDS = 4;
+  // shows the floor caving in, only as far as its steep inner part.
+  var MAJOR = 5, MESH = 0.5, MESH_BANDS = 4, MESH_R = 2;
 
   function drawCyberArena(s) {
     var walls = sortedWalls();
@@ -1100,24 +1122,24 @@ window.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Floor lines every MESH squares within the well, fixed to the floor so they stretch as the well moves
-  // through them, sagging with it, brightest in the middle and fading out towards the rim.
+  // Floor lines every MESH squares within MESH_R of the well's middle, fixed to the floor so they stretch as
+  // the well moves through them, sagging with it, brightest in the middle and gone before the shallow outer part.
   function drawWellMesh(s) {
     var bands = [], b;
     for (b = 0; b < MESH_BANDS; b++) bands.push([]);
     function line(alongX, at) {
-      var off = at - (alongX ? well.z : well.x), half = Math.sqrt(Math.max(0, DIG_R * DIG_R - off * off));
+      var off = at - (alongX ? well.z : well.x), half = Math.sqrt(Math.max(0, MESH_R * MESH_R - off * off));
       var mid = alongX ? well.x : well.z, u0 = Math.max(0, mid - half), u1 = Math.min(alongX ? COLS : ROWS, mid + half);
       var n = Math.ceil((u1 - u0) / 0.25);
       for (var k = 0; k < n; k++) {
-        var a = u0 + (u1 - u0) * k / n, e = u0 + (u1 - u0) * (k + 1) / n, d = Math.hypot((a + e) / 2 - mid, off) / DIG_R;
+        var a = u0 + (u1 - u0) * k / n, e = u0 + (u1 - u0) * (k + 1) / n, d = Math.hypot((a + e) / 2 - mid, off) / MESH_R;
         bands[Math.min(MESH_BANDS - 1, Math.floor(d * MESH_BANDS))].push(alongX
           ? [[a, -depthAt(a, at), at], [e, -depthAt(e, at), at]]
           : [[at, -depthAt(at, a), a], [at, -depthAt(at, e), e]]);
       }
     }
     function lines(alongX, c0, max) {
-      for (var k = Math.ceil((c0 - DIG_R) / MESH); k * MESH <= c0 + DIG_R; k++) {
+      for (var k = Math.ceil((c0 - MESH_R) / MESH); k * MESH <= c0 + MESH_R; k++) {
         var at = k * MESH;
         if (at > 0 && at < max && at % MAJOR) line(alongX, at);
       }
@@ -2858,7 +2880,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
   var KEY_DIRS = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
                    ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
-  // Enter starts a round and Space pauses one, except while typing in a box.
+  // Enter starts a round, Space pauses one and X switches the view, except while typing in a box.
   function typing(e) { var tag = e.target && e.target.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'; }
   document.addEventListener('keydown', function (e) {
     var k = e.key;
@@ -2866,6 +2888,10 @@ window.addEventListener('DOMContentLoaded', function () {
     if (k === 'Enter') { e.preventDefault(); if (!e.repeat && !alive) startGame(); return; }
     if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat && alive) setPaused(!paused); return; }
     if (e.code === 'KeyZ' || k === 'z' || k === 'Z') { if (!e.repeat) setFast(true); return; }
+    if (e.code === 'KeyX' || k === 'x' || k === 'X') {
+      if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) setView(view === 'close' ? 'wide' : 'close');
+      return;
+    }
     if (k.indexOf('Arrow') === 0) e.preventDefault();
     if (e.repeat || !KEY_DIRS[k]) return;
     press(KEY_DIRS[k]);
