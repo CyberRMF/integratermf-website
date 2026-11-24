@@ -144,6 +144,27 @@
       -webkit-font-smoothing: antialiased;
     }
     .btn:hover { border-color: var(--muted); }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+    .btn:disabled:hover { border-color: var(--border); }
+    #snake-pause { min-width: 104px; }
+    .fov-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      background: rgba(35,39,46,0.75);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color .2s;
+      -webkit-font-smoothing: antialiased;
+    }
+    .fov-btn:hover { border-color: var(--muted); }
+    .canvas-wrap.cyber .fov-btn { border-color: rgba(0,229,255,0.45); }
 
     /* ── Game Tabs ── */
     .game-tabs {
@@ -232,8 +253,60 @@
     .dpad-down  { bottom: 0; left: 50%; transform: translateX(-50%); }
     .dpad-left  { left: 0;  top: 50%;  transform: translateY(-50%); }
     .dpad-right { right: 0; top: 50%;  transform: translateY(-50%); }
+
+    /* ── Joystick ── */
+    .joy {
+      display: none;
+      width: 180px;
+      height: 180px;
+      position: relative;
+      margin: 12px auto 20px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96,165,250,0.05) 0, var(--bg3) 72%);
+      border: 1px solid var(--border);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .joy-hint { position: absolute; width: 18px; height: 18px; fill: var(--muted); opacity: 0.6; }
+    .joy-up    { top: 10px; left: 50%; margin-left: -9px; }
+    .joy-down  { bottom: 10px; left: 50%; margin-left: -9px; }
+    .joy-left  { left: 10px; top: 50%; margin-top: -9px; }
+    .joy-right { right: 10px; top: 50%; margin-top: -9px; }
+    .joy-knob {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 72px;
+      height: 72px;
+      margin: -36px 0 0 -36px;
+      border-radius: 50%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+      transition: transform .15s ease-out, border-color .1s, background .1s;
+      pointer-events: none;
+    }
+    .joy.active .joy-knob { transition: border-color .1s, background .1s; border-color: var(--accent); background: rgba(96,165,250,0.15); }
+    .pad-switch {
+      display: none;
+      margin: 0 auto 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+    }
     @media (max-width: 600px), (pointer: coarse) {
       .dpad { display: block; }
+      .pad-switch { display: block; }
+      .game-wrap.use-joy .dpad { display: none; }
+      .game-wrap.use-joy .joy { display: block; }
       .game-sub { font-size: 10px; }
     }
     @media (min-width: 900px) and (pointer: fine) {
@@ -250,7 +323,7 @@
   <div class="game-wrap">
     <div style="text-align:center">
       <div class="game-title">NIST SP 800-53 Snake</div>
-      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn, up jumps (even over yourself), hold down to slow down: arrow keys, WASD, or D-pad.</div>
+      <div class="game-sub" id="game-sub">Eat the controls. Left and right turn, up jumps (even over yourself), hold down to slow down: arrow keys, WASD, D-pad or joystick. Hold Z to speed up. Enter starts, Space pauses.</div>
     </div>
     <div class="tab-row">
       <div class="game-tabs">
@@ -268,11 +341,13 @@
     </div>
     <div class="canvas-wrap">
       <canvas id="snake-canvas"></canvas>
+      <button class="fov-btn" id="fov-btn" type="button" title="Switch between the wide view and the close-up view">FOV: Wide</button>
     </div>
     <div class="hud">
       <span class="score">Score: <strong id="snake-score">0</strong></span>
       <span class="score"><span id="hud-label">Control</span>: <strong id="snake-ctrl">-</strong></span>
-      <button class="btn" id="snake-start">Start</button>
+      <button class="btn" id="snake-start" type="button">Start</button>
+      <button class="btn" id="snake-pause" type="button" disabled>Pause</button>
     </div>
 
     <div class="dpad" id="dpad">
@@ -289,6 +364,14 @@
         <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-5H4v-6h8V4z"/></svg>
       </div>
     </div>
+    <div class="joy" id="joy">
+      <svg class="joy-hint joy-up" viewBox="0 0 24 24"><path d="M12 6l-7 8h14z"/></svg>
+      <svg class="joy-hint joy-down" viewBox="0 0 24 24"><path d="M12 18l7-8H5z"/></svg>
+      <svg class="joy-hint joy-left" viewBox="0 0 24 24"><path d="M6 12l8 7V5z"/></svg>
+      <svg class="joy-hint joy-right" viewBox="0 0 24 24"><path d="M18 12l-8-7v14z"/></svg>
+      <div class="joy-knob" id="joy-knob"></div>
+    </div>
+    <button class="pad-switch" id="pad-switch" type="button">Use joystick</button>
   </div>
 
   <script>
@@ -299,6 +382,8 @@ window.addEventListener('DOMContentLoaded', function () {
   var ctrlEl = document.getElementById('snake-ctrl');
   var flashIdEl = document.getElementById('flash-id');
   var flashNameEl = document.getElementById('flash-name');
+  var pauseBtn = document.getElementById('snake-pause');
+  var fovBtn = document.getElementById('fov-btn');
   if (!canvas || !startBtn) return;
 
   var ctx = canvas.getContext('2d');
@@ -328,6 +413,7 @@ window.addEventListener('DOMContentLoaded', function () {
     canvas.style.height = drawH + 'px';
     canvas.width = Math.round(drawW * dpr);
     canvas.height = Math.round(drawH * dpr);
+    if (fovBtn) fovBtn.style.right = Math.round((cw - drawW) / 2 + 8) + 'px';
   }
   sizeCanvas();
   window.addEventListener('resize', function () {
@@ -437,12 +523,16 @@ window.addEventListener('DOMContentLoaded', function () {
   var rafId = null;
   var justAte = false;
   var ateTime = 0;
+  // Play time, which stands still while paused, and when in it the snake last ate.
+  var playMs = 0, ateAt = -1e9;
   var CASCADE_DURATION = 180;
   var CASCADE_STAGGER = 35;
   var camYaw = 0;
   var lastFrame = 0;
   var answer = '';
   var over = false;
+  var paused = false;
+  var KEYS = window.matchMedia('(pointer: fine)').matches;
 
   var THEME_KEY = 'cyber-snake-theme';
   var theme = 'cyber';
@@ -483,8 +573,8 @@ window.addEventListener('DOMContentLoaded', function () {
     dirX = 1; dirY = 0;
     score = 0; animT = 0; justAte = false; over = false; endScene = null;
     jumps = []; digHeld = false; digAmt = 0; digDepth = 0;
-    stepCount = 0; crossing = false; boost = 1;
-    answer = ''; turnBuf = []; lastStep = null; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
+    stepCount = 0; crossing = false; boost = 1; fastHeld = false; fastAmt = 0;
+    answer = ''; ateAt = -1e9; turnBuf = []; lastStep = null; camYaw = Math.atan2(dirY, dirX); lastFrame = 0;
     if (scoreEl) scoreEl.textContent = '0';
     if (ctrlEl) ctrlEl.textContent = '-';
     if (hudLabelEl) hudLabelEl.textContent = gameMode === 'controls' ? 'Control' : 'Port';
@@ -563,31 +653,33 @@ window.addEventListener('DOMContentLoaded', function () {
     return Math.min((score - 30) / 40, 1);
   }
 
-  // near: the body just behind the head; far: the tail. After score 30 the body blends towards stops.
+  // near: the body just behind the head; far: the tail. After score 30, stops (green, light yellow, yellow,
+  // orange, red, front to tail) spread back over the body from just behind the head.
   var SNAKE_COLORS = {
     classic: {
       head: '#60a5fa', headGlow: 'rgba(96,165,250,0.5)', near: [234, 179, 8], far: [220, 50, 38],
       eat: '#22c55e', eatRgb: '34,197,94',
       stops: [
-        { pos: 0,    r: 220, g: 50,  b: 38  },
-        { pos: 0.25, r: 234, g: 130, b: 8   },
-        { pos: 0.5,  r: 234, g: 200, b: 30  },
-        { pos: 0.75, r: 34,  g: 197, b: 94  },
-        { pos: 1,    r: 22,  g: 120, b: 50  }
+        { pos: 0,    r: 34,  g: 197, b: 94  },
+        { pos: 0.25, r: 240, g: 230, b: 140 },
+        { pos: 0.5,  r: 234, g: 190, b: 20  },
+        { pos: 0.75, r: 234, g: 120, b: 10  },
+        { pos: 1,    r: 220, g: 50,  b: 38  }
       ]
     },
     cyber: {
       head: '#14c8ff', headGlow: 'rgba(20,200,255,0.65)', near: [255, 150, 0], far: [255, 30, 90],
       eat: '#39ff14', eatRgb: '57,255,20',
       stops: [
-        { pos: 0,    r: 255, g: 30,  b: 90  },
-        { pos: 0.25, r: 255, g: 110, b: 0   },
-        { pos: 0.5,  r: 255, g: 230, b: 0   },
-        { pos: 0.75, r: 57,  g: 255, b: 20  },
-        { pos: 1,    r: 0,   g: 210, b: 120 }
+        { pos: 0,    r: 57,  g: 255, b: 20  },
+        { pos: 0.25, r: 240, g: 255, b: 150 },
+        { pos: 0.5,  r: 255, g: 225, b: 0   },
+        { pos: 0.75, r: 255, g: 130, b: 0   },
+        { pos: 1,    r: 255, g: 30,  b: 90  }
       ]
     }
   };
+  var SPREAD_EDGE = 0.25;
 
   function sampleGradient(stops, t) {
     if (t <= 0) return stops[0];
@@ -606,14 +698,16 @@ window.addEventListener('DOMContentLoaded', function () {
     return stops[0];
   }
 
+  // The new colours reach back as far as the blend has got, fading into the old ones over SPREAD_EDGE.
   function segmentRgb(i, len) {
     var pal = SNAKE_COLORS[theme];
     var t = i / Math.max(len - 1, 1);
     var gb = greenBlend();
     var rgb = [0, 1, 2].map(function (k) { return Math.round(lerp(pal.near[k], pal.far[k], t)); });
-    if (gb > 0) {
+    var m = gb > 0 ? smooth((gb * (1 + SPREAD_EDGE) - t) / SPREAD_EDGE) : 0;
+    if (m > 0) {
       var c = sampleGradient(pal.stops, t);
-      rgb = [Math.round(lerp(rgb[0], c.r, gb)), Math.round(lerp(rgb[1], c.g, gb)), Math.round(lerp(rgb[2], c.b, gb))];
+      rgb = [Math.round(lerp(rgb[0], c.r, m)), Math.round(lerp(rgb[1], c.g, m)), Math.round(lerp(rgb[2], c.b, m))];
     }
     return rgb;
   }
@@ -713,7 +807,8 @@ window.addEventListener('DOMContentLoaded', function () {
     if (alive) {
       var dt = now - lastTick;
       lastTick = now;
-      if (dt > TICK_MS * 5) dt = 0;
+      if (paused || dt > TICK_MS * 5) dt = 0;
+      playMs += dt;
       updateSpeed(dt);
       tickProgress += dt * speedNow() / TICK_MS;
       while (alive && tickProgress >= 1) {
@@ -731,25 +826,32 @@ window.addEventListener('DOMContentLoaded', function () {
 
   // World units are grid cells, the board lies on y = 0 from (0, 0) to (COLS, ROWS),
   // and the camera rides behind and above the head, turning with it.
-  // Far enough back that the head and the next two balls are in view, and looking out far enough to show a
-  // good band of sky.
-  var CAM_BACK = 5, CAM_UP = 2.9, LOOK_AHEAD = 2.2, LOOK_UP = 1.2, NEAR = 0.15, WALL_H = 0.7, FOCAL = 0.88;
+  // The wide view is far enough back that the head and the next two balls are in view, and looks out far enough
+  // to show a good band of sky; the close-up is the original, nearer the head and looking down the board. The FOV
+  // button eases from one to the other over VIEW_EASE, and the choice is remembered on this device.
+  var CAM_UP = 2.9, NEAR = 0.15, WALL_H = 0.7, FOCAL = 0.88, VIEW_KEY = 'cyber-snake-view', VIEW_EASE = 350;
+  var VIEWS = { wide: { back: 5, ahead: 2.2, look: 1.2, focal: FOCAL }, close: { back: 3.2, ahead: 4, look: 0.3, focal: 0.95 } };
+  var view = 'wide', viewMix = 0;
+  try { if (localStorage.getItem(VIEW_KEY) === 'close') { view = 'close'; viewMix = 1; } } catch (e) {}
   var cam = null;
 
+  function viewParam(name) { return lerp(VIEWS.wide[name], VIEWS.close[name], smooth(viewMix)); }
+
   function setCamera(hx, hz) {
+    var back = viewParam('back'), ahead = viewParam('ahead');
     var fx = Math.cos(camYaw), fz = Math.sin(camYaw);
-    var vx = fx * (CAM_BACK + LOOK_AHEAD), vy = LOOK_UP - CAM_UP, vz = fz * (CAM_BACK + LOOK_AHEAD);
+    var vx = fx * (back + ahead), vy = viewParam('look') - CAM_UP, vz = fz * (back + ahead);
     var vl = Math.sqrt(vx * vx + vy * vy + vz * vz);
     vx /= vl; vy /= vl; vz /= vl;
     var rl = Math.sqrt(vx * vx + vz * vz);
     var rx = -vz / rl, rz = vx / rl;
     cam = {
-      x: hx - fx * CAM_BACK, y: CAM_UP, z: hz - fz * CAM_BACK,
+      x: hx - fx * back, y: CAM_UP, z: hz - fz * back,
       fx: vx, fy: vy, fz: vz,
       rx: rx, rz: rz,
       ux: -rz * vy, uy: rz * vx - rx * vz, uz: rx * vy,
       hx: fx, hz: fz,
-      f: canvas.height * FOCAL, cx: canvas.width / 2, cy: canvas.height / 2
+      f: canvas.height * viewParam('focal'), cx: canvas.width / 2, cy: canvas.height / 2
     };
   }
 
@@ -848,8 +950,10 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Holding down slows the snake and sinks a gravity well under the head that the floor caves into. It deepens
-  // while held, up to DIG_MAX, and springs back when let go; the snake slows by up to SLOW as it does.
-  var DIG_MAX = 1.3, DIG_SIGMA = 1.7, DIG_R = 5, DIG_IN = 700, DIG_OUT = 350, DIG_TAP = 0.2, SLOW = 0.4;
+  // while held, up to DIG_MAX, and springs back when let go; the snake slows by up to SLOW as it does. It reaches
+  // out DIG_R squares, where it meets the flat floor.
+  var DIG_MAX = 1.3, DIG_SIGMA = 1.7, DIG_R = 3.2, DIG_IN = 700, DIG_OUT = 350, DIG_TAP = 0.2, SLOW = 0.4;
+  var DIG_RIM = Math.exp(-DIG_R * DIG_R / (2 * DIG_SIGMA * DIG_SIGMA));
   var digHeld = false, digAmt = 0, digDepth = 0, well = { x: 0, z: 0 };
 
   // Up makes the snake hop: the head rises and falls over JUMP_STEPS squares, and each ball behind it makes the
@@ -862,7 +966,7 @@ window.addEventListener('DOMContentLoaded', function () {
   function stepPos() { return stepCount + Math.min(tickProgress, 1); }
 
   function jump() {
-    if (!alive) return;
+    if (!alive || paused) return;
     var at = stepPos();
     if (jumps.length && at - jumps[jumps.length - 1] < JUMP_STEPS) return;
     jumps.push(at);
@@ -888,14 +992,20 @@ window.addEventListener('DOMContentLoaded', function () {
     return false;
   }
 
+  // Holding Z runs the snake FAST times faster, easing in and out over about FAST_EASE.
+  var FAST = 1.25, FAST_EASE = 90, fastHeld = false, fastAmt = 0;
+
   function updateSpeed(dt) {
     boost += ((crossing ? BOOST : 1) - boost) * (1 - Math.exp(-dt / (crossing ? 70 : 600)));
+    fastAmt += ((fastHeld ? 1 : 0) - fastAmt) * (1 - Math.exp(-dt / FAST_EASE));
   }
 
-  function speedNow() { return boost * (1 - SLOW * digAmt); }
+  function speedNow() { return boost * (1 + (FAST - 1) * fastAmt) * (1 - SLOW * digAmt); }
+
+  function setFast(on) { fastHeld = on && alive && !paused; }
 
   function setDig(on) {
-    if (on && !alive) return;
+    if (on && (!alive || paused)) return;
     if (on && !digHeld) digAmt = Math.max(digAmt, DIG_TAP);
     digHeld = on;
   }
@@ -908,7 +1018,7 @@ window.addEventListener('DOMContentLoaded', function () {
   function depthAt(x, z) {
     if (digDepth <= 0) return 0;
     var dx = x - well.x, dz = z - well.z, d2 = dx * dx + dz * dz;
-    return d2 >= DIG_R * DIG_R ? 0 : digDepth * Math.exp(-d2 / (2 * DIG_SIGMA * DIG_SIGMA));
+    return d2 >= DIG_R * DIG_R ? 0 : digDepth * (Math.exp(-d2 / (2 * DIG_SIGMA * DIG_SIGMA)) - DIG_RIM) / (1 - DIG_RIM);
   }
 
   // A floor line at x = at (running along z) or z = at (alongX), from a to b, bent through the well near it.
@@ -950,14 +1060,18 @@ window.addEventListener('DOMContentLoaded', function () {
     fillFog(horizon, cw, ch, '31,35,42');
   }
 
-  // Cybernetic: pitch black around the arena, a black floor with a glowing cyan line every five squares, and
-  // light walls. The grid is sparse, so round the well a finer mesh shows the floor caving in.
+  // Cybernetic: drawn over the sky, a black floor with a glowing cyan line every five squares, and light walls.
+  // The walls are backed in black first, so nothing in the sky shows through them, but the floor drawn after
+  // still shows through the near wall from outside the arena. The grid is sparse, so round the well a finer mesh
+  // shows the floor caving in.
   var MAJOR = 5, MESH = 0.5, MESH_BANDS = 4;
 
-  function drawCyberArena(cw, ch, s) {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, cw, ch);
-
+  function drawCyberArena(s) {
+    var walls = sortedWalls();
+    walls.forEach(function (w) {
+      var top = wallTop(w);
+      fillWorldPoly([w.a, w.b, top[1], top[0]], '#000');
+    });
     fillWorldPoly(BOARD, '#02060c');
     var c, r;
     ctx.beginPath();
@@ -967,7 +1081,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     if (digDepth > 0.02) drawWellMesh(s);
 
-    sortedWalls().forEach(function (w) {
+    walls.forEach(function (w) {
       var top = wallTop(w);
       fillWorldPoly([w.a, w.b, top[1], top[0]], 'rgba(0,229,255,0.1)');
       var len = Math.abs(w.b[0] - w.a[0]) + Math.abs(w.b[2] - w.a[2]);
@@ -1020,12 +1134,13 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A solid orb swells up beyond the
-  // north wall, nine small orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign of
-  // flipping squares beyond the west wall, and nebulas of every size and colour fade in round the sky, two of
-  // them fractals. Then the sky keeps going, one of each at a time: a comet now and then, a satellite going round
-  // the arena, and, two minutes after the first Start and two minutes apart, a quasar, a magnetar and a black
-  // hole. Everything in the sky stands off one side of the arena, so it's in view while the snake heads that way.
+  // Cybernetic theme, outside the walls, after the CyberRMF apps' screensaver. A solid white orb swells up beyond
+  // the north wall, nine small orbs form and circle it, and there it stays. CyberRMF Integrate stands on a sign of
+  // flipping squares beyond the west wall. Nebulas form round the sky one at a time, a while apart, two of them
+  // fractals. Then the sky keeps going: a comet now and then and, as the snake eats, a space event every SKY_PER
+  // balls (a quasar, a magnetar or a black hole, one of each at a time) and a satellite going round the arena
+  // every SAT_PER. Things in the sky stand well apart, the events off the sides of the arena so each is in view
+  // while the snake heads that way. It's all drawn before the arena, so the arena hides whatever it's in front of.
   var FX_PRIMARY = [0, 150, 255], FX_LIGHT = [120, 245, 255];
   var FX_R = 3, FX_ORBIT_R = 5.6, FX_SUB_R = 0.6, FX_TILT = 0.5;
   var FX_REST = 1500, FX_FORM = 2500, FX_SUB_FORM = 1500, FX_SPAWN = 15500 + FX_SUB_FORM, FX_ORBIT = 14000, FX_CRUISE = 5;
@@ -1059,15 +1174,19 @@ window.addEventListener('DOMContentLoaded', function () {
   };
 
   // The arena's four sides, as directions from its middle (x across, z down the board): east, south, west and
-  // north. Things in the sky stand off one of them: quasars and magnetars up to SIDE_SPREAD either side of
-  // straight out, nebulas a little further.
-  var SIDES = [0, Math.PI / 2, Math.PI, -Math.PI / 2], SIDE_SPREAD = 0.16;
-  // A quasar, a magnetar, then a black hole: the first SKY_EVERY after the first Start, the others SKY_EVERY
-  // apart, off the east and south sides (the orb and the sign have the others). Each forms where it stands over
-  // SKY_FORM and lights up at SKY_IGNITE.
-  var SKY_EVERY = 120000, SKY_TYPES = ['quasar', 'magnetar', 'blackhole'], SKY_FORM = 5000, SKY_IGNITE = 5500;
+  // north. Space events take one slot a side, so they're never crowded together even in a phone's narrower view:
+  // up over the orb and N_OFF to one side of it, and off the east and south sides SLOT_OFF to one side, with the
+  // fractal there FRAC_OFF to the other (none behind the sign). The other nebulas form off the corners, up to
+  // NEB_JIT either way.
+  var SIDES = [0, Math.PI / 2, Math.PI, -Math.PI / 2], SLOT_OFF = 0.22, FRAC_OFF = 0.28, N_OFF = 0.28, NEB_JIT = 0.08;
+  // A quasar, a magnetar, then a black hole, and round again: one every SKY_PER balls eaten, in the free slot
+  // furthest from the others. Once all three are out, each new one takes over from the last of its kind, which
+  // fades out over SKY_FADE, and forms in its slot once it's gone. Each forms where it stands over SKY_FORM and
+  // lights up at SKY_IGNITE.
+  var SKY_PER = 5, SKY_TYPES = ['quasar', 'magnetar', 'blackhole'], SKY_FORM = 5000, SKY_IGNITE = 5500, SKY_FADE = 4000;
   // A quasar: a white-hot core with spikes of light, a disk of particles swirling round it (two spiral arms that
-  // turn together, the rest faster the closer in they are), and a short jet out of each face of the disk.
+  // turn together, the rest faster the closer in they are), and a short jet out of each face of the disk, Q_JET
+  // particles each, twice that while it feeds.
   var Q_JETS = 3500, Q_DISK = 600, Q_JET = 70, Q_IN = 0.9;
   var Q_PALETTES = [
     [[255, 255, 255], [160, 250, 255], [0, 229, 255], [140, 90, 255], [255, 40, 214]],
@@ -1077,18 +1196,18 @@ window.addEventListener('DOMContentLoaded', function () {
   ];
   // A magnetar: a tiny, fiercely bright star that pulses, loops of its magnetic field traced by particles
   // streaming from pole to pole, and a beam out of each pole, all swinging round as it spins. Now and then it
-  // flares.
-  var M_LOOPS = 10, M_PER = 56, M_SIZE = 8, M_BEAM = 20, M_SPIN = 9000, M_PULSE = 1100, M_FLARE = 17000;
+  // flares. While it feeds, M_BJ particles stream out along each beam.
+  var M_LOOPS = 10, M_PER = 56, M_SIZE = 8, M_BEAM = 20, M_SPIN = 9000, M_PULSE = 1100, M_FLARE = 17000, M_BJ = 60;
   var M_PALETTE = [[255, 255, 255], [200, 180, 255], [130, 100, 255], [80, 200, 255], [255, 90, 230]];
   // A black hole, far off: a shadow ringed by bent light, and a hot disk seen nearly edge on, the far side of it
   // lensed up over the top of the shadow, the near side across its front, and the side turning towards us
   // brighter. Streaks in the disk show it turning.
   var B_TILT = 0.2, B_DISK = 3.4, B_SPIN = 7000;
   var B_PALETTE = [[255, 250, 235], [255, 205, 130], [255, 140, 50], [200, 60, 20]];
-  // Nebulas: glowing clouds of gas in three colours with dust through them, painted once onto a picture N_RES
-  // wide, and a few young stars twinkling inside. A big one and a small one off each side, each in its own
-  // colours, fading in one after another over the first few seconds.
-  var N_BIG = [18, 34], N_SMALL = [7, 13], N_RES = 384, N_FADE = 5000;
+  // Nebulas: glowing clouds of gas in three colours, painted once onto a picture N_RES wide, with a few young stars
+  // twinkling in them. The first forms NEB_FIRST in and then one every NEB_GAP while there's room, each coming
+  // together over N_FORM. Off the corners they're N_U either side of the middle and NEB_D away.
+  var N_RES = 384, N_FORM = 8000, NEB_FIRST = 2500, NEB_GAP = [25000, 40000], N_U = [12, 20], NEB_D = [100, 130];
   var N_PALETTES = [
     [[255, 60, 170], [110, 50, 220], [0, 200, 220]],
     [[255, 120, 40], [210, 30, 90], [255, 205, 110]],
@@ -1099,29 +1218,58 @@ window.addEventListener('DOMContentLoaded', function () {
     [[255, 90, 230], [255, 200, 80], [120, 60, 255]],
     [[0, 240, 255], [0, 120, 255], [160, 255, 250]]
   ];
-  // Two of the big ones are fractals instead: a Mandelbrot set and a Julia set, drawn as glowing gas brightest
-  // along their edges. Each is the part of the plane given, worked out to iter steps.
+  // Real nebulas come in a few shapes, and so do these: clouds along a filament; a spiral of gas round a bright
+  // middle; a planetary nebula's ring, or its hourglass, round the star that blew it off; a supernova remnant's
+  // shell of thin, broken filaments; and a star-forming cloud with dark pillars of dust rising into it. Rings,
+  // hourglasses and shells swell out from the middle as they form; the rest swirl in. Each is turned up to
+  // N_ROLL either way.
+  var N_SHAPES = ['filament', 'spiral', 'ring', 'hourglass', 'shell', 'pillars'];
+  var N_FORMS = { filament: 'fade', spiral: 'swirl', ring: 'expand', hourglass: 'expand', shell: 'expand', pillars: 'swirl' };
+  var N_ROLL = { filament: 0.5, spiral: Math.PI, ring: Math.PI, hourglass: Math.PI / 2, shell: Math.PI, pillars: 0.25 };
+  // Two are fractals, a Mandelbrot set and a Julia set, drawn as glowing gas brightest along their edges, one
+  // off the east side and one off the south: the Julia set big, the Mandelbrot set small, both further off than
+  // anything else in the sky. Each is the part of the plane given, worked out to iter steps, U either side of
+  // its middle and D away.
   var FRACTALS = {
-    mandelbrot: { x0: -2.35, x1: 0.85, y0: -1.12, y1: 1.12, iter: 90 },
-    julia: { x0: -1.6, x1: 1.6, y0: -0.9, y1: 0.9, c: [-0.8, 0.156], iter: 110 }
+    mandelbrot: { x0: -2.35, x1: 0.85, y0: -1.12, y1: 1.12, iter: 90, U: [22, 26], D: [165, 180] },
+    julia: { x0: -1.6, x1: 1.6, y0: -0.9, y1: 0.9, c: [-0.8, 0.156], iter: 110, U: [42, 50], D: [150, 170] }
   };
-  // The comings and goings, in fx time: a comet every COMET_GAP, each crossing the sky over COMET_LIFE, and a
-  // satellite every SAT_GAP after the last one, each going once round the arena over SAT_LIFE.
+  // A nebula that comes within EAT_R of a lit quasar or magnetar is eaten. Over EAT_FALL it's pulled in and
+  // round, stretched out along the pull; then over EAT_TEAR it's torn apart, nearest part first, into EAT_N
+  // particles that each take EAT_IN to wind in, closer and faster round as they go, the way orbits do. A
+  // quasar's jets, or a magnetar's beams, flare up while it feeds and ease off over EAT_EASE after. Now and then
+  // (EAT_CHANCE) a nebula forms close by one that's hungry, N_FEED_U either side of its middle.
+  var EAT_R = 36, EAT_FALL = 8000, EAT_TEAR = 9000, EAT_IN = [3000, 6500], EAT_EASE = 5000, EAT_N = 240;
+  var EAT_END = EAT_FALL + EAT_TEAR + EAT_IN[1], EAT_CHANCE = 0.45, N_FEED_U = [8, 12];
+  // A comet every COMET_GAP (in fx time), each crossing the sky over COMET_LIFE, and a satellite every SAT_PER
+  // balls eaten, each going once round the arena over SAT_LIFE (one due while another's going round waits for it).
   var COMET_GAP = [6000, 16000], COMET_LIFE = 10000, COMET_TAIL = 240;
-  var SAT_GAP = [40000, 90000], SAT_LIFE = 50000, SAT_R = [42, 48], SAT_H = [6.5, 8], SAT_SIZE = 1.4;
-  var fx = null, skyStart = 0, sky = [];
+  var SAT_PER = 20, SAT_LIFE = 50000, SAT_R = [42, 48], SAT_H = [6.5, 8], SAT_SIZE = 1.4;
+  var fx = null, sky = [];
 
+  // The Mandelbrot set goes off the east or south side and the Julia set off the other, each to one side, with
+  // the event slot there on the other.
   function fxSetup() {
     var o = { x: FX_ORB.x, y: FX_ORB.y, z: FX_ORB.z, start: FX_REST, orbit: 0 };
     var tl = Math.hypot(COLS / 2 - o.x, ROWS / 2 - o.z);
     o.tx = (COLS / 2 - o.x) / tl; o.tz = (ROWS / 2 - o.z) / tl;
-    var sides = Math.random() < 0.5 ? [0, 1] : [1, 0];
-    fx = { t: 0, last: 0, orb: o, sign: signSetup(), sat: null, comet: null,
-           nextSat: 40000, nextComet: 20000, skySides: sides.concat(pick(sides)) };
-    fx.nebulas = makeNebulas();
+    var mSide = Math.random() < 0.5 ? 0 : 1, mOff = pick([-1, 1]) * FRAC_OFF, jOff = pick([-1, 1]) * FRAC_OFF;
+    fx = { t: 0, last: 0, dt: 0, orb: o, sign: signSetup(), sat: null, satWait: false, comet: null, nextComet: 20000,
+           skyN: 0, nebulas: [], nextNeb: NEB_FIRST, pals: shuffled(N_PALETTES), palN: 0,
+           kinds: shuffled(['mandelbrot', 'julia'].concat(N_SHAPES)),
+           fractals: { mandelbrot: { side: mSide, off: mOff }, julia: { side: 1 - mSide, off: jOff } },
+           slots: [{ side: 3, off: pick([-1, 1]) * N_OFF, high: true },
+                   { side: mSide, off: mOff > 0 ? -SLOT_OFF : SLOT_OFF }, { side: 1 - mSide, off: jOff > 0 ? -SLOT_OFF : SLOT_OFF }],
+           corners: SIDES.map(function (a) { return { ang: a + Math.PI / 4 }; }) };
   }
 
   function randIn(r) { return r[0] + Math.random() * (r[1] - r[0]); }
+
+  function shuffled(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
 
   function signSetup() {
     var widths = SIGN.lines.map(function (l) { return l.length * 6 - 1; });
@@ -1153,6 +1301,7 @@ window.addEventListener('DOMContentLoaded', function () {
     var dt = fx.last ? Math.min(now - fx.last, 100) : 0;
     fx.last = now;
     fx.t += dt;
+    fx.dt = dt;
     var o = fx.orb, st = orbPhase(fx.t - o.start), pt = st.pt, speed = 0;
     if (st.ph === 'spawn') speed = 1;
     else if (st.ph === 'orbit') speed = pt < 3000 ? 1 + pt / 3000 * 34 : pt < 10000 ? 35 : lerp(35, FX_CRUISE, easeInOut((pt - 10000) / 4000));
@@ -1160,48 +1309,87 @@ window.addEventListener('DOMContentLoaded', function () {
     o.orbit += dt * 0.0001 * speed;
   }
 
-  function fxEvents() {
+  function fxEvents(now) {
     if (fx.t >= fx.nextComet && !fx.comet) {
       fx.comet = makeComet();
       fx.nextComet = fx.t + randIn(COMET_GAP);
     }
-    if (fx.t >= fx.nextSat && !fx.sat) {
-      fx.sat = makeSatellite();
-      fx.nextSat = fx.t + SAT_LIFE + randIn(SAT_GAP);
-    }
+    if (!fx.sat && fx.satWait) { fx.satWait = false; fx.sat = makeSatellite(); }
+    if (fx.t >= fx.nextNeb) { fx.nextNeb = fx.t + randIn(NEB_GAP); formNebula(now); }
   }
 
-  function skyCount(now) { return skyStart ? Math.min(SKY_TYPES.length, Math.floor((now - skyStart) / SKY_EVERY)) : 0; }
+  // Called with the score each time the snake eats.
+  function fxAte(n) {
+    if (!fx) return;
+    if (n % SKY_PER === 0) addSkyEvent(performance.now());
+    if (n % SAT_PER === 0) { if (fx.sat) fx.satWait = true; else fx.sat = makeSatellite(); }
+  }
 
-  function skyAge(o, now) { return now - skyStart - (o.k + 1) * SKY_EVERY; }
+  function skyAge(o, now) { return now - o.born; }
+
+  // 1, and once it's been taken over from, fading to 0 over SKY_FADE.
+  function skyFade(o, lt) { return o.goneAt == null ? 1 : 1 - clamp01((lt - o.goneAt) / SKY_FADE); }
 
   function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
 
-  function makeSky(k) {
-    var type = SKY_TYPES[k], side = fx.skySides[k];
-    var o = type === 'quasar' ? makeQuasar(pick(Q_PALETTES), side) : type === 'magnetar' ? makeMagnetar(side) : makeBlackHole(side);
-    o.type = type; o.k = k;
+  function addSkyEvent(now) {
+    var type = SKY_TYPES[fx.skyN++ % SKY_TYPES.length], born = now;
+    sky.forEach(function (o) { if (o.type === type && o.goneAt == null) o.goneAt = skyAge(o, now); });
+    var slot = freeSlot();
+    if (!slot) {
+      var old = null, left = Infinity;
+      sky.forEach(function (o) {
+        if (o.goneAt == null || sky.some(function (p) { return p.slot === o.slot && p.goneAt == null; })) return;
+        var l = o.goneAt + SKY_FADE - skyAge(o, now);
+        if (l < left) { left = l; old = o; }
+      });
+      if (!old) { old = sky[0]; dropSky(old); left = 0; }
+      slot = old.slot; born = now + Math.max(left, 0);
+    }
+    var o = type === 'quasar' ? makeQuasar(pick(Q_PALETTES), slot) : type === 'magnetar' ? makeMagnetar(slot) : makeBlackHole(slot);
+    o.type = type; o.born = born;
+    sky.push(o);
     return o;
   }
 
-  // Near to far from the middle of the arena off the given side, up to spread either side of straight out, and
-  // clear of the orb, the sign and the others already off that side.
-  function placeSky(o, side, near, far, spread, others) {
-    var avoid = [[SIDES[3], 0.12], [SIDES[2], 0.12]], ang;
-    others.forEach(function (s) { if (s.side === side) avoid.push([s.ang, 0.2]); });
-    for (var tries = 0; tries < 40; tries++) {
-      ang = SIDES[side] + (Math.random() * 2 - 1) * spread;
-      if (avoid.every(function (v) { return Math.abs(Math.atan2(Math.sin(ang - v[0]), Math.cos(ang - v[0]))) > v[1]; })) break;
-    }
-    o.side = side; o.ang = ang; o.dist = near + Math.random() * (far - near);
-    o.x = COLS / 2 + Math.cos(ang) * o.dist; o.z = ROWS / 2 + Math.sin(ang) * o.dist;
+  function slotAng(sl) { return SIDES[sl.side] + sl.off; }
+
+  function angGap(a, b) { return Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b))); }
+
+  // The free slot furthest round the sky from the events out already, or null if there's none.
+  function freeSlot() {
+    var free = fx.slots.filter(function (sl) { return !sky.some(function (o) { return o.slot === sl; }); });
+    var best = null, bestGap = -1;
+    shuffled(free).forEach(function (sl) {
+      var gap = 9;
+      sky.forEach(function (o) { gap = Math.min(gap, angGap(slotAng(sl), o.ang)); });
+      if (gap > bestGap) { bestGap = gap; best = sl; }
+    });
+    return best;
   }
 
-  // A height that puts it 3.5 to 6.5 degrees above the camera seen from the middle of the arena: high enough to
-  // clear the far wall from across the arena, and capped so ext above it still fits under the top of the view
-  // from the near side.
-  function skyY(dist, ext) {
-    var y = CAM_UP + dist * Math.tan((3.5 + Math.random() * 3) * Math.PI / 180);
+  // Takes it out of the sky, with any nebula it's eating.
+  function dropSky(o) {
+    sky.splice(sky.indexOf(o), 1);
+    fx.nebulas = fx.nebulas.filter(function (nb) { return !(nb.eat && nb.eat.ob === o); });
+  }
+
+  // In its slot, near to far from the middle of the arena; up over the orb, in the far part of that, so it's
+  // small enough to clear the orb.
+  function placeSky(o, slot, near, far) {
+    if (slot.high) near = lerp(near, far, 0.6);
+    o.slot = slot; o.side = slot.side; o.high = !!slot.high;
+    o.ang = slotAng(slot) + (Math.random() - 0.5) * 0.06;
+    o.dist = near + Math.random() * (far - near);
+    o.x = COLS / 2 + Math.cos(o.ang) * o.dist; o.z = ROWS / 2 + Math.sin(o.ang) * o.dist;
+  }
+
+  // A height that puts it 3.5 to 6.5 degrees above the camera seen from the middle of the arena (up over the orb,
+  // with ext below it still 1.5 degrees up): high enough to clear the far wall from across the arena, and capped
+  // so ext above it still fits under the top of the view from the near side.
+  function skyY(dist, ext, high) {
+    var lo = high ? Math.max(3.5, 1.5 + Math.atan(ext / dist) * 180 / Math.PI) : 3.5;
+    var y = CAM_UP + dist * Math.tan((lo + Math.random() * 3) * Math.PI / 180);
     return Math.min(y, CAM_UP + (dist - 12) * Math.tan(13 * Math.PI / 180) - ext);
   }
 
@@ -1213,15 +1401,16 @@ window.addEventListener('DOMContentLoaded', function () {
 
   // Its disk tilted 35 to 65 degrees from flat. The disk forms from the outside in, each particle fading in a
   // little further out and spiralling in to its place.
-  function makeQuasar(pal, side) {
-    var q = { pal: pal }, i;
-    placeSky(q, side, 65, 100, SIDE_SPREAD, sky);
+  function makeQuasar(pal, slot) {
+    var q = { pal: pal, jph: 0 }, i;
+    placeSky(q, slot, 65, 100);
     q.R = 6 + Math.random() * 3; q.L = q.R * 1.6;
     var tilt = (35 + Math.random() * 30) * Math.PI / 180, az = Math.random() * Math.PI * 2;
     var n = [Math.sin(tilt) * Math.cos(az), Math.cos(tilt), Math.sin(tilt) * Math.sin(az)], fr = frameAround(n);
     q.n = n; q.e1 = fr[0]; q.e2 = fr[1];
-    q.y = skyY(q.dist, Math.max(q.R * Math.sin(tilt), q.L * Math.cos(tilt) * 0.6));
+    q.y = skyY(q.dist, Math.max(q.R * Math.sin(tilt), q.L * Math.cos(tilt) * 0.6), q.high);
     var dir = Math.random() < 0.5 ? 1 : -1, wArm = dir * Math.PI * 2 / 24000, wOut = dir * Math.PI * 2 / 40000;
+    q.dir = dir;
     q.p = [];
     for (i = 0; i < Q_DISK; i++) {
       var p = {}, r;
@@ -1241,7 +1430,9 @@ window.addEventListener('DOMContentLoaded', function () {
       q.p.push(p);
     }
     q.j = [];
-    for (i = 0; i < Q_JET * 2; i++) q.j.push({ s: Math.random(), phi: Math.random() * Math.PI * 2, side: i < Q_JET ? 1 : -1 });
+    for (i = 0; i < Q_JET * 4; i++) {
+      q.j.push({ s: Math.random(), phi: Math.random() * Math.PI * 2, side: i % 2 ? 1 : -1, extra: i >= Q_JET * 2 });
+    }
     q.cols = q.pal.map(rgbStr);
     return q;
   }
@@ -1249,10 +1440,10 @@ window.addEventListener('DOMContentLoaded', function () {
   // Its spin axis up to 20 degrees off vertical and its magnetic axis 35 degrees off that, so the field and
   // beams sweep round. Each loop is a dipole field line, r = L sin^2(theta) from the star.
   // Its loops trace themselves out one after another as it forms.
-  function makeMagnetar(side) {
+  function makeMagnetar(slot) {
     var m = {};
-    placeSky(m, side, 65, 90, SIDE_SPREAD, sky);
-    m.y = skyY(m.dist, M_SIZE * 0.8);
+    placeSky(m, slot, 65, 90);
+    m.y = skyY(m.dist, M_SIZE * 0.8, m.high);
     return magnetarBody(m);
   }
 
@@ -1270,6 +1461,8 @@ window.addEventListener('DOMContentLoaded', function () {
                    at: (SKY_FORM - 1200) * (i + Math.random()) / M_LOOPS });
       }
     }
+    m.bj = []; m.bph = 0;
+    for (i = 0; i < M_BJ * 2; i++) m.bj.push({ s: Math.random(), phi: Math.random() * Math.PI * 2, side: i % 2 ? 1 : -1 });
     m.cols = m.pal.map(rgbStr);
     return m;
   }
@@ -1286,81 +1479,257 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // Far off, its disk tipped B_TILT from edge on and turned a little in the view.
-  function makeBlackHole(side) {
+  function makeBlackHole(slot) {
     var h = { pal: B_PALETTE, R: 3.5 + Math.random(), roll: (Math.random() - 0.5) * 0.5, dir: Math.random() < 0.5 ? 1 : -1 };
-    placeSky(h, side, 115, 140, 0.24, sky);
-    h.y = skyY(h.dist, h.R * 1.6);
+    placeSky(h, slot, 115, 140);
+    h.y = skyY(h.dist, h.R * 1.6, h.high);
     return h;
   }
 
-  // The big ones off the east and south sides are the fractals, where neither the orb nor the sign is in front.
-  function makeNebulas() {
-    var pals = N_PALETTES.slice(), list = [], kinds = {}, i;
-    for (i = pals.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = pals[i]; pals[i] = pals[j]; pals[j] = t; }
-    var m = Math.random() < 0.5 ? 0 : 2;
-    kinds[m] = 'mandelbrot'; kinds[2 - m] = 'julia';
-    for (i = 0; i < SIDES.length * 2; i++) {
-      list.push(makeNebula(pals[i % pals.length], i >> 1, randIn(i % 2 ? N_SMALL : N_BIG), list, kinds[i]));
-    }
-    return list;
+  function nextPal() { return fx.pals[fx.palN++ % fx.pals.length]; }
+
+  // Lit quasars and magnetars that could eat a nebula: not fading out, not feeding or still flaring from it.
+  function canEat(o, now) {
+    return (o.type === 'quasar' || o.type === 'magnetar') && o.goneAt == null && skyAge(o, now) > SKY_IGNITE + 1000 &&
+      !o.feed && feedLevel(o) === 0;
   }
 
-  // Clouds along a curving filament, U across and V high either side of its middle, with dust through them and
-  // a few stars inside; or a fractal. Big ones may spread past the edges of the view; their middles stay in it.
-  function makeNebula(pal, side, S, others, kind) {
-    var nb = { type: 'nebula', pal: pal, S: S, U: S * 1.5, V: S * 0.75, at: 300 + Math.random() * 6000 }, i;
-    if (kind) {
-      var F = FRACTALS[kind];
-      nb.kind = kind; nb.U = Math.max(S, 26) * 1.3; nb.V = nb.U * (F.y1 - F.y0) / (F.x1 - F.x0);
+  // The next on the list (then any shape), if there's room: the fractals have their own places, and the rest
+  // take a free corner or, now and then, form beside a quasar or magnetar that could eat them and has none
+  // beside it already.
+  function formNebula(now) {
+    var kind = fx.kinds.length ? fx.kinds[0] : pick(N_SHAPES), nb;
+    if (FRACTALS[kind]) nb = makeFractal(kind);
+    else {
+      var prey = sky.filter(function (o) { return canEat(o, now) && !fx.nebulas.some(function (n) { return n.near === o; }); });
+      var corners = fx.corners.filter(function (c) { return !fx.nebulas.some(function (n) { return n.corner === c; }); });
+      if (prey.length && (!corners.length || Math.random() < EAT_CHANCE)) nb = makeShaped(kind, randIn(N_FEED_U), pick(prey));
+      else if (corners.length) nb = makeShaped(kind, randIn(N_U), null, pick(corners));
+      else return;
     }
-    placeSky(nb, side, 75, 130, S > 14 ? 0.3 : 0.22, others);
+    if (fx.kinds.length) fx.kinds.shift();
+    fx.nebulas.push(nb);
+  }
+
+  // Facing the arena, U either side of its middle and V above and below, with a few stars in it; next to the
+  // quasar or magnetar given, on the side towards the middle of its side of the sky, or else in the corner given.
+  function makeShaped(kind, U, near, corner) {
+    var nb = { kind: kind, pal: nextPal(), at: fx.t, form: N_FORMS[kind], roll: (Math.random() * 2 - 1) * N_ROLL[kind],
+               spin: pick([-1, 1]), U: U }, sh = N_BUILD[kind](), eu = 0, ev = 0;
+    sh.blobs.forEach(function (bl) { eu = Math.max(eu, Math.abs(bl.u) + bl.r); ev = Math.max(ev, Math.abs(bl.v) + bl.r); });
+    nb.S = U / (eu * 1.04); nb.V = ev * 1.04 * nb.S;
+    if (near) {
+      var sd = near.slot.off > 0 ? -1 : 1, gap = (near.type === 'quasar' ? near.R * 1.1 : M_SIZE) + 0.8 * U;
+      nb.near = near; nb.side = near.side; nb.dist = near.dist + (Math.random() - 0.5) * 6;
+      nb.ang = near.ang + sd * gap / near.dist;
+      nb.y = near.y + (Math.random() - 0.5) * 4;
+    } else {
+      nb.corner = corner; nb.ang = corner.ang + (Math.random() * 2 - 1) * NEB_JIT; nb.dist = randIn(NEB_D);
+      nb.y = skyY(nb.dist, Math.min(nb.V * 0.5, 4));
+    }
+    nb.x = COLS / 2 + Math.cos(nb.ang) * nb.dist; nb.z = ROWS / 2 + Math.sin(nb.ang) * nb.dist;
+    nb.blobs = sh.blobs;
+    nb.img = paintNebula(nb, sh.blobs, sh.draw);
+    nb.stars = sh.stars.map(function (st, i) {
+      return { u: st.u, v: st.v, big: st.big, at: nb.at + N_FORM * 0.7 + i * 900, c: Math.floor(Math.random() * 3), ph: Math.random() * 6.28 };
+    });
+    return nb;
+  }
+
+  function makeFractal(kind) {
+    var F = FRACTALS[kind], at = fx.fractals[kind], i;
+    var nb = { kind: kind, fractal: true, pal: nextPal(), at: fx.t, form: 'fade', roll: 0, spin: 1, S: 1, U: randIn(F.U) };
+    nb.V = nb.U * (F.y1 - F.y0) / (F.x1 - F.x0);
+    nb.side = at.side; nb.ang = SIDES[at.side] + at.off; nb.dist = randIn(F.D);
+    nb.x = COLS / 2 + Math.cos(nb.ang) * nb.dist; nb.z = ROWS / 2 + Math.sin(nb.ang) * nb.dist;
     nb.y = skyY(nb.dist, Math.min(nb.V * 0.5, 4));
-    if (kind) {
-      nb.img = paintFractal(nb, FRACTALS[kind]);
-      nb.stars = [];
-      for (i = 0; i < 3; i++) {
-        nb.stars.push({ u: (Math.random() - 0.5) * nb.U * 0.8, v: (Math.random() - 0.5) * nb.V * 0.8,
-                        at: nb.at + N_FADE * 0.6 + i * 900, c: Math.floor(Math.random() * 3), ph: Math.random() * 6.28 });
-      }
-      return nb;
-    }
-    var n = S > 14 ? 10 : 6, bend = Math.random() * Math.PI * 2, wave = 0.06 + Math.random() * 0.12, blobs = [];
-    for (i = 0; i < n; i++) {
-      var t = i / (n - 1) - 0.5;
-      blobs.push({
-        u: t * S * 1.8 + (Math.random() - 0.5) * S * 0.15,
-        v: Math.sin(t * Math.PI * 1.3 + bend) * S * wave + (Math.random() - 0.5) * S * 0.08,
-        r: S * (0.28 + Math.random() * 0.22), c: i % 3
-      });
-    }
-    nb.img = paintNebula(nb, blobs);
+    nb.img = paintFractal(nb, F);
     nb.stars = [];
-    for (i = 0; i < (S > 14 ? 6 : 3); i++) {
-      var sb = blobs[1 + Math.floor(Math.random() * (n - 2))];
-      nb.stars.push({ u: sb.u + (Math.random() - 0.5) * sb.r, v: sb.v + (Math.random() - 0.5) * sb.r * 0.6,
-                      at: nb.at + N_FADE * 0.6 + i * 900, c: Math.floor(Math.random() * 3), ph: Math.random() * 6.28 });
+    for (i = 0; i < 3; i++) {
+      nb.stars.push({ u: (Math.random() - 0.5) * nb.U * 0.8, v: (Math.random() - 0.5) * nb.V * 0.8,
+                      at: nb.at + N_FORM * 0.6 + i * 900, c: Math.floor(Math.random() * 3), ph: Math.random() * 6.28 });
     }
     return nb;
   }
 
-  function paintNebula(nb, blobs) {
-    var cv = document.createElement('canvas'), k = N_RES / (2 * nb.U), i;
+  function starIn(bl) { return { u: bl.u + (Math.random() - 0.5) * bl.r, v: bl.v + (Math.random() - 0.5) * bl.r * 0.6 }; }
+
+  // Each shape at unit size: glowing blobs (u across and v up from its middle, r across, colour c, brightness a,
+  // 1 if not given), stars, and anything drawn over them, given the picture, where a point lands on it and how
+  // big a unit is there.
+  var N_BUILD = {
+    filament: function () {
+      var bend = Math.random() * Math.PI * 2, wave = 0.06 + Math.random() * 0.12, blobs = [], stars = [], i;
+      for (i = 0; i < 8; i++) {
+        var t = i / 7 - 0.5;
+        blobs.push({ u: t * 1.8 + (Math.random() - 0.5) * 0.15, v: Math.sin(t * Math.PI * 1.3 + bend) * wave + (Math.random() - 0.5) * 0.08,
+                     r: 0.28 + Math.random() * 0.22, c: i % 3 });
+      }
+      for (i = 0; i < 4; i++) stars.push(starIn(blobs[1 + Math.floor(Math.random() * 6)]));
+      return { blobs: blobs, stars: stars };
+    },
+    // Two arms seen at a slant, with dust along their inside edges.
+    spiral: function () {
+      var tilt = 0.5 + Math.random() * 0.4, blobs = [{ u: 0, v: 0, r: 0.4, c: 0, a: 1.4 }, { u: 0, v: 0, r: 1, c: 2, a: 0.25 }], lanes = [], arm, i;
+      function on(a, t, inset) { var rho = (0.16 + 0.84 * t) * inset, th = a * Math.PI + t * 3.6; return [Math.cos(th) * rho, Math.sin(th) * rho * tilt]; }
+      for (arm = 0; arm < 2; arm++) {
+        for (i = 0; i < 11; i++) { var t = i / 10, p = on(arm, t, 1); blobs.push({ u: p[0], v: p[1], r: 0.24 - 0.12 * t, c: t < 0.25 ? 0 : 1 + arm }); }
+        var lane = [];
+        for (i = 0; i <= 20; i++) lane.push(on(arm, 0.1 + 0.8 * i / 20, 0.86));
+        lanes.push(lane);
+      }
+      return { blobs: blobs, stars: [{ u: 0, v: 0, big: 1 }, starIn(blobs[7]), starIn(blobs[18])], draw: function (g, P, L) {
+        g.globalCompositeOperation = 'destination-out';
+        g.filter = 'blur(' + Math.max(1, Math.round(L * 0.03)) + 'px)';
+        g.strokeStyle = 'rgba(0,0,0,0.45)';
+        g.lineWidth = L * 0.06;
+        lanes.forEach(function (lane) {
+          g.beginPath();
+          lane.forEach(function (pt, j) { var q = P(pt[0], pt[1]); if (j) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); });
+          g.stroke();
+        });
+      } };
+    },
+    // A ring in one colour inside a fainter halo in another, round the dying star; the middle nearly hollow
+    // and lit faintly in the third.
+    ring: function () {
+      var ey = 0.7 + Math.random() * 0.25, blobs = [], i, th;
+      for (i = 0; i < 26; i++) {
+        th = (i + Math.random() * 0.5) / 26 * Math.PI * 2;
+        blobs.push({ u: Math.cos(th) * 0.62, v: Math.sin(th) * 0.62 * ey, r: 0.2 + Math.random() * 0.08, c: 1, a: 0.9 });
+      }
+      for (i = 0; i < 16; i++) {
+        th = (i + Math.random() * 0.5) / 16 * Math.PI * 2;
+        blobs.push({ u: Math.cos(th) * 0.84, v: Math.sin(th) * 0.84 * ey, r: 0.24, c: 0, a: 0.35 });
+      }
+      return { blobs: blobs, stars: [{ u: 0, v: 0, big: 1 }], draw: function (g, P, L, pal) {
+        var c = P(0, 0), r = 0.5 * L, gr;
+        g.setTransform(1, 0, 0, ey, 0, c[1] * (1 - ey));
+        g.globalCompositeOperation = 'destination-out';
+        gr = g.createRadialGradient(c[0], c[1], 0, c[0], c[1], r);
+        gr.addColorStop(0, 'rgba(0,0,0,0.6)');
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr;
+        g.fillRect(c[0] - r, c[1] - r, 2 * r, 2 * r);
+        g.globalCompositeOperation = 'lighter';
+        gr = g.createRadialGradient(c[0], c[1], 0, c[0], c[1], r);
+        gr.addColorStop(0, rgbaStr(pal[2], 0.2));
+        gr.addColorStop(1, rgbaStr(pal[2], 0));
+        g.fillStyle = gr;
+        g.fillRect(c[0] - r, c[1] - r, 2 * r, 2 * r);
+      } };
+    },
+    // Two lobes blown out either way from the star, pinched at the waist by a dark ring of dust.
+    hourglass: function () {
+      var blobs = [{ u: 0, v: 0, r: 0.16, c: 0, a: 1.4 }], sd, i;
+      for (sd = -1; sd <= 1; sd += 2) {
+        for (i = 0; i < 9; i++) {
+          var t = (i + 0.5) / 9, x = sd * t * 1.2, w = 0.55 * Math.pow(Math.sin(Math.PI * Math.min(0.97, t)), 0.8), r = 0.1 + 0.18 * Math.sin(Math.PI * t), c = t < 0.35 ? 0 : 1;
+          blobs.push({ u: x, v: w * 0.6, r: r, c: c, a: 0.75 }, { u: x, v: -w * 0.6, r: r, c: c, a: 0.75 },
+                     { u: x, v: 0, r: w * 0.7 + 0.04, c: t > 0.6 ? 2 : 1, a: 0.45 });
+        }
+      }
+      return { blobs: blobs, stars: [{ u: 0, v: 0, big: 1 }], draw: function (g, P, L) {
+        var c = P(0, 0);
+        g.globalCompositeOperation = 'destination-out';
+        g.filter = 'blur(' + Math.max(1, Math.round(L * 0.03)) + 'px)';
+        g.fillStyle = 'rgba(0,0,0,0.55)';
+        g.beginPath();
+        g.ellipse(c[0], c[1], 0.07 * L, 0.3 * L, 0, 0, Math.PI * 2);
+        g.fill();
+      } };
+    },
+    // The blast's shell: thin, broken filaments in all three colours round a faint glow.
+    shell: function () {
+      var blobs = [{ u: 0, v: 0, r: 0.85, c: 2, a: 0.16 }], arcs = [], i;
+      for (i = 0; i < 22; i++) {
+        var a0 = Math.random() * Math.PI * 2, len = 0.25 + Math.random() * 0.7, rr = 0.68 + Math.random() * 0.2;
+        arcs.push({ a0: a0, len: len, rr: rr, c: i % 3, w: Math.random() * 6.28 });
+        blobs.push({ u: Math.cos(a0 + len / 2) * rr, v: Math.sin(a0 + len / 2) * rr, r: 0.12, c: i % 3, a: 0.45 });
+      }
+      return { blobs: blobs, stars: [starIn(blobs[0]), starIn(blobs[0])], draw: function (g, P, L, pal) {
+        [[Math.max(1, Math.round(L * 0.025)), 0.045, 0.35], [0, 0.014, 0.7]].forEach(function (pass) {
+          g.filter = pass[0] ? 'blur(' + pass[0] + 'px)' : 'none';
+          g.lineWidth = Math.max(1, L * pass[1]);
+          arcs.forEach(function (ar) {
+            g.strokeStyle = rgbaStr(pal[ar.c], pass[2]);
+            g.beginPath();
+            for (var j = 0; j <= 12; j++) {
+              var th = ar.a0 + ar.len * j / 12, rr = ar.rr * (1 + 0.035 * Math.sin(th * 7 + ar.w)), q = P(Math.cos(th) * rr, Math.sin(th) * rr);
+              if (j) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]);
+            }
+            g.stroke();
+          });
+        });
+      } };
+    },
+    // A cloud with dark pillars of dust rising from its bottom edge, their tips lit by young stars above them.
+    pillars: function () {
+      var blobs = [], pills = [], stars = [], base = -0.85, i;
+      for (i = 0; i < 16; i++) {
+        blobs.push({ u: (Math.random() * 2 - 1), v: (Math.random() * 2 - 1) * 0.55, r: 0.3 + Math.random() * 0.25,
+                     c: Math.random() < 0.5 ? 0 : 1 + i % 2, a: 0.8 });
+      }
+      for (i = 0; i < 3; i++) {
+        pills.push({ x: (i - 1) * 0.45 + (Math.random() - 0.5) * 0.2, h: 0.55 + Math.random() * 0.45, w: 0.1 + Math.random() * 0.06,
+                     lean: (Math.random() - 0.5) * 0.25 });
+      }
+      for (i = 0; i < 5; i++) stars.push({ u: (Math.random() - 0.5) * 1.2, v: 0.1 + Math.random() * 0.4 });
+      return { blobs: blobs, stars: stars, draw: function (g, P, L, pal) {
+        g.globalCompositeOperation = 'destination-out';
+        g.filter = 'blur(' + Math.max(1, Math.round(L * 0.02)) + 'px)';
+        g.fillStyle = 'rgba(0,0,0,0.7)';
+        pills.forEach(function (pl) {
+          var top = base + pl.h, tx = pl.x + pl.lean, a = P(pl.x - pl.w * 1.4, base - 0.2), b = P(pl.x + pl.w * 1.4, base - 0.2);
+          var c = P(tx + pl.w * 0.5, top), t = P(tx, top);
+          g.beginPath();
+          g.moveTo(a[0], a[1]);
+          g.lineTo(b[0], b[1]);
+          g.lineTo(c[0], c[1]);
+          g.arc(t[0], t[1], pl.w * 0.5 * L, 0, Math.PI, true);
+          g.closePath();
+          g.fill();
+        });
+        g.filter = 'none';
+        g.globalCompositeOperation = 'lighter';
+        pills.forEach(function (pl) {
+          var t = P(pl.x + pl.lean, base + pl.h + pl.w * 0.3), r = pl.w * 1.2 * L, gr = g.createRadialGradient(t[0], t[1], 0, t[0], t[1], r);
+          gr.addColorStop(0, rgbaStr(mixRgb(pal[1], [255, 255, 255], 0.4), 0.5));
+          gr.addColorStop(1, rgbaStr(pal[1], 0));
+          g.fillStyle = gr;
+          g.fillRect(t[0] - r, t[1] - r, 2 * r, 2 * r);
+        });
+      } };
+    }
+  };
+
+  function paintNebula(nb, blobs, draw) {
+    var cv = document.createElement('canvas'), k = N_RES / (2 * nb.U), L = nb.S * k, i;
     cv.width = N_RES; cv.height = Math.ceil(2 * nb.V * k);
     var g = cv.getContext('2d');
+    function P(u, v) { return [(nb.U + u * nb.S) * k, (nb.V - v * nb.S) * k]; }
     g.globalCompositeOperation = 'lighter';
     blobs.forEach(function (bl) {
-      var x = (nb.U + bl.u) * k, y = (nb.V - bl.v) * k, r = bl.r * k, col = nb.pal[bl.c], gr = g.createRadialGradient(x, y, 0, x, y, r);
-      gr.addColorStop(0, rgbaStr(col, 0.4));
-      gr.addColorStop(0.4, rgbaStr(col, 0.22));
+      var p = P(bl.u, bl.v), r = bl.r * L, col = nb.pal[bl.c], a = bl.a == null ? 1 : bl.a;
+      var gr = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], r);
+      gr.addColorStop(0, rgbaStr(col, 0.4 * a));
+      gr.addColorStop(0.4, rgbaStr(col, 0.22 * a));
       gr.addColorStop(1, rgbaStr(col, 0));
       g.fillStyle = gr;
-      g.fillRect(x - r, y - r, 2 * r, 2 * r);
+      g.fillRect(p[0] - r, p[1] - r, 2 * r, 2 * r);
     });
+    if (draw) {
+      draw(g, P, L, nb.pal);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.filter = 'none';
+      g.globalCompositeOperation = 'lighter';
+    }
     var q = Math.max(1, k * 0.12);
-    for (i = 0; i < 40 + nb.S * 6; i++) {
+    for (i = 0; i < 60 + nb.S * 4; i++) {
       var bl = blobs[Math.floor(Math.random() * blobs.length)], d = Math.pow(Math.random(), 0.7) * bl.r * 0.9, a = Math.random() * Math.PI * 2;
+      var p = P(bl.u + Math.cos(a) * d, bl.v + Math.sin(a) * d * 0.6);
       g.fillStyle = rgbaStr(nb.pal[bl.c].map(function (v) { return Math.round(lerp(v, 255, 0.35)); }), 0.2 + Math.random() * 0.3);
-      g.fillRect((nb.U + bl.u + Math.cos(a) * d) * k, (nb.V - bl.v - Math.sin(a) * d * 0.6) * k, q, q);
+      g.fillRect(p[0], p[1], q, q);
     }
     return cv;
   }
@@ -1449,12 +1818,12 @@ window.addEventListener('DOMContentLoaded', function () {
   function drawFx(now, s) {
     if (!fx) fxSetup();
     fxAdvance(now);
-    fxEvents();
-    while (sky.length < skyCount(now)) sky.push(makeSky(sky.length));
+    fxEvents(now);
+    sky.slice().forEach(function (k) { if (skyFade(k, skyAge(k, now)) <= 0) dropSky(k); });
+    feedNebulas(now);
     var o = fx.orb, st = orbPhase(fx.t - o.start);
     o.ph = st.ph; o.pt = st.pt;
     ctx.save();
-    clipOutFloor();
     drawFxSign();
     ctx.globalCompositeOperation = 'lighter';
     fx.nebulas.forEach(function (nb) { nebulaGlow(nb); });
@@ -1463,6 +1832,18 @@ window.addEventListener('DOMContentLoaded', function () {
       else if (k.type === 'magnetar') magnetarGlow(k, skyAge(k, now));
       else blackHoleGlow(k, now);
     });
+    ctx.restore();
+    // The sky events are all further off than the orb, so their jets and beams go behind it.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    sky.forEach(function (k) {
+      if (k.type === 'quasar') quasarParticles(k, now, s);
+      else if (k.type === 'magnetar') magnetarParticles(k, skyAge(k, now), s);
+    });
+    fx.nebulas.forEach(function (nb) { if (nb.eat) eatParticles(nb, now, s); });
+    ctx.restore();
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
     drawOrb(o);
     ctx.globalCompositeOperation = 'source-over';
     if (fx.sat && !drawSatellite(fx.sat, s)) fx.sat = null;
@@ -1471,21 +1852,112 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.restore();
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    sky.forEach(function (k) {
-      if (k.type === 'quasar') quasarParticles(k, now, s);
-      else if (k.type === 'magnetar') magnetarParticles(k, skyAge(k, now), s);
-    });
     if (fx.comet) cometParticles(fx.comet, s);
     ctx.restore();
   }
 
-  // The orb, sky objects and sign stand beyond the walls, so wherever the floor is in front of them they're under
-  // it and hidden. Particles are checked one by one instead.
-  function clipOutFloor() {
-    ctx.beginPath();
-    ctx.rect(0, 0, canvas.width, canvas.height);
-    worldPolyPath(BOARD);
-    ctx.clip('evenodd');
+  // Sets a nebula that's come too close to a quasar or magnetar falling in (the one it formed beside, or else
+  // the nearest), and clears away the ones eaten.
+  function feedNebulas(now) {
+    fx.nebulas.forEach(function (nb) {
+      if (nb.fractal || nb.eat || fx.t - nb.at < N_FORM + 1500) return;
+      var by = null, best = EAT_R;
+      sky.forEach(function (o) {
+        var d = Math.hypot(nb.x - o.x, nb.y - o.y, nb.z - o.z);
+        if (!canEat(o, now) || d >= EAT_R) return;
+        if (o === nb.near) d = -1;
+        if (d < best) { best = d; by = o; }
+      });
+      if (by) startEat(nb, by);
+    });
+    fx.nebulas = fx.nebulas.filter(function (nb) {
+      if (!nb.eat || fx.t - nb.eat.t0 < EAT_END + 300) return true;
+      nb.eat.ob.feed = null;
+      return false;
+    });
+  }
+
+  // How much the quasar or magnetar is flaring from what it's eating: up as the nebula's torn apart, staying up
+  // till the last of it is in, then easing off over EAT_EASE.
+  function feedLevel(o) {
+    if (o.feedT0 == null) return 0;
+    var te = fx.t - o.feedT0;
+    return te < EAT_END ? smooth((te - EAT_FALL) / 3000) : 1 - smooth((te - EAT_END) / EAT_EASE);
+  }
+
+  // Where the nebula's middle has got to te into being eaten (frac of the way out it started, swung phi round),
+  // how far it's stretched along the pull, its size, and how much of it is left.
+  function eatPose(te, dir) {
+    if (te < EAT_FALL) {
+      var q = te / EAT_FALL;
+      return { frac: 1 - 0.55 * q * q, phi: dir * 0.5 * q * q, st: 0.7 * q * q, sc: 1, a: 1 };
+    }
+    var w = clamp01((te - EAT_FALL) / EAT_TEAR);
+    return { frac: 0.45 * (1 - 0.6 * w), phi: dir * (0.5 + 0.7 * w), st: 0.7 + 0.6 * w, sc: 1 - 0.5 * w, a: 1 - smooth(w / 0.9) };
+  }
+
+  function eatCenter(E, ps) {
+    var o = E.ob, c = Math.cos(ps.phi), s = Math.sin(ps.phi);
+    return [o.x + (E.dx * c - E.dz * s) * ps.frac, o.y + E.dy * ps.frac, o.z + (E.dx * s + E.dz * c) * ps.frac];
+  }
+
+  // Works out the gas it'll be torn into: EAT_N bits of its blobs, turned with its picture, each let go (nearest
+  // first) from where that part of the stretched cloud is by then, and set in the eater's frame (its disk, or a
+  // magnetar's spin) as a distance and angle round it and a height off it.
+  function startEat(nb, o) {
+    var E = { ob: o, t0: fx.t, dx: nb.x - o.x, dy: nb.y - o.y, dz: nb.z - o.z, dir: o.dir, parts: [],
+              cols: [nb.pal[0], nb.pal[1], nb.pal[2], [255, 255, 255]].map(rgbStr) };
+    nb.eat = E; o.feed = nb; o.feedT0 = fx.t;
+    var mag = o.type === 'magnetar', e1 = mag ? o.P : o.e1, e2 = mag ? o.Q : o.e2, n = mag ? o.A : o.n;
+    var R = [-Math.sin(nb.ang), 0, Math.cos(nb.ang)], cr = Math.cos(nb.roll), sr = Math.sin(nb.roll), total = 0, bits = [], i, j;
+    nb.blobs.forEach(function (bl) { total += bl.r * bl.r * (bl.a == null ? 1 : bl.a); });
+    for (i = 0; i < EAT_N; i++) {
+      var pickAt = Math.random() * total, bl = nb.blobs[0];
+      for (j = 0; j < nb.blobs.length; j++) {
+        bl = nb.blobs[j];
+        pickAt -= bl.r * bl.r * (bl.a == null ? 1 : bl.a);
+        if (pickAt <= 0) break;
+      }
+      var d = Math.sqrt(Math.random()) * bl.r * 0.8, an = Math.random() * Math.PI * 2;
+      var u = (bl.u + Math.cos(an) * d) * nb.S, v = (bl.v + Math.sin(an) * d) * nb.S, su = u * cr + v * sr, sv = v * cr - u * sr;
+      bits.push({ u: su, v: sv, c: bl.c, d: Math.hypot(E.dx + R[0] * su, E.dy + sv, E.dz + R[2] * su) });
+    }
+    var dmin = Math.min.apply(null, bits.map(function (b) { return b.d; })), dmax = Math.max.apply(null, bits.map(function (b) { return b.d; }));
+    bits.forEach(function (b) {
+      var tr = EAT_FALL + EAT_TEAR * (0.8 * (b.d - dmin) / Math.max(dmax - dmin, 1e-6) + 0.15 * Math.random());
+      var ps = eatPose(tr, E.dir), c = eatCenter(E, ps);
+      var off = [R[0] * b.u * ps.sc, b.v * ps.sc, R[2] * b.u * ps.sc], to = [o.x - c[0], o.y - c[1], o.z - c[2]];
+      var tl = Math.hypot(to[0], to[1], to[2]) || 1, along = (off[0] * to[0] + off[1] * to[1] + off[2] * to[2]) / tl * ps.st;
+      var rx = c[0] + off[0] + to[0] / tl * along - o.x, ry = c[1] + off[1] + to[1] / tl * along - o.y, rz = c[2] + off[2] + to[2] / tl * along - o.z;
+      var a = rx * e1[0] + ry * e1[1] + rz * e1[2], bb = rx * e2[0] + ry * e2[1] + rz * e2[2];
+      E.parts.push({ tr: tr, tf: lerp(EAT_IN[0], EAT_IN[1], clamp01(Math.hypot(rx, ry, rz) / EAT_R)), r0: Math.max(Math.hypot(a, bb), 1),
+                     th0: Math.atan2(bb, a), h0: rx * n[0] + ry * n[1] + rz * n[2], c: b.c });
+    });
+  }
+
+  // The torn-off gas winding in, closer and faster round as it goes, heating up white, and settling into a
+  // quasar's disk; at a magnetar its field catches it at M_SIZE and it runs along a field line to a pole.
+  function eatParticles(nb, now, s) {
+    var E = nb.eat, o = E.ob, te = fx.t - E.t0, lt = skyAge(o, now), fade = skyFade(o, lt), mag = o.type === 'magnetar';
+    var e1 = mag ? o.P : o.e1, e2 = mag ? o.Q : o.e2, n = mag ? o.A : o.n, F = mag ? magnetarFrame(o, lt) : null;
+    var r1 = mag ? M_SIZE * 0.85 : Q_IN, wrap = mag ? 0.72 : 1;
+    for (var k = 0; k < E.parts.length; k++) {
+      var p = E.parts[k], u = (te - p.tr) / p.tf;
+      if (u <= 0 || u >= 1) continue;
+      var u1 = Math.min(u / wrap, 1), rho = r1 + (p.r0 - r1) * Math.pow(1 - u1, 2 / 3);
+      var th = p.th0 - E.dir * 1.1 * Math.log(1 - 0.94 * u1), h = p.h0 * (1 - u1) * (1 - u1);
+      var lx = Math.cos(th) * rho, ly = Math.sin(th) * rho;
+      var x = e1[0] * lx + e2[0] * ly + n[0] * h, y = e1[1] * lx + e2[1] * ly + n[1] * h, z = e1[2] * lx + e2[2] * ly + n[2] * h;
+      if (u > wrap) {
+        var fx0 = x * F.x[0] + y * F.x[1] + z * F.x[2], fy0 = x * F.y[0] + y * F.y[1] + z * F.y[2], fz0 = x * F.z[0] + y * F.z[1] + z * F.z[2];
+        var hr = Math.hypot(fx0, fy0, fz0), t0 = Math.acos(fy0 / hr), s0 = Math.sin(t0), Lf = hr / (s0 * s0);
+        var t1 = lerp(t0, fy0 > 0 ? 0.2 : Math.PI - 0.2, smooth((u - wrap) / (1 - wrap))), s1 = Math.sin(t1), rr = Lf * s1 * s1, ph = Math.atan2(fz0, fx0);
+        var mx = rr * s1 * Math.cos(ph), my = rr * Math.cos(t1), mz = rr * s1 * Math.sin(ph);
+        x = mx * F.x[0] + my * F.y[0] + mz * F.z[0]; y = mx * F.x[1] + my * F.y[1] + mz * F.z[1]; z = mx * F.x[2] + my * F.y[2] + mz * F.z[2];
+      }
+      pushPt(o.x + x, o.y + y, o.z + z, (0.35 + 0.65 * u) * Math.min(1, (1 - u) / 0.12) * fade, 1, u < 0.5 ? p.c : 3, s);
+    }
+    flushPts(E.cols);
   }
 
   // A halo and then the solid ball, swelling up over FX_FORM; and the small orbs on a ring tilted up on the
@@ -1510,19 +1982,19 @@ window.addEventListener('DOMContentLoaded', function () {
     var p = proj(oc), r = FX_R * grow * cam.f / oc.z;
     if (r > 0.5) {
       ctx.globalCompositeOperation = 'lighter';
-      glowDot(p.x, p.y, r * 1.9, [[0, 'rgba(0,229,255,0.3)'], [0.55, 'rgba(0,229,255,0.22)'], [1, 'rgba(0,229,255,0)']]);
+      glowDot(p.x, p.y, r * 1.9, [[0, 'rgba(255,255,255,0.26)'], [0.55, 'rgba(235,240,255,0.18)'], [1, 'rgba(235,240,255,0)']]);
       ctx.globalCompositeOperation = 'source-over';
       var g = ctx.createRadialGradient(p.x - r * 0.35, p.y - r * 0.4, r * 0.05, p.x, p.y, r);
-      g.addColorStop(0, '#e6feff');
-      g.addColorStop(0.2, '#8ff0ff');
-      g.addColorStop(0.55, '#1cb8ff');
-      g.addColorStop(1, '#0b5fd8');
+      g.addColorStop(0, '#ffffff');
+      g.addColorStop(0.2, '#f6f8fb');
+      g.addColorStop(0.55, '#dfe4ec');
+      g.addColorStop(1, '#b4bdcb');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.lineWidth = Math.max(1, r * 0.04);
-      ctx.strokeStyle = 'rgba(170,250,255,0.85)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
       ctx.stroke();
     }
     subs.forEach(function (sb) { if (sb.c.z < oc.z) fxSubOrb(sb.c, sb.f); });
@@ -1547,15 +2019,23 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // A white-hot core that flares as the quasar ignites, a faint glow in the disk's colour, and spikes of
-  // light across the core like a bright star seen through a telescope.
+  // light across the core like a bright star seen through a telescope. While it feeds, the core burns brighter
+  // and a beam of light runs up the middle of each jet.
   function quasarGlow(q, now) {
-    var lt = skyAge(q, now), ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000));
-    if (ign <= 0 || !sphereVisible(q.x, q.y, q.z, q.R * 1.4)) return;
+    var lt = skyAge(q, now), fade = skyFade(q, lt), ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000)) * fade;
+    var fl = feedLevel(q) * fade;
+    if (ign <= 0 || !sphereVisible(q.x, q.y, q.z, q.L * (1 + 1.3 * fl))) return;
     var c = toCam(q.x, q.y, q.z);
     if (c.z < 2) return;
     var p = proj(c), k = cam.f / c.z, pal = q.pal, white = [255, 255, 255];
     var flash = lt > SKY_IGNITE ? Math.exp(-Math.pow((lt - SKY_IGNITE) / 700, 2)) : 0;
-    var I = ign * (1 + 0.12 * Math.sin(lt * 0.003));
+    var I = ign * (1 + 0.12 * Math.sin(lt * 0.003)) * (1 + 0.5 * fl);
+    if (fl > 0.02) {
+      [1, -1].forEach(function (sd) {
+        var Lj = q.L * (1 + 1.3 * fl) * 0.9 * sd, e = toCam(q.x + q.n[0] * Lj, q.y + q.n[1] * Lj, q.z + q.n[2] * Lj);
+        if (e.z >= 1) glowLine(p, proj(e), rgbaStr(white, 0.5 * fl), rgbaStr(pal[2], 0), Math.max(3, 1.4 * k * fl), Math.max(1, 0.3 * k));
+      });
+    }
     var hr = q.R * 1.4 * k, g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hr);
     g.addColorStop(0, rgbaStr(pal[3], 0.12 * I));
     g.addColorStop(1, rgbaStr(pal[3], 0));
@@ -1621,18 +2101,23 @@ window.addEventListener('DOMContentLoaded', function () {
     return { pulse: Math.pow(Math.max(0, Math.sin(lt * Math.PI * 2 / M_PULSE)), 6), flare: Math.max(flash, flare) };
   }
 
-  // A small, dazzling core beating fast, a violet haze, and a beam out of each magnetic pole.
+  // A small, dazzling core beating fast, a violet haze, and a beam out of each magnetic pole, longer, wider and
+  // brighter while it feeds.
   function magnetarGlow(m, lt) {
-    var ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000));
-    if (ign <= 0 || !sphereVisible(m.x, m.y, m.z, M_BEAM)) return;
+    var fade = skyFade(m, lt), ign = smooth(clamp01((lt - SKY_IGNITE + 3000) / 3000)) * fade, fl = feedLevel(m) * fade;
+    var Lb = M_BEAM * (1 + 0.9 * fl);
+    if (ign <= 0 || !sphereVisible(m.x, m.y, m.z, Lb)) return;
     var c = toCam(m.x, m.y, m.z);
     if (c.z < 2) return;
     var p = proj(c), k = cam.f / c.z, pal = m.pal, b = magnetarBeat(lt), I = ign * (0.6 + 0.4 * b.pulse + b.flare);
     var F = magnetarFrame(m, lt);
     glowDot(p.x, p.y, M_SIZE * 1.1 * k * (1 + 0.4 * b.flare), [[0, rgbaStr(pal[2], 0.13 * I)], [1, rgbaStr(pal[2], 0)]]);
     [1, -1].forEach(function (sd) {
-      var e = toCam(m.x + F.y[0] * M_BEAM * sd, m.y + F.y[1] * M_BEAM * sd, m.z + F.y[2] * M_BEAM * sd);
-      if (e.z >= 1) glowLine(p, proj(e), rgbaStr(pal[1], 0.6 * I), rgbaStr(pal[3], 0), Math.max(2, 0.9 * k), Math.max(1, 0.25 * k));
+      var e = toCam(m.x + F.y[0] * Lb * sd, m.y + F.y[1] * Lb * sd, m.z + F.y[2] * Lb * sd);
+      if (e.z >= 1) {
+        glowLine(p, proj(e), rgbaStr(pal[1], (0.6 + 0.4 * fl) * I), rgbaStr(pal[3], 0), Math.max(2, 0.9 * k) * (1 + 1.5 * fl),
+                 Math.max(1, 0.25 * k) * (1 + fl));
+      }
     });
     glowDot(p.x, p.y, 0.8 * k * (1 + 0.6 * b.pulse + 2.5 * b.flare), [[0, rgbaStr(pal[0], 0.95 * I + b.flare)],
       [0.3, rgbaStr(pal[1], 0.75 * I)], [0.7, rgbaStr(pal[2], 0.25 * I)], [1, rgbaStr(pal[2], 0)]]);
@@ -1642,7 +2127,7 @@ window.addEventListener('DOMContentLoaded', function () {
   // shadow, and the ring of its light bent round the shadow; the shadow and its thin photon ring; then the
   // near half of the disk across the front. Disk streaks closer in go round faster.
   function blackHoleGlow(h, now) {
-    var lt = skyAge(h, now), on = smooth(clamp01(lt / SKY_FORM));
+    var lt = skyAge(h, now), on = smooth(clamp01(lt / SKY_FORM)) * skyFade(h, lt);
     if (on <= 0 || !sphereVisible(h.x, h.y, h.z, h.R * B_DISK)) return;
     var c = toCam(h.x, h.y, h.z);
     if (c.z < h.R * B_DISK) return;
@@ -1708,23 +2193,47 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.restore();
   }
 
-  // The picture, facing the camera, fading in and then breathing slowly; the stars light one by one.
+  // The picture, facing the camera, coming together over N_FORM (swelling out from the middle, swirling in as
+  // it shrinks to size, or just fading in) and then breathing slowly; the stars light one by one. While it's
+  // eaten it's drawn where it's been pulled to, stretched towards what's eating it, and fades as it's torn away.
   function nebulaGlow(nb) {
-    var on = smooth(clamp01((fx.t - nb.at) / N_FADE));
-    if (on <= 0 || !sphereVisible(nb.x, nb.y, nb.z, nb.U)) return;
-    var c = toCam(nb.x, nb.y, nb.z);
+    var age = fx.t - nb.at;
+    if (age <= 0) return;
+    var e = clamp01(age / N_FORM), ee = 1 - Math.pow(1 - e, 3), on = smooth(e), sc = 1, rot = nb.roll, st = 0, pos = [nb.x, nb.y, nb.z];
+    if (nb.form === 'expand') sc = 0.25 + 0.75 * ee;
+    else if (nb.form === 'swirl') { sc = 1 + 0.45 * (1 - ee); rot += nb.spin * 1.6 * (1 - ee); }
+    else sc = 1 + 0.12 * (1 - ee);
+    if (nb.eat) {
+      var ps = eatPose(fx.t - nb.eat.t0, nb.eat.dir);
+      pos = eatCenter(nb.eat, ps); sc *= ps.sc; on *= ps.a; st = ps.st;
+    }
+    if (on <= 0.005 || !sphereVisible(pos[0], pos[1], pos[2], nb.U * sc * (1 + st))) return;
+    var c = toCam(pos[0], pos[1], pos[2]);
     if (c.z < nb.U * 0.5) return;
     var p = proj(c), k = cam.f / c.z;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if (st) {
+      var oc = toCam(nb.eat.ob.x, nb.eat.ob.y, nb.eat.ob.z);
+      if (oc.z > 1) {
+        var op = proj(oc), a = Math.atan2(op.y - p.y, op.x - p.x);
+        ctx.rotate(a);
+        ctx.scale(1 + st, 1 / (1 + 0.5 * st));
+        ctx.rotate(-a);
+      }
+    }
+    ctx.rotate(rot);
     ctx.globalAlpha = on * (0.85 + 0.15 * Math.sin(fx.t * 0.0004 + nb.at));
-    ctx.drawImage(nb.img, p.x - nb.U * k, p.y - nb.V * k, 2 * nb.U * k, 2 * nb.V * k);
+    ctx.drawImage(nb.img, -nb.U * k * sc, -nb.V * k * sc, 2 * nb.U * k * sc, 2 * nb.V * k * sc);
     ctx.globalAlpha = 1;
-    nb.stars.forEach(function (st) {
-      var son = smooth(clamp01((fx.t - st.at) / 1500));
+    nb.stars.forEach(function (s) {
+      var son = smooth(clamp01((fx.t - s.at) / 1500));
       if (son <= 0) return;
-      var flash = Math.exp(-Math.pow((fx.t - st.at - 1500) / 600, 2)), I = son * (0.75 + 0.25 * Math.sin(fx.t * 0.002 + st.ph));
-      glowDot(p.x + st.u * k, p.y - st.v * k, 1.3 * k * (1 + 2 * flash), [[0, rgbaStr([255, 255, 255], 0.95 * I + 0.5 * flash)],
-        [0.2, rgbaStr([255, 255, 255], 0.5 * I)], [0.45, rgbaStr(nb.pal[st.c], 0.3 * I)], [1, rgbaStr(nb.pal[st.c], 0)]]);
+      var flash = Math.exp(-Math.pow((fx.t - s.at - 1500) / 600, 2)), I = son * on * (0.75 + 0.25 * Math.sin(fx.t * 0.002 + s.ph));
+      glowDot(s.u * nb.S * k * sc, -s.v * nb.S * k * sc, (s.big ? 1.9 : 1.3) * k * (1 + 2 * flash), [[0, rgbaStr([255, 255, 255], 0.95 * I + 0.5 * flash * on)],
+        [0.2, rgbaStr([255, 255, 255], 0.5 * I)], [0.45, rgbaStr(nb.pal[s.c], 0.3 * I)], [1, rgbaStr(nb.pal[s.c], 0)]]);
     });
+    ctx.restore();
   }
 
   // Two solar panels either side of a small body, turning slowly about their long side, and a red light
@@ -1847,10 +2356,11 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   // The disk forms from the outside in, each particle spiralling in to its place as it fades in; the core ignites
-  // once it's full and the jets shoot out of it.
+  // once it's full and the jets shoot out of it. While it feeds the jets reach up to 2.3 times as far, run
+  // faster, wider and brighter, and fill in with the second half of their particles.
   function quasarParticles(q, now, s) {
-    var lt = skyAge(q, now);
-    if (lt < 0 || !sphereVisible(q.x, q.y, q.z, q.L)) return;
+    var lt = skyAge(q, now), fade = skyFade(q, lt), fl = feedLevel(q) * fade, L = q.L * (1 + 1.3 * fl);
+    if (lt < 0 || fade <= 0 || !sphereVisible(q.x, q.y, q.z, L)) return;
     var n = q.n, e1 = q.e1, e2 = q.e2, k;
     for (k = 0; k < q.p.length; k++) {
       var p = q.p[k], e = clamp01((lt - p.at) / 1500);
@@ -1858,27 +2368,32 @@ window.addEventListener('DOMContentLoaded', function () {
       var ee = 1 - (1 - e) * (1 - e), th = p.th + p.w * lt - (1 - ee) * 1.2, r = p.r * (1 + 0.5 * (1 - ee));
       var u = Math.cos(th) * r, v = Math.sin(th) * r;
       pushPt(q.x + e1[0] * u + e2[0] * v + n[0] * p.h, q.y + e2[1] * v + n[1] * p.h, q.z + e1[2] * u + e2[2] * v + n[2] * p.h,
-             p.a * ee, 1, p.bk, s);
+             p.a * ee * fade, 1, p.bk, s);
     }
     if (lt > SKY_IGNITE) {
-      var reach = q.L * (1 - Math.pow(1 - clamp01((lt - SKY_IGNITE) / Q_JETS), 3));
+      var reach = L * (1 - Math.pow(1 - clamp01((lt - SKY_IGNITE) / Q_JETS), 3));
+      q.jph = (q.jph + fx.dt * (1 + 1.5 * fl) / 2200) % 1;
       for (k = 0; k < q.j.length; k++) {
-        var jp = q.j[k], d = ((jp.s + lt / 2200) % 1) * q.L;
+        var jp = q.j[k];
+        if (jp.extra && fl < 0.02) continue;
+        var d = ((jp.s + q.jph) % 1) * L;
         if (d > reach) continue;
-        var rad = 0.1 + d * 0.03, ang = jp.phi + d * 0.5 + lt * 0.0015;
+        var rad = (0.1 + d * 0.03) * (1 + 0.5 * fl), ang = jp.phi + d * 0.5 + lt * 0.0015;
         var cu = Math.cos(ang) * rad, cv = Math.sin(ang) * rad, dd = d * jp.side;
-        pushPt(q.x + n[0] * dd + e1[0] * cu + e2[0] * cv, q.y + n[1] * dd + e2[1] * cv,
-               q.z + n[2] * dd + e1[2] * cu + e2[2] * cv, Math.pow(1 - d / q.L, 1.3), 1.6, d < q.L * 0.2 ? 0 : 1, s);
+        pushPt(q.x + n[0] * dd + e1[0] * cu + e2[0] * cv, q.y + n[1] * dd + e2[1] * cv, q.z + n[2] * dd + e1[2] * cu + e2[2] * cv,
+               Math.pow(1 - d / L, 1.3) * (jp.extra ? fl : 1) * (1 + 0.4 * fl) * fade, 1.6, d < L * 0.2 ? 0 : 1, s);
       }
     }
     flushPts(q.cols);
   }
 
   // The loops fill in one after another as it forms, then stream from pole to pole, brightest near the star.
+  // While it feeds, particles stream out along both beams too.
   function magnetarParticles(m, lt, s) {
-    if (lt < 0 || !sphereVisible(m.x, m.y, m.z, M_SIZE)) return;
-    var F = magnetarFrame(m, lt), boost = 1 + 0.5 * magnetarBeat(lt).flare;
-    for (var k = 0; k < m.p.length; k++) {
+    var fade = skyFade(m, lt), fl = feedLevel(m) * fade, Lb = M_BEAM * (1 + 0.9 * fl), k;
+    if (lt < 0 || fade <= 0 || !sphereVisible(m.x, m.y, m.z, fl > 0.02 ? Lb : M_SIZE)) return;
+    var F = magnetarFrame(m, lt), boost = (1 + 0.5 * magnetarBeat(lt).flare) * fade;
+    for (k = 0; k < m.p.length; k++) {
       var p = m.p[k], e = smooth((lt - p.at) / 1200), bk = p.bk;
       if (e <= 0) continue;
       var th = 0.35 + (Math.PI - 0.7) * ((p.s + lt / 2600) % 1), sn = Math.sin(th), r = p.L * sn * sn;
@@ -1886,6 +2401,15 @@ window.addEventListener('DOMContentLoaded', function () {
       if (r < p.L * 0.3) bk = 1;
       pushPt(m.x + lx * F.x[0] + ly * F.y[0] + lz * F.z[0], m.y + lx * F.x[1] + ly * F.y[1] + lz * F.z[1],
              m.z + lx * F.x[2] + ly * F.y[2] + lz * F.z[2], (0.3 + 0.6 * (1 - r / p.L)) * boost * e, 1, bk, s);
+    }
+    if (fl > 0.02) {
+      m.bph = (m.bph + fx.dt / 900) % 1;
+      for (k = 0; k < m.bj.length; k++) {
+        var b = m.bj[k], d = ((b.s + m.bph) % 1) * Lb, rad = 0.12 + d * 0.025, ang = b.phi + d * 0.4;
+        var cx = Math.cos(ang) * rad, cz = Math.sin(ang) * rad, dd = d * b.side;
+        pushPt(m.x + F.y[0] * dd + F.x[0] * cx + F.z[0] * cz, m.y + F.y[1] * dd + F.x[1] * cx + F.z[1] * cz,
+               m.z + F.y[2] * dd + F.x[2] * cx + F.z[2] * cz, Math.pow(1 - d / Lb, 1.2) * fl, 1.4, d < Lb * 0.25 ? 0 : 1, s);
+      }
     }
     flushPts(m.cols);
   }
@@ -1945,37 +2469,25 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.globalAlpha = 1;
   }
 
-  // Classic: a dark shadow under each ball. Cybernetic: a glow on the floor under the food in its own colour.
-  // Both shrink under a ball in the air and follow the floor down into the well.
-  function drawFloorMarks(items) {
-    var cyber = theme === 'cyber';
-    var off = cyber ? 0 : 0.06, size = cyber ? 1.3 : 0.95;
-    if (!cyber) ctx.beginPath();
+  // Classic's dark shadow under each ball, shrinking under a ball in the air and following the floor down into
+  // the well.
+  function drawShadows(items) {
+    ctx.beginPath();
     items.forEach(function (it) {
-      var pts = [], rr = it.r * size / (1 + it.lift * 0.7);
+      var pts = [], rr = it.r * 0.95 / (1 + it.lift * 0.7);
       for (var k = 0; k < 16; k++) {
         var a = k / 16 * Math.PI * 2;
-        var px = it.x + off + Math.cos(a) * rr, pz = it.z + off + Math.sin(a) * rr;
+        var px = it.x + 0.06 + Math.cos(a) * rr, pz = it.z + 0.06 + Math.sin(a) * rr;
         var p = toCam(px, -depthAt(px, pz), pz);
         if (p.z < NEAR) return;
         pts.push(proj(p));
       }
-      if (cyber) ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for (k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y);
       ctx.closePath();
-      if (cyber) {
-        ctx.save();
-        ctx.globalAlpha = 0.6 / (1 + it.lift);
-        ctx.fillStyle = it.glow;
-        ctx.fill();
-        ctx.restore();
-      }
     });
-    if (!cyber) {
-      ctx.fillStyle = 'rgba(0,0,0,0.4)';
-      ctx.fill();
-    }
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fill();
   }
 
   function drawScene(now) {
@@ -1990,6 +2502,8 @@ window.addEventListener('DOMContentLoaded', function () {
     while (turnBy > Math.PI) turnBy -= Math.PI * 2;
     while (turnBy < -Math.PI) turnBy += Math.PI * 2;
     camYaw += dt ? turnBy * (1 - Math.exp(-dt / 60)) : turnBy;
+    var viewTo = view === 'close' ? 1 : 0;
+    viewMix = !dt ? viewTo : viewTo > viewMix ? Math.min(viewTo, viewMix + dt / VIEW_EASE) : Math.max(viewTo, viewMix - dt / VIEW_EASE);
 
     updateDig(dt);
     var at = stepPos();
@@ -2000,8 +2514,12 @@ window.addEventListener('DOMContentLoaded', function () {
     well.z = lerp(headPrev.y, head.y, t) + 0.5;
     setCamera(well.x, well.z);
 
-    if (theme === 'cyber') { drawCyberArena(cw, ch, s); drawFx(now, s); }
-    else {
+    if (theme === 'cyber') {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, cw, ch);
+      drawFx(now, s);
+      drawCyberArena(s);
+    } else {
       var horizon = cam.cy - (cam.hx * cam.ux + cam.hz * cam.uz) / (cam.hx * cam.fx + cam.hz * cam.fz) * cam.f;
       drawClassicArena(horizon, cw, ch, s);
     }
@@ -2025,7 +2543,7 @@ window.addEventListener('DOMContentLoaded', function () {
     food.y = foodR + 0.1 + pulse * 0.12 - depthAt(food.x, food.z);
     items.push(food);
 
-    drawFloorMarks(theme === 'cyber' ? [food] : items);
+    if (theme !== 'cyber') drawShadows(items);
 
     items.forEach(function (it) {
       it.c = toCam(it.x, it.y, it.z);
@@ -2070,10 +2588,50 @@ window.addEventListener('DOMContentLoaded', function () {
       drawTag(currentCtrl[0], ax + (onLeft ? 10 : -10) * s, ay, onLeft ? 'left' : 'right', 11 * s, 'rgba(34,197,94,0.7)');
     }
 
-    if (answer && headItem.sr) {
-      var ap = proj(toCam(headItem.x, headItem.y + headItem.r + 0.3, headItem.z));
-      drawTag(answer, ap.x, ap.y, 'center', 13 * s, 'rgba(96,165,250,0.7)');
+    var since = playMs - ateAt;
+    if (headItem.sr && since < ANSWER_MS) {
+      var ap = proj(toCam(headItem.x, headItem.y + headItem.r + 0.3, headItem.z)), tagH = 13 * s * 1.8;
+      if (answer) {
+        ctx.globalAlpha = 1 - smooth((since - ANSWER_MS + ANSWER_FADE) / ANSWER_FADE);
+        drawTag(answer, ap.x, ap.y, 'center', 13 * s, 'rgba(96,165,250,0.7)');
+        ctx.globalAlpha = 1;
+      }
+      if (since < PLUS_MS) drawPlusOne(ap.x, ap.y - (answer ? tagH * 0.5 + 10 * s : 0), since / PLUS_MS, s);
     }
+    if (paused) drawPaused(cw, ch, s);
+  }
+
+  // The answer shows over the head for ANSWER_MS after eating, fading out over the last ANSWER_FADE of it. A gold
+  // +1 rises over it as the app's points do: up 18px at full strength over the first 40% of PLUS_MS, then on to
+  // 40px as it fades.
+  var ANSWER_MS = 2000, ANSWER_FADE = 500, PLUS_MS = 900;
+  function drawPlusOne(x, y, p, s) {
+    var ease = function (u) { u = clamp01(u); return 1 - (1 - u) * (1 - u); };
+    var rise = p < 0.4 ? 18 * ease(p / 0.4) : 18 + 22 * ease((p - 0.4) / 0.6);
+    ctx.save();
+    ctx.globalAlpha = p < 0.4 ? 1 : 1 - ease((p - 0.4) / 0.6);
+    ctx.font = '800 ' + Math.round(16 * s) + 'px -apple-system, "Segoe UI", Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = '#facc15';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 2 * s; ctx.shadowOffsetY = s;
+    ctx.fillText('+1', x, y - rise * s);
+    ctx.shadowColor = 'rgba(250,204,21,0.6)'; ctx.shadowBlur = 8 * s; ctx.shadowOffsetY = 0;
+    ctx.fillText('+1', x, y - rise * s);
+    ctx.restore();
+  }
+
+  function drawPaused(cw, ch, s) {
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold ' + Math.round(22 * s) + 'px -apple-system, "Segoe UI", Consolas, monospace';
+    ctx.fillStyle = '#e4e6eb';
+    ctx.fillText('Paused', cw / 2, ch / 2 - 12 * s);
+    ctx.font = Math.round(12 * s) + 'px -apple-system, "Segoe UI", Consolas, monospace';
+    ctx.fillStyle = '#9ca3af';
+    ctx.fillText(KEYS ? 'Press Space or Resume to carry on' : 'Tap Resume to carry on', cw / 2, ch / 2 + 16 * s);
   }
 
   function tick() {
@@ -2098,8 +2656,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
     if (nx === foodX && ny === foodY) {
       score++;
+      fxAte(score);
       justAte = true;
       ateTime = performance.now();
+      ateAt = playMs;
       if (scoreEl) scoreEl.textContent = String(score);
       if (ctrlEl) ctrlEl.textContent = currentCtrl[0];
       flash(currentCtrl);
@@ -2127,6 +2687,7 @@ window.addEventListener('DOMContentLoaded', function () {
   function die() {
     alive = false;
     over = true;
+    setPaused(false);
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     endScene = makeEndScene();
     drawGameOver();
@@ -2225,7 +2786,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     ctx.font = Math.round(12 * s) + 'px -apple-system, "Segoe UI", Consolas, monospace';
     ctx.fillStyle = '#6b7280';
-    ctx.fillText('Press Start to play again', x, y3);
+    ctx.fillText(KEYS ? 'Press Enter or Start to play again' : 'Press Start to play again', x, y3);
   }
 
   function drawGameOver(now) {
@@ -2243,18 +2804,41 @@ window.addEventListener('DOMContentLoaded', function () {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     initSnake();
     alive = true;
-    if (!skyStart) skyStart = performance.now();
+    setPaused(false);
     lastTick = performance.now();
     tickProgress = 0;
     rafId = requestAnimationFrame(render);
   }
 
-  startBtn.addEventListener('click', startGame);
+  // While paused the snake stands still and the sky carries on.
+  function setPaused(on) {
+    if (on && !alive) return;
+    paused = on;
+    if (on) { setDig(false); setFast(false); }
+    if (pauseBtn) {
+      pauseBtn.textContent = on ? 'Resume' : 'Pause';
+      pauseBtn.disabled = !alive;
+    }
+  }
+
+  function setView(v) {
+    view = v;
+    try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
+    showView();
+    if (!alive && theme !== 'cyber') { doInitialRender(); if (over) drawGameOver(); }
+  }
+
+  function showView() { if (fovBtn) fovBtn.textContent = view === 'close' ? 'FOV: Close' : 'FOV: Wide'; }
+
+  // Buttons give up focus once clicked, so Space and Enter go to the game rather than clicking them again.
+  startBtn.addEventListener('click', function () { startBtn.blur(); startGame(); });
+  if (pauseBtn) pauseBtn.addEventListener('click', function () { pauseBtn.blur(); setPaused(!paused); });
+  if (fovBtn) fovBtn.addEventListener('click', function () { fovBtn.blur(); setView(view === 'close' ? 'wide' : 'close'); });
 
   // Turns wait in a short line, each checked against the one before it, so two quick turns both happen.
   // Left and right turn from the direction the snake will be facing by then.
   function setDir(dir) {
-    if (!alive || turnBuf.length >= TURN_BUFFER) return;
+    if (!alive || paused || turnBuf.length >= TURN_BUFFER) return;
     var last = turnBuf.length ? turnBuf[turnBuf.length - 1] : { x: dirX, y: dirY };
     var nx, ny;
     if (dir === 'left') { nx = last.y; ny = -last.x; }
@@ -2274,14 +2858,24 @@ window.addEventListener('DOMContentLoaded', function () {
 
   var KEY_DIRS = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
                    ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
+  // Enter starts a round and Space pauses one, except while typing in a box.
+  function typing(e) { var tag = e.target && e.target.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'; }
   document.addEventListener('keydown', function (e) {
     var k = e.key;
+    if (typing(e)) return;
+    if (k === 'Enter') { e.preventDefault(); if (!e.repeat && !alive) startGame(); return; }
+    if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat && alive) setPaused(!paused); return; }
+    if (e.code === 'KeyZ' || k === 'z' || k === 'Z') { if (!e.repeat) setFast(true); return; }
     if (k.indexOf('Arrow') === 0) e.preventDefault();
     if (e.repeat || !KEY_DIRS[k]) return;
     press(KEY_DIRS[k]);
   });
-  document.addEventListener('keyup', function (e) { if (KEY_DIRS[e.key]) release(KEY_DIRS[e.key]); });
-  window.addEventListener('blur', function () { setDig(false); });
+  document.addEventListener('keyup', function (e) {
+    if ((e.key === ' ' || e.key === 'Spacebar') && !typing(e)) e.preventDefault();
+    if (e.code === 'KeyZ' || e.key === 'z' || e.key === 'Z') setFast(false);
+    if (KEY_DIRS[e.key]) release(KEY_DIRS[e.key]);
+  });
+  window.addEventListener('blur', function () { setDig(false); setFast(false); });
 
   var dpad = document.getElementById('dpad');
   if (dpad) {
@@ -2319,6 +2913,64 @@ window.addEventListener('DOMContentLoaded', function () {
       })(btns[b]);
     }
   }
+
+  // The joystick does what the arrows do: push it left or right to turn, up to jump, and hold it down to slow
+  // down. A push counts once the knob is JOY_DEAD of the way out, and holds while it stays within JOY_HOLD
+  // either side of that way, so a thumb near a diagonal doesn't flick between two. Back in the middle lets go.
+  var JOY_DEAD = 0.35, JOY_HOLD = Math.PI / 3, PAD_KEY = 'cyber-snake-pad';
+  var joy = document.getElementById('joy'), knob = document.getElementById('joy-knob');
+  var padSwitch = document.getElementById('pad-switch'), gameWrap = document.querySelector('.game-wrap');
+  var JOY_ANG = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
+  var joyId = null, joyDir = null;
+  function joyMove(e) {
+    var r = joy.getBoundingClientRect(), R = r.width / 2, lim = R - knob.offsetWidth / 2;
+    var dx = e.clientX - r.left - R, dy = e.clientY - r.top - R, d = Math.hypot(dx, dy);
+    if (d > lim) { dx *= lim / d; dy *= lim / d; }
+    knob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+    var dir = null, a = Math.atan2(dy, dx);
+    if (d >= JOY_DEAD * lim) {
+      if (joyDir && angGap(a, JOY_ANG[joyDir]) < JOY_HOLD) dir = joyDir;
+      else dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    }
+    if (dir === joyDir) return;
+    if (joyDir) release(joyDir);
+    joyDir = dir;
+    if (dir) press(dir);
+  }
+  function joyEnd(e) {
+    if (e.pointerId !== joyId) return;
+    joyId = null;
+    joy.classList.remove('active');
+    knob.style.transform = '';
+    if (joyDir) release(joyDir);
+    joyDir = null;
+  }
+  if (joy && knob) {
+    joy.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      joyId = e.pointerId;
+      try { joy.setPointerCapture(e.pointerId); } catch (err) {}
+      joy.classList.add('active');
+      joyMove(e);
+    });
+    joy.addEventListener('pointermove', function (e) { if (e.pointerId === joyId) joyMove(e); });
+    joy.addEventListener('pointerup', joyEnd);
+    joy.addEventListener('pointercancel', joyEnd);
+  }
+
+  function showPad(useJoy) {
+    if (gameWrap) gameWrap.classList.toggle('use-joy', useJoy);
+    if (padSwitch) padSwitch.textContent = useJoy ? 'Use arrows' : 'Use joystick';
+  }
+  var useJoy = false;
+  try { useJoy = localStorage.getItem(PAD_KEY) === 'joy'; } catch (e) {}
+  showPad(useJoy);
+  if (padSwitch) padSwitch.addEventListener('click', function () {
+    useJoy = !useJoy;
+    try { localStorage.setItem(PAD_KEY, useJoy ? 'joy' : 'arrows'); } catch (e) {}
+    showPad(useJoy);
+    padSwitch.blur();
+  });
 
   // Swipes act as soon as the finger has moved far enough, and one gesture can chain them (left then right,
   // say); moving on in the same direction doesn't repeat it. Up jumps; down slows the snake until the finger
@@ -2359,6 +3011,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (tabP) tabP.classList.toggle('active', mode === 'ports');
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     alive = false;
+    setPaused(false);
     initSnake();
     sizeCanvas();
     lastTick = performance.now();
@@ -2400,6 +3053,7 @@ window.addEventListener('DOMContentLoaded', function () {
     drawScene(performance.now());
   }
   showTheme();
+  showView();
   doInitialRender();
   runIdle();
 });
