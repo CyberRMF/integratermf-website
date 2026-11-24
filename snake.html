@@ -1202,10 +1202,41 @@ window.addEventListener('DOMContentLoaded', function () {
 
   // The sign faces the arena from beyond the west wall, so its letters run along -z (left to right as the snake
   // sees them).
-  var SIGN = { x: -22, y: 2.6, z: ROWS / 2, ux: 0, uz: -1, cell: 0.34, lines: ['CyberRMF', 'Integrate'] };
-  // It's a flip-dot board. Every SIGN_CYCLE a wave sweeps across it, left to right over SIGN_SWEEP, turning
-  // every square over (each takes SIGN_FLIP) and blanking the words; at SIGN_IN another wave turns them back.
-  var SIGN_CYCLE = 14000, SIGN_OUT = 9000, SIGN_IN = 11400, SIGN_SWEEP = 1400, SIGN_FLIP = 280, SIGN_JITTER = 140;
+  var SIGN = { x: -22, y: 2.6, z: ROWS / 2, ux: 0, uz: -1, cell: 0.34, lines: ['CyberRMF', 'Integrate'],
+               slogan: ['The best', '800-53', 'workflow!'] };
+  // It's a flip-dot board that goes round every SIGN_CYCLE. The name stands until SIGN_TO_SLOGAN, when a wave
+  // sweeps across it, left to right over SIGN_SWEEP, turning every square over (each takes SIGN_FLIP) to the
+  // slogan. At SIGN_SHED the squares that aren't the CyberRMF logo fall away, outermost first, over
+  // SIGN_SHED_SPREAD, each tumbling off over SIGN_FALL, while the logo's own squares turn over to its blue. At
+  // SIGN_GEN squares form round the logo again, nearest first, over SIGN_GEN_SPREAD (each over SIGN_FORM), and at
+  // SIGN_BACK another wave turns the whole board back to the name.
+  var SIGN_CYCLE = 25000, SIGN_TO_SLOGAN = 8000, SIGN_SHED = 14000, SIGN_GEN = 20000, SIGN_BACK = 22600;
+  var SIGN_SWEEP = 1400, SIGN_FLIP = 280, SIGN_JITTER = 140, SIGN_SHED_SPREAD = 1800, SIGN_FALL = 1400;
+  var SIGN_GEN_SPREAD = 1800, SIGN_FORM = 450, SIGN_GRAVITY = 30;
+  // The slogan's letters are smaller, five squares high (lower case a square shorter), each as wide as it needs.
+  var SIGN_SMALL = {
+    T: ['#####', '..#..', '..#..', '..#..', '..#..'],
+    h: ['#...', '#.#.', '##.#', '#..#', '#..#'],
+    e: ['....', '.##.', '####', '#...', '.###'],
+    b: ['#...', '###.', '#..#', '#..#', '###.'],
+    s: ['....', '.###', '##..', '..##', '###.'],
+    t: ['.#.', '###', '.#.', '.#.', '.##'],
+    w: ['.....', '#...#', '#...#', '#.#.#', '.#.#.'],
+    o: ['....', '.##.', '#..#', '#..#', '.##.'],
+    r: ['....', '#.##', '##..', '#...', '#...'],
+    k: ['#...', '#..#', '#.#.', '###.', '#..#'],
+    f: ['.##', '###', '#..', '#..', '#..'],
+    l: ['#.', '#.', '#.', '#.', '.#'],
+    '8': ['.##.', '#..#', '.##.', '#..#', '.##.'],
+    '0': ['.##.', '#..#', '#..#', '#..#', '.##.'],
+    '5': ['####', '#...', '###.', '...#', '###.'],
+    '3': ['###.', '...#', '.##.', '...#', '###.'],
+    '-': ['...', '...', '###', '...', '...'],
+    '!': ['#', '#', '#', '.', '#'],
+    ' ': ['..', '..', '..', '..', '..']
+  };
+  // The CyberRMF logo on SIGN_LOGO_N squares: a corner bracket in each corner and a round dot in the middle.
+  var SIGN_LOGO_N = 17, SIGN_LOGO_RGB = [98, 155, 248];
   // 5 x 8 blocks: capitals fill the top seven rows; the last row holds the tails of g and y.
   var SIGN_FONT = {
     C: ['01110','10001','10000','10000','10000','10001','01110','00000'],
@@ -1325,18 +1356,49 @@ window.addEventListener('DOMContentLoaded', function () {
     return a;
   }
 
+  // Whether square (x, y) of the logo is lit: a bracket two squares thick with arms six long in each corner, and
+  // a dot seven across in the middle.
+  function signLogoAt(x, y) {
+    var n = SIGN_LOGO_N - 1, m = n / 2, ex = Math.min(x, n - x), ey = Math.min(y, n - y);
+    if ((ex < 2 && ey < 6) || (ey < 2 && ex < 6)) return true;
+    return (x - m) * (x - m) + (y - m) * (y - m) <= 12.25;
+  }
+
+  // Each square knows whether it's lit in the name, the slogan and the logo (centred on the board), when the
+  // waves reach it, and when it falls away and forms again: the further from the logo's middle, the sooner it
+  // falls and the later it forms. A falling square hops up a little, drifts outwards and towards the arena, and
+  // tumbles as it drops.
   function signSetup() {
     var widths = SIGN.lines.map(function (l) { return l.length * 6 - 1; });
-    var pw = Math.max.apply(null, widths) + 4, ph = SIGN.lines.length * 9 + 1, lit = {}, cells = [];
+    var pw = Math.max.apply(null, widths) + 4, ph = SIGN.lines.length * 9 + 1, name = {}, slogan = {}, logo = {}, cells = [];
     SIGN.lines.forEach(function (line, li) {
       var c0 = Math.floor((pw - widths[li]) / 2), r0 = 1 + li * 9;
       for (var ci = 0; ci < line.length; ci++) {
         var bm = SIGN_FONT[line[ci]];
-        for (var r = 0; r < 8; r++) for (var c = 0; c < 5; c++) if (bm[r][c] === '1') lit[(c0 + ci * 6 + c) + ',' + (r0 + r)] = 1;
+        for (var r = 0; r < 8; r++) for (var c = 0; c < 5; c++) if (bm[r][c] === '1') name[(c0 + ci * 6 + c) + ',' + (r0 + r)] = 1;
       }
     });
+    SIGN.slogan.forEach(function (line, li) {
+      var glyphs = line.split('').map(function (ch) { return SIGN_SMALL[ch]; });
+      var w = glyphs.reduce(function (sum, g) { return sum + g[0].length + 1; }, -1);
+      var c0 = Math.floor((pw - w) / 2), r0 = 1 + li * 6;
+      glyphs.forEach(function (g) {
+        for (var r = 0; r < 5; r++) for (var c = 0; c < g[r].length; c++) if (g[r][c] === '#') slogan[(c0 + c) + ',' + (r0 + r)] = 1;
+        c0 += g[0].length + 1;
+      });
+    });
+    var lc = Math.floor((pw - SIGN_LOGO_N) / 2), lr = Math.floor((ph - SIGN_LOGO_N) / 2), mid = (SIGN_LOGO_N - 1) / 2;
+    for (var y = 0; y < SIGN_LOGO_N; y++) for (var x = 0; x < SIGN_LOGO_N; x++) if (signLogoAt(x, y)) logo[(lc + x) + ',' + (lr + y)] = 1;
+    var far = Math.hypot(Math.max(lc + mid, pw - 1 - lc - mid), Math.max(lr + mid, ph - 1 - lr - mid));
     for (var r = 0; r < ph; r++) for (var c = 0; c < pw; c++) {
-      cells.push({ c: c, r: r, text: !!lit[c + ',' + r], d: c / (pw - 1) * SIGN_SWEEP + Math.random() * SIGN_JITTER });
+      var key = c + ',' + r, dc = c - lc - mid, dist = Math.hypot(dc, r - lr - mid) / far;
+      cells.push({ c: c, r: r, name: !!name[key], slogan: !!slogan[key], logo: !!logo[key],
+                   d: c / (pw - 1) * SIGN_SWEEP + Math.random() * SIGN_JITTER,
+                   shedAt: SIGN_SHED + ((1 - dist) * 0.8 + Math.random() * 0.2) * SIGN_SHED_SPREAD,
+                   genAt: SIGN_GEN + (dist * 0.8 + Math.random() * 0.2) * SIGN_GEN_SPREAD,
+                   logoAt: SIGN_SHED + SIGN_SHED_SPREAD * 0.4 + dist * 600,
+                   vc: dc / far * 4 + (Math.random() - 0.5) * 2, vr: -1 - Math.random() * 4,
+                   vn: 2 + Math.random() * 4, spin: 6 + Math.random() * 10 });
     }
     return { cells: cells, pw: pw, ph: ph };
   }
@@ -2483,41 +2545,59 @@ window.addEventListener('DOMContentLoaded', function () {
     flushPts(COMET_COLS);
   }
 
-  // A panel of blocks, the letters lit and the rest dim, standing upright and facing the arena. A square turning
-  // over narrows to an edge and opens out showing its other face; the words show in negative until the next
-  // wave turns them back.
+  // A panel of blocks, the lit ones bright and the rest dim, standing upright and facing the arena. A square
+  // turning over narrows to an edge and opens out showing its other face. A falling square drops away from the
+  // board, tumbling and fading; a forming one grows from nothing, glowing as it comes and settling to dim.
   function drawFxSign() {
     var sg = fx.sign, C = SIGN.cell, f = cam.f, W = canvas.width, H = canvas.height;
     if (!sphereVisible(SIGN.x, SIGN.y, SIGN.z, sg.pw * C * 0.6)) return;
-    var hw = (sg.pw - 1) / 2 * C, hx = SIGN.ux * C, hz = SIGN.uz * C;
+    var hw = (sg.pw - 1) / 2 * C, hx = SIGN.ux * C, hz = SIGN.uz * C, nx = -SIGN.uz * C, nz = SIGN.ux * C;
     var o = toCam(SIGN.x - SIGN.ux * hw, SIGN.y + (sg.ph - 1) / 2 * C, SIGN.z - SIGN.uz * hw);
     var exX = hx * cam.rx + hz * cam.rz, exY = hx * cam.ux + hz * cam.uz, exZ = hx * cam.fx + hz * cam.fz;
+    var enX = nx * cam.rx + nz * cam.rz, enY = nx * cam.ux + nz * cam.uz, enZ = nx * cam.fx + nz * cam.fz;
     var eyY = -C * cam.uy, eyZ = -C * cam.fy;
     var side = 0.75 * C * f, squash = Math.max(Math.abs(SIGN.ux * cam.rx + SIGN.uz * cam.rz), 0.15);
-    var ct = fx.t % SIGN_CYCLE, dim = [], lit = [];
+    var ct = fx.t % SIGN_CYCLE, faces = { dim: [], lit: [], logo: [] };
+    function turning(t0) { var u = ct - t0; return u >= 0 && u < SIGN_FLIP ? Math.max(0.06, Math.abs(Math.cos(u / SIGN_FLIP * Math.PI))) : 1; }
     sg.cells.forEach(function (cell) {
-      var to = ct - SIGN_OUT - cell.d, ti = ct - SIGN_IN - cell.d, h = 1;
-      var turning = to >= 0 && to < SIGN_FLIP ? to : ti >= 0 && ti < SIGN_FLIP ? ti : -1;
-      if (turning >= 0) h = Math.max(0.06, Math.abs(Math.cos(turning / SIGN_FLIP * Math.PI)));
-      var neg = to >= SIGN_FLIP / 2 && ti < SIGN_FLIP / 2;
-      (cell.text !== neg ? lit : dim).push([cell, h]);
+      var c = cell.c, r = cell.r, n = 0, h = 1, size = 1, glow = 1, face;
+      if (!cell.logo && ct >= cell.shedAt && ct < cell.genAt) {
+        var tf = (ct - cell.shedAt) / 1000;
+        if (tf * 1000 >= SIGN_FALL) return;
+        c += cell.vc * tf; r += cell.vr * tf + SIGN_GRAVITY * tf * tf / 2; n = cell.vn * tf;
+        h = Math.max(0.06, Math.abs(Math.cos(cell.spin * tf)));
+        glow = 1 - Math.pow(tf * 1000 / SIGN_FALL, 2);
+      }
+      var formed = !cell.logo && ct >= cell.genAt, toSlogan = SIGN_TO_SLOGAN + cell.d, back = SIGN_BACK + cell.d;
+      if (ct < toSlogan + SIGN_FLIP / 2 || ct >= back + SIGN_FLIP / 2) face = cell.name ? 'lit' : 'dim';
+      else if (cell.logo) face = ct >= cell.logoAt + SIGN_FLIP / 2 ? 'logo' : cell.slogan ? 'lit' : 'dim';
+      else face = !formed && cell.slogan ? 'lit' : 'dim';
+      h *= turning(toSlogan) * turning(back) * (cell.logo ? turning(cell.logoAt) : 1);
+      if (formed && ct < cell.genAt + SIGN_FORM) {
+        var u = (ct - cell.genAt) / SIGN_FORM;
+        size = 1 - (1 - u) * (1 - u);
+        glow = 1 + 2.5 * (1 - u);
+      }
+      faces[face].push([c, r, n, h, size, glow]);
     });
-    function block(e) {
-      var cell = e[0], cz = o.z + cell.c * exZ + cell.r * eyZ;
-      if (cz < 1) return;
-      var sx = cam.cx + (o.x + cell.c * exX) * f / cz, sy = cam.cy - (o.y + cell.c * exY + cell.r * eyY) * f / cz;
-      if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) return;
-      var q = side / cz;
-      ctx.fillRect(sx - q * squash / 2, sy - q * e[1] / 2, q * squash, q * e[1]);
+    function draw(list, rgb, alpha) {
+      ctx.fillStyle = rgbStr(rgb);
+      list.forEach(function (e) {
+        var cz = o.z + e[0] * exZ + e[1] * eyZ + e[2] * enZ;
+        if (cz < 1) return;
+        var sx = cam.cx + (o.x + e[0] * exX + e[2] * enX) * f / cz;
+        var sy = cam.cy - (o.y + e[0] * exY + e[1] * eyY + e[2] * enY) * f / cz;
+        if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) return;
+        var q = side / cz * e[4];
+        ctx.globalAlpha = Math.min(1, alpha * e[5]);
+        ctx.fillRect(sx - q * squash / 2, sy - q * e[3] / 2, q * squash, q * e[3]);
+      });
     }
-    ctx.globalAlpha = 0.2;
-    ctx.fillStyle = rgbStr(FX_PRIMARY);
-    dim.forEach(block);
     var tc = [];
     for (var ch = 0; ch < 3; ch++) tc.push(Math.round(lerp(FX_LIGHT[ch], 255, 0.4)));
-    ctx.globalAlpha = 0.675;
-    ctx.fillStyle = rgbStr(tc);
-    lit.forEach(block);
+    draw(faces.dim, FX_PRIMARY, 0.2);
+    draw(faces.lit, tc, 0.675);
+    draw(faces.logo, SIGN_LOGO_RGB, 0.95);
     ctx.globalAlpha = 1;
   }
 
